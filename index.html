@@ -4,28 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>家庭血壓記錄系統</title>
-    <!-- 引入 Tailwind CSS -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入自訂樣式 -->
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
+    <!-- Chart.js 趨勢圖表庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- 自訂樣式 -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="text-slate-800 min-h-screen p-4 sm:p-6">
+<body class="text-slate-800 dark:text-slate-100 min-h-screen p-4 sm:p-6 transition-colors duration-300">
 
     <div class="max-w-3xl mx-auto space-y-6">
-        <!-- 標題 -->
-        <header class="text-center">
-            <h1 class="text-2xl sm:text-3xl font-bold text-slate-900">💓 家庭血壓記錄系統</h1>
-            <p class="text-sm text-slate-500 mt-1">輕鬆管理與追蹤家人的每日健康數值</p>
+        <!-- 頂端標題與控制列 -->
+        <header class="flex justify-between items-center bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">💓 家庭血壓記錄系統</h1>
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">輕鬆管理與追蹤家人的每日健康數值</p>
+            </div>
+            <!-- 深色模式切換按鈕 -->
+            <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition text-slate-600 dark:text-slate-200">
+                <span id="darkModeIcon">🌙</span>
+            </button>
         </header>
 
         <!-- 人員管理區塊 -->
-        <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100">
+        <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">👥 人員管理</h2>
             <div class="flex flex-col sm:flex-row gap-3">
                 <input type="text" id="newMemberName" placeholder="輸入新成員姓名 (例如: 王小明)" 
-                    class="flex-1 px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    class="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <button onclick="addMember()" 
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-xl transition">
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-xl transition shadow-sm">
                     新增人員
                 </button>
             </div>
@@ -33,28 +44,52 @@
             <div id="memberTabs" class="flex flex-wrap gap-2 mt-4"></div>
         </div>
 
-        <!-- 記錄血壓表單 (當有選擇成員時顯示) -->
-        <div id="recordSection" class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 hidden">
-            <h2 class="text-lg font-semibold mb-3">📝 記錄 <span id="currentMemberTitle" class="text-blue-600"></span> 的血壓</h2>
+        <!-- 數據統計小卡 (選擇成員後顯示) -->
+        <div id="statsSection" class="grid grid-cols-1 sm:grid-cols-3 gap-4 hidden">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                <p class="text-xs font-medium text-slate-400">平均收縮壓 (SYS)</p>
+                <p id="avgSys" class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">-- <span class="text-xs font-normal text-slate-400">mmHg</span></p>
+            </div>
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                <p class="text-xs font-medium text-slate-400">平均舒張壓 (DIA)</p>
+                <p id="avgDia" class="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">-- <span class="text-xs font-normal text-slate-400">mmHg</span></p>
+            </div>
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                <p class="text-xs font-medium text-slate-400">總測量次數</p>
+                <p id="totalCount" class="text-2xl font-bold text-slate-700 dark:text-slate-200 mt-1">-- <span class="text-xs font-normal text-slate-400">次</span></p>
+            </div>
+        </div>
+
+        <!-- 血壓趨勢圖表區塊 -->
+        <div id="chartSection" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hidden">
+            <h2 class="text-lg font-semibold mb-4">📈 血壓趨勢圖</h2>
+            <div class="relative h-64 w-full">
+                <canvas id="bloodPressureChart"></canvas>
+            </div>
+        </div>
+
+        <!-- 記錄血壓表單 -->
+        <div id="recordSection" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hidden">
+            <h2 class="text-lg font-semibold mb-3">📝 記錄 <span id="currentMemberTitle" class="text-blue-600 dark:text-blue-400"></span> 的血壓</h2>
             <form onsubmit="addRecord(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1">收縮壓 (SYS mmHg)</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">收縮壓 (SYS mmHg)</label>
                     <input type="number" id="sysInput" required placeholder="例如: 120"
-                        class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1">舒張壓 (DIA mmHg)</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">舒張壓 (DIA mmHg)</label>
                     <input type="number" id="diaInput" required placeholder="例如: 80"
-                        class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-slate-500 mb-1">脈搏 (Pulse bpm)</label>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">脈搏 (Pulse bpm)</label>
                     <input type="number" id="pulseInput" placeholder="例如: 72"
-                        class="w-full px-4 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="sm:col-span-3 flex justify-end">
                     <button type="submit" 
-                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2 rounded-xl transition">
+                        class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2 rounded-xl transition shadow-sm">
                         儲存記錄
                     </button>
                 </div>
@@ -62,15 +97,19 @@
         </div>
 
         <!-- 歷史紀錄表格 -->
-        <div id="historySection" class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 hidden">
-            <div class="flex justify-between items-center mb-4">
+        <div id="historySection" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hidden">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                 <h2 class="text-lg font-semibold">📊 歷史測量紀錄</h2>
-                <button onclick="deleteCurrentMember()" class="text-xs text-red-500 hover:underline">刪除目前成員</button>
+                <div class="flex items-center gap-3">
+                    <button onclick="exportCSV()" class="text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg transition font-medium">匯出 CSV</button>
+                    <!-- 改為紅底白字的按鈕 -->
+                    <button onclick="deleteCurrentMember()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg transition font-medium">刪除目前成員</button>
+                </div>
             </div>
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-100 text-slate-400 text-xs uppercase tracking-wider">
+                        <tr class="border-b border-slate-100 dark:border-slate-700 text-slate-400 text-xs uppercase tracking-wider">
                             <th class="py-3 px-4">時間</th>
                             <th class="py-3 px-4">收縮壓 / 舒張壓</th>
                             <th class="py-3 px-4">脈搏</th>
@@ -78,7 +117,7 @@
                             <th class="py-3 px-4 text-right">操作</th>
                         </tr>
                     </thead>
-                    <tbody id="recordTableBody" class="divide-y divide-slate-50 text-sm">
+                    <tbody id="recordTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50 text-sm">
                         <!-- 動態插入紀錄 -->
                     </tbody>
                 </table>
@@ -87,15 +126,27 @@
     </div>
 
     <script>
-        // 資料結構初始化 (從 localStorage 讀取)
         let db = JSON.parse(localStorage.getItem('blood_pressure_db')) || { members: {} };
         let currentMember = null;
+        let bpChart = null;
+
+        // 初始化深色模式
+        if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+            document.getElementById('darkModeIcon').textContent = '☀️';
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            document.getElementById('darkModeIcon').textContent = isDark ? '☀️' : '🌙';
+            if (bpChart) updateChart();
+        }
 
         function saveDB() {
             localStorage.setItem('blood_pressure_db', JSON.stringify(db));
         }
 
-        // 新增人員
         function addMember() {
             const nameInput = document.getElementById('newMemberName');
             const name = nameInput.value.trim();
@@ -109,7 +160,6 @@
             switchMember(name);
         }
 
-        // 渲染成員標籤按鈕
         function renderMembers() {
             const container = document.getElementById('memberTabs');
             container.innerHTML = '';
@@ -117,8 +167,9 @@
 
             if (memberNames.length === 0) {
                 container.innerHTML = '<p class="text-sm text-slate-400">目前尚無成員，請先新增。</p>';
-                document.getElementById('recordSection').classList.add('hidden');
-                document.getElementById('historySection').classList.add('hidden');
+                ['statsSection', 'chartSection', 'recordSection', 'historySection'].forEach(id => {
+                    document.getElementById(id).classList.add('hidden');
+                });
                 return;
             }
 
@@ -128,29 +179,29 @@
                 btn.className = `px-4 py-2 rounded-xl text-sm font-medium transition ${
                     currentMember === name 
                         ? 'bg-blue-600 text-white shadow-sm' 
-                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`;
                 btn.onclick = () => switchMember(name);
                 container.appendChild(btn);
             });
 
-            // 若原本沒有選取成員，預設選取第一個
             if (!currentMember && memberNames.length > 0) {
                 switchMember(memberNames[0]);
             }
         }
 
-        // 切換目前檢視的成員
         function switchMember(name) {
             currentMember = name;
             renderMembers();
-            document.getElementById('recordSection').classList.remove('hidden');
-            document.getElementById('historySection').classList.remove('hidden');
+            ['statsSection', 'chartSection', 'recordSection', 'historySection'].forEach(id => {
+                document.getElementById(id).classList.remove('hidden');
+            });
             document.getElementById('currentMemberTitle').textContent = name;
+            renderStats();
             renderRecords();
+            updateChart();
         }
 
-        // 新增血壓紀錄
         function addRecord(e) {
             e.preventDefault();
             const sys = parseInt(document.getElementById('sysInput').value);
@@ -168,17 +219,19 @@
             document.getElementById('diaInput').value = '';
             document.getElementById('pulseInput').value = '';
 
+            renderStats();
             renderRecords();
+            updateChart();
         }
 
-        // 刪除單筆紀錄
         function deleteRecord(id) {
             db.members[currentMember] = db.members[currentMember].filter(r => r.id !== id);
             saveDB();
+            renderStats();
             renderRecords();
+            updateChart();
         }
 
-        // 刪除目前成員
         function deleteCurrentMember() {
             if (confirm(`確定要刪除成員「${currentMember}」及其所有紀錄嗎？`)) {
                 delete db.members[currentMember];
@@ -188,16 +241,30 @@
             }
         }
 
-        // 判斷血壓狀態
-        function getBloodPressureStatus(sys, dia) {
-            if (sys < 120 && dia < 80) return { text: '正常', class: 'bg-emerald-50 text-emerald-600' };
-            if (sys <= 129 && dia < 80) return { text: '血壓偏高', class: 'bg-amber-50 text-amber-600' };
-            if ((sys >= 130 && sys <= 139) || (dia >= 80 && dia <= 89)) return { text: '高血壓第一期', class: 'bg-orange-50 text-orange-600' };
-            if (sys >= 140 || dia >= 90) return { text: '高血壓第二期', class: 'bg-rose-50 text-rose-600' };
-            return { text: '需注意', class: 'bg-slate-100 text-slate-600' };
+        function renderStats() {
+            const records = db.members[currentMember] || [];
+            if (records.length === 0) {
+                document.getElementById('avgSys').innerHTML = `-- <span class="text-xs font-normal text-slate-400">mmHg</span>`;
+                document.getElementById('avgDia').innerHTML = `-- <span class="text-xs font-normal text-slate-400">mmHg</span>`;
+                document.getElementById('totalCount').innerHTML = `0 <span class="text-xs font-normal text-slate-400">次</span>`;
+                return;
+            }
+
+            const totalSys = records.reduce((sum, r) => sum + r.sys, 0);
+            const totalDia = records.reduce((sum, r) => sum + r.dia, 0);
+            document.getElementById('avgSys').innerHTML = `${Math.round(totalSys / records.length)} <span class="text-xs font-normal text-slate-400">mmHg</span>`;
+            document.getElementById('avgDia').innerHTML = `${Math.round(totalDia / records.length)} <span class="text-xs font-normal text-slate-400">mmHg</span>`;
+            document.getElementById('totalCount').innerHTML = `${records.length} <span class="text-xs font-normal text-slate-400">次</span>`;
         }
 
-        // 渲染歷史紀錄表格
+        function getBloodPressureStatus(sys, dia) {
+            if (sys < 120 && dia < 80) return { text: '正常', class: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400' };
+            if (sys <= 129 && dia < 80) return { text: '血壓偏高', class: 'bg-amber-50 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400' };
+            if ((sys >= 130 && sys <= 139) || (dia >= 80 && dia <= 89)) return { text: '高血壓第一期', class: 'bg-orange-50 text-orange-600 dark:bg-orange-950/50 dark:text-orange-400' };
+            if (sys >= 140 || dia >= 90) return { text: '高血壓第二期', class: 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400' };
+            return { text: '需注意', class: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300' };
+        }
+
         function renderRecords() {
             const tbody = document.getElementById('recordTableBody');
             tbody.innerHTML = '';
@@ -211,9 +278,9 @@
             records.forEach(r => {
                 const status = getBloodPressureStatus(r.sys, r.dia);
                 const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50/50 transition';
+                tr.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition';
                 tr.innerHTML = `
-                    <td class="py-3 px-4 text-slate-500 text-xs">${r.time}</td>
+                    <td class="py-3 px-4 text-slate-500 dark:text-slate-400 text-xs">${r.time}</td>
                     <td class="py-3 px-4 font-semibold">${r.sys} / ${r.dia} <span class="text-xs font-normal text-slate-400">mmHg</span></td>
                     <td class="py-3 px-4">${r.pulse} <span class="text-xs text-slate-400">${r.pulse !== '-' ? 'bpm' : ''}</span></td>
                     <td class="py-3 px-4"><span class="px-2.5 py-1 rounded-full text-xs font-medium ${status.class}">${status.text}</span></td>
@@ -223,6 +290,86 @@
                 `;
                 tbody.appendChild(tr);
             });
+        }
+
+        function updateChart() {
+            const records = [...(db.members[currentMember] || [])].reverse();
+            const ctx = document.getElementById('bloodPressureChart').getContext('2d');
+            const isDark = document.documentElement.classList.contains('dark');
+
+            const labels = records.map(r => r.time);
+            const sysData = records.map(r => r.sys);
+            const diaData = records.map(r => r.dia);
+
+            if (bpChart) bpChart.destroy();
+
+            bpChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '收縮壓 (SYS)',
+                            data: sysData,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: '舒張壓 (DIA)',
+                            data: diaData,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: isDark ? '#cbd5e1' : '#475569',
+                                font: { size: 12 }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 10 } },
+                            grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
+                        },
+                        y: {
+                            ticks: { color: isDark ? '#94a3b8' : '#64748b', font: { size: 10 } },
+                            grid: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        function exportCSV() {
+            const records = db.members[currentMember] || [];
+            if (records.length === 0) return alert('目前沒有資料可供匯出！');
+
+            let csvContent = "\uFEFF時間,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
+            records.forEach(r => {
+                csvContent += `"${r.time}",${r.sys},${r.dia},${r.pulse}\r\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `${currentMember}_血壓紀錄.csv`);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
 
         renderMembers();
