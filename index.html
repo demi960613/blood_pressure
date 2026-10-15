@@ -71,7 +71,12 @@
         <!-- 記錄血壓表單 -->
         <div id="recordSection" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hidden">
             <h2 class="text-lg font-semibold mb-3">📝 記錄 <span id="currentMemberTitle" class="text-blue-600 dark:text-blue-400"></span> 的血壓</h2>
-            <form onsubmit="addRecord(event)" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <form onsubmit="addRecord(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">測量時間 (選填)</label>
+                    <input type="datetime-local" id="recordTimeInput"
+                        class="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
+                </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">收縮壓 (SYS mmHg)</label>
                     <input type="number" id="sysInput" required placeholder="例如: 120"
@@ -87,7 +92,7 @@
                     <input type="number" id="pulseInput" placeholder="例如: 72"
                         class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
-                <div class="sm:col-span-3 flex justify-end">
+                <div class="sm:col-span-4 flex justify-end">
                     <button type="submit" 
                         class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-6 py-2 rounded-xl transition shadow-sm">
                         儲存記錄
@@ -102,7 +107,6 @@
                 <h2 class="text-lg font-semibold">📊 歷史測量紀錄</h2>
                 <div class="flex items-center gap-3">
                     <button onclick="exportCSV()" class="text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg transition font-medium">匯出 CSV</button>
-                    <!-- 改為紅底白字的按鈕 -->
                     <button onclick="deleteCurrentMember()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg transition font-medium">刪除目前成員</button>
                 </div>
             </div>
@@ -207,14 +211,23 @@
             const sys = parseInt(document.getElementById('sysInput').value);
             const dia = parseInt(document.getElementById('diaInput').value);
             const pulse = document.getElementById('pulseInput').value ? parseInt(document.getElementById('pulseInput').value) : '-';
+            
+            const timeInputValue = document.getElementById('recordTimeInput').value;
+            let timeString;
 
-            const now = new Date();
-            const timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            if (timeInputValue) {
+                const dateObj = new Date(timeInputValue);
+                timeString = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+            } else {
+                const now = new Date();
+                timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            }
 
             const record = { id: Date.now(), time: timeString, sys, dia, pulse };
             db.members[currentMember].unshift(record);
             saveDB();
 
+            document.getElementById('recordTimeInput').value = '';
             document.getElementById('sysInput').value = '';
             document.getElementById('diaInput').value = '';
             document.getElementById('pulseInput').value = '';
