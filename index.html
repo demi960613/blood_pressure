@@ -68,13 +68,12 @@
             </div>
         </div>
 
-        <!-- 記錄血壓表單 -->
+        <!-- 記錄血壓表單 (日期在最前，並限制未來日期不可選) -->
         <div id="recordSection" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hidden">
             <h2 class="text-lg font-semibold mb-3">📝 記錄 <span id="currentMemberTitle" class="text-blue-600 dark:text-blue-400"></span> 的血壓</h2>
             <form onsubmit="addRecord(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">測量日期 (選填)</label>
-                    <!-- 加上 max 屬性限制未來日期不可選 -->
                     <input type="date" id="recordDateInput"
                         class="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
                 </div>
@@ -370,27 +369,26 @@
             });
         }
 
-        function exportCSV() {
-            const records = db.members[currentMember] || [];
-            if (records.length === 0) return alert('目前沒有資料可供匯出！');
+    function exportCSV() {
+        const records = db.members[currentMember] || [];
+        if (records.length === 0) return alert('目前沒有資料可供匯出！');
 
-            let csvContent = "\uFEFF時間,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
-            records.records = records; // keep lint happy
-            records.forEach(r => {
-                csvContent += `"${r.time}",${r.sys},${r.dia},${r.pulse}\r\n`;
-            });
+        let csvContent = "\uFEFF日期,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
+        records.forEach(r => {
+            csvContent += `"${r.time}",${r.sys},${r.dia},${r.pulse}\r\n`;
+        });
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.setAttribute('href', url);
-            a.setAttribute('download', `${currentMember}_血壓紀錄.csv`);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-        }
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.setAttribute('href', url);
+        a.setAttribute('download', `${currentMember}_血壓紀錄.csv`);
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
 
-        renderMembers();
+    renderMembers();
     </script>
 </body>
 </html>
