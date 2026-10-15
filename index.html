@@ -29,16 +29,21 @@
             </button>
         </header>
 
-        <!-- 人員管理區塊 -->
+        <!-- 人員管理區塊 (刪除按鈕已移至新增人員右方) -->
         <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">👥 人員管理</h2>
             <div class="flex flex-col sm:flex-row gap-3">
                 <input type="text" id="newMemberName" placeholder="輸入新成員姓名 (例如: 王小明)" 
                     class="flex-1 px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button onclick="addMember()" 
-                    class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-xl transition shadow-sm">
-                    新增人員
-                </button>
+                <div class="flex gap-2">
+                    <button onclick="addMember()" 
+                        class="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2 rounded-xl transition shadow-sm">
+                        新增人員
+                    </button>
+                    <button onclick="deleteCurrentMember()" id="deleteMemberBtn" class="flex-1 sm:flex-none bg-rose-600 hover:bg-rose-700 text-white font-medium px-4 py-2 rounded-xl transition shadow-sm hidden">
+                        刪除目前成員
+                    </button>
+                </div>
             </div>
             <!-- 成員切換按鈕清單 -->
             <div id="memberTabs" class="flex flex-wrap gap-2 mt-4"></div>
@@ -68,7 +73,7 @@
             </div>
         </div>
 
-        <!-- 記錄血壓表單 (日期在最前，並限制未來日期不可選) -->
+        <!-- 記錄血壓表單 -->
         <div id="recordSection" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hidden">
             <h2 class="text-lg font-semibold mb-3">📝 記錄 <span id="currentMemberTitle" class="text-blue-600 dark:text-blue-400"></span> 的血壓</h2>
             <form onsubmit="addRecord(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
@@ -107,7 +112,6 @@
                 <h2 class="text-lg font-semibold">📊 歷史測量紀錄</h2>
                 <div class="flex items-center gap-3">
                     <button onclick="exportCSV()" class="text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg transition font-medium">匯出 CSV</button>
-                    <button onclick="deleteCurrentMember()" class="text-xs bg-rose-600 hover:bg-rose-700 text-white px-3 py-1.5 rounded-lg transition font-medium">刪除目前成員</button>
                 </div>
             </div>
             <div class="overflow-x-auto">
@@ -172,14 +176,18 @@
             const container = document.getElementById('memberTabs');
             container.innerHTML = '';
             const memberNames = Object.keys(db.members);
+            const deleteBtn = document.getElementById('deleteMemberBtn');
 
             if (memberNames.length === 0) {
                 container.innerHTML = '<p class="text-sm text-slate-400">目前尚無成員，請先新增。</p>';
+                deleteBtn.classList.add('hidden');
                 ['statsSection', 'chartSection', 'recordSection', 'historySection'].forEach(id => {
                     document.getElementById(id).classList.add('hidden');
                 });
                 return;
             }
+
+            deleteBtn.classList.remove('hidden');
 
             memberNames.forEach(name => {
                 const btn = document.createElement('button');
@@ -369,26 +377,26 @@
             });
         }
 
-    function exportCSV() {
-        const records = db.members[currentMember] || [];
-        if (records.length === 0) return alert('目前沒有資料可供匯出！');
+        function exportCSV() {
+            const records = db.members[currentMember] || [];
+            if (records.length === 0) return alert('目前沒有資料可供匯出！');
 
-        let csvContent = "\uFEFF日期,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
-        records.forEach(r => {
-            csvContent += `"${r.time}",${r.sys},${r.dia},${r.pulse}\r\n`;
-        });
+            let csvContent = "\uFEFF日期,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
+            records.forEach(r => {
+                csvContent += `"${r.time}",${r.sys},${r.dia},${r.pulse}\r\n`;
+            });
 
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.setAttribute('href', url);
-        a.setAttribute('download', `${currentMember}_血壓紀錄.csv`);
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-    }
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', `${currentMember}_血壓紀錄.csv`);
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
 
-    renderMembers();
+        renderMembers();
     </script>
 </body>
 </html>
