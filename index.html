@@ -6,8 +6,10 @@
     <title>家庭血壓記錄系統</title>
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入自訂樣式 -->
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen p-4 sm:p-6">
+<body class="text-slate-800 min-h-screen p-4 sm:p-6">
 
     <div class="max-w-3xl mx-auto space-y-6">
         <!-- 標題 -->
@@ -159,10 +161,9 @@
             const timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
 
             const record = { id: Date.now(), time: timeString, sys, dia, pulse };
-            db.members[currentMember].unshift(record); // 加到最前面
+            db.members[currentMember].unshift(record);
             saveDB();
 
-            // 清空輸入框
             document.getElementById('sysInput').value = '';
             document.getElementById('diaInput').value = '';
             document.getElementById('pulseInput').value = '';
@@ -187,7 +188,7 @@
             }
         }
 
-        // 判斷血壓狀態 (參考台灣高血壓指引簡易標準)
+        // 判斷血壓狀態
         function getBloodPressureStatus(sys, dia) {
             if (sys < 120 && dia < 80) return { text: '正常', class: 'bg-emerald-50 text-emerald-600' };
             if (sys <= 129 && dia < 80) return { text: '血壓偏高', class: 'bg-amber-50 text-amber-600' };
@@ -224,7 +225,6 @@
             });
         }
 
-        // 初始化載入
         renderMembers();
     </script>
 </body>
