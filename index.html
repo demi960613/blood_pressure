@@ -29,7 +29,7 @@
             </button>
         </header>
 
-        <!-- 人員管理區塊 (改用 Radio 按鈕選取) -->
+        <!-- 人員管理區塊 -->
         <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">👥 人員管理</h2>
             <div class="flex flex-col sm:flex-row gap-3">
@@ -84,17 +84,17 @@
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">收縮壓 (SYS mmHg)</label>
-                    <input type="number" id="sysInput" required placeholder="例如: 120"
+                    <input type="number" id="sysInput" required min="50" max="260" placeholder="例如: 120"
                         class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">舒張壓 (DIA mmHg)</label>
-                    <input type="number" id="diaInput" required placeholder="例如: 80"
+                    <input type="number" id="diaInput" required min="30" max="180" placeholder="例如: 80"
                         class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-1">脈搏 (Pulse bpm)</label>
-                    <input type="number" id="pulseInput" placeholder="例如: 72"
+                    <input type="number" id="pulseInput" min="30" max="220" placeholder="例如: 72"
                         class="w-full px-4 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
                 </div>
                 <div class="sm:col-span-4 flex justify-end">
@@ -234,7 +234,20 @@
             e.preventDefault();
             const sys = parseInt(document.getElementById('sysInput').value);
             const dia = parseInt(document.getElementById('diaInput').value);
-            const pulse = document.getElementById('pulseInput').value ? parseInt(document.getElementById('pulseInput').value) : '-';
+            const pulseInputVal = document.getElementById('pulseInput').value;
+            const pulse = pulseInputVal ? parseInt(pulseInputVal) : '-';
+
+            // 防呆 1：收縮壓必須大於舒張壓
+            if (sys <= dia) {
+                alert('⚠️ 錯誤：收縮壓 (SYS) 必須大於舒張壓 (DIA)！');
+                return;
+            }
+
+            // 防呆 2：脈搏數值合理範圍檢查（若有填寫的話）
+            if (pulseInputVal !== '' && (pulse < 30 || pulse > 220)) {
+                alert('⚠️ 警告：脈搏數值超出常理範圍 (30 - 220 bpm)，請重新確認！');
+                return;
+            }
             
             const dateInputValue = document.getElementById('recordDateInput').value;
             let dateString;
@@ -244,6 +257,17 @@
             } else {
                 const now = new Date();
                 dateString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            }
+
+            // 防呆 3：檢查該日期是否已經有記錄，若有則詢問是否取代
+            const existingRecordIndex = db.members[currentMember].findIndex(r => r.time === dateString);
+            if (existingRecordIndex !== -1) {
+                const confirmReplace = confirm(`⚠️ 提示：${dateString} 已經有血壓記錄了，請問是否要取代舊的記錄？`);
+                if (!confirmReplace) {
+                    return; // 使用者選擇不取代，直接返回
+                }
+                // 使用者選擇取代：刪除舊記錄
+                db.members[currentMember].splice(existingRecordIndex, 1);
             }
 
             const record = { id: Date.now(), time: dateString, sys, dia, pulse };
