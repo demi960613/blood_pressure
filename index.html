@@ -68,13 +68,13 @@
             </div>
         </div>
 
-        <!-- 記錄血壓表單 (已調整順序：先日期時間，後血壓) -->
+        <!-- 記錄血壓表單 (先日期，且限制未來日期不可選) -->
         <div id="recordSection" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hidden">
             <h2 class="text-lg font-semibold mb-3">📝 記錄 <span id="currentMemberTitle" class="text-blue-600 dark:text-blue-400"></span> 的血壓</h2>
             <form onsubmit="addRecord(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">測量時間 (選填)</label>
-                    <input type="datetime-local" id="recordTimeInput"
+                    <label class="block text-xs font-medium text-slate-400 mb-1">測量日期 (選填)</label>
+                    <input type="date" id="recordDateInput"
                         class="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 bg-transparent rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs sm:text-sm">
                 </div>
                 <div>
@@ -114,7 +114,7 @@
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="border-b border-slate-100 dark:border-slate-700 text-slate-400 text-xs uppercase tracking-wider">
-                            <th class="py-3 px-4">時間</th>
+                            <th class="py-3 px-4">日期</th>
                             <th class="py-3 px-4">收縮壓 / 舒張壓</th>
                             <th class="py-3 px-4">脈搏</th>
                             <th class="py-3 px-4">狀態</th>
@@ -133,6 +133,10 @@
         let db = JSON.parse(localStorage.getItem('blood_pressure_db')) || { members: {} };
         let currentMember = null;
         let bpChart = null;
+
+        // 初始化日期輸入框的最大值為「今天」，防止選取未來日期
+        const todayStr = new Date().toISOString().split('T')[0];
+        document.getElementById('recordDateInput').max = todayStr;
 
         // 初始化深色模式
         if (localStorage.getItem('theme') === 'dark' || (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
@@ -212,22 +216,21 @@
             const dia = parseInt(document.getElementById('diaInput').value);
             const pulse = document.getElementById('pulseInput').value ? parseInt(document.getElementById('pulseInput').value) : '-';
             
-            const timeInputValue = document.getElementById('recordTimeInput').value;
-            let timeString;
+            const dateInputValue = document.getElementById('recordDateInput').value;
+            let dateString;
 
-            if (timeInputValue) {
-                const dateObj = new Date(timeInputValue);
-                timeString = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')} ${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`;
+            if (dateInputValue) {
+                dateString = dateInputValue;
             } else {
                 const now = new Date();
-                timeString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+                dateString = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             }
 
-            const record = { id: Date.now(), time: timeString, sys, dia, pulse };
+            const record = { id: Date.now(), time: dateString, sys, dia, pulse };
             db.members[currentMember].unshift(record);
             saveDB();
 
-            document.getElementById('recordTimeInput').value = '';
+            document.getElementById('recordDateInput').value = '';
             document.getElementById('sysInput').value = '';
             document.getElementById('diaInput').value = '';
             document.getElementById('pulseInput').value = '';
@@ -370,7 +373,7 @@
             const records = db.members[currentMember] || [];
             if (records.length === 0) return alert('目前沒有資料可供匯出！');
 
-            let csvContent = "\uFEFF時間,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
+            let csvContent = "\uFEFF日期,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
             records.forEach(r => {
                 csvContent += `"${r.time}",${r.sys},${r.dia},${r.pulse}\r\n`;
             });
