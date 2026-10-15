@@ -29,7 +29,7 @@
             </button>
         </header>
 
-        <!-- 人員管理區塊 (刪除按鈕已移至新增人員右方) -->
+        <!-- 人員管理區塊 (改用 Radio 按鈕選取) -->
         <div class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">👥 人員管理</h2>
             <div class="flex flex-col sm:flex-row gap-3">
@@ -45,8 +45,8 @@
                     </button>
                 </div>
             </div>
-            <!-- 成員切換按鈕清單 -->
-            <div id="memberTabs" class="flex flex-wrap gap-2 mt-4"></div>
+            <!-- 成員切換 Radio 選項群組清單 -->
+            <div id="memberTabs" class="flex flex-wrap gap-3 mt-4"></div>
         </div>
 
         <!-- 數據統計小卡 (選擇成員後顯示) -->
@@ -190,15 +190,27 @@
             deleteBtn.classList.remove('hidden');
 
             memberNames.forEach(name => {
-                const btn = document.createElement('button');
-                btn.textContent = name;
-                btn.className = `px-4 py-2 rounded-xl text-sm font-medium transition ${
+                const label = document.createElement('label');
+                label.className = `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium cursor-pointer transition border ${
                     currentMember === name 
-                        ? 'bg-blue-600 text-white shadow-sm' 
-                        : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600'
+                        ? 'bg-blue-50 border-blue-500 text-blue-700 dark:bg-blue-950/40 dark:border-blue-500 dark:text-blue-300 shadow-sm' 
+                        : 'bg-slate-50 border-slate-200 text-slate-600 dark:bg-slate-700/50 dark:border-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                 }`;
-                btn.onclick = () => switchMember(name);
-                container.appendChild(btn);
+
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'memberRadio';
+                radio.value = name;
+                radio.checked = (currentMember === name);
+                radio.className = 'text-blue-600 focus:ring-blue-500 dark:bg-slate-800 dark:border-slate-600';
+                radio.onchange = () => switchMember(name);
+
+                const span = document.createElement('span');
+                span.textContent = name;
+
+                label.appendChild(radio);
+                label.appendChild(span);
+                container.appendChild(label);
             });
 
             if (!currentMember && memberNames.length > 0) {
