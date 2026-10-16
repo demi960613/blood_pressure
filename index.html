@@ -30,6 +30,10 @@
                 <select id="memberSelect" onchange="switchMember()" class="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500">
                     <!-- 動態載入成員 -->
                 </select>
+                <!-- 重新命名按鈕 -->
+                <button onclick="renameMember()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-xl text-sm font-medium transition flex items-center gap-1.5 cursor-pointer" title="重新命名目前成員">
+                    <i class="fa-solid fa-pen"></i> 改名
+                </button>
                 <button onclick="exportCSV()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-xl text-sm font-medium transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-file-arrow-down"></i> 匯出表格
                 </button>
@@ -141,6 +145,34 @@
             render();
         }
 
+        function renameMember() {
+            const oldName = currentMember;
+            const newName = prompt(`請輸入「${oldName}」的新名字：`, oldName);
+            
+            if (!newName) return; 
+            const trimmedNewName = newName.trim();
+            
+            if (trimmedNewName === "") {
+                alert("名字不能為空白！");
+                return;
+            }
+            
+            if (db.members[trimmedNewName]) {
+                alert("此名字已經存在，請換一個名字！");
+                return;
+            }
+            
+            db.members[trimmedNewName] = db.members[oldName];
+            delete db.members[oldName];
+            
+            currentMember = trimmedNewName;
+            db.currentMember = currentMember;
+            
+            saveDB();
+            render();
+            alert(`🎉 已經成功將成員重新命名為「${trimmedNewName}」！`);
+        }
+
         function saveDB() {
             localStorage.setItem('blood_pressure_db', JSON.stringify(db));
         }
@@ -157,13 +189,11 @@
             }
 
             db.members[currentMember].push({ date, sys, dia, pulse });
-            // 依日期排序
             db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
             
             saveDB();
             render();
             
-            // 清空輸入
             document.getElementById('sysInput').value = '';
             document.getElementById('diaInput').value = '';
             document.getElementById('pulseInput').value = '';
@@ -315,8 +345,6 @@
                             }
                         }
                         
-                        // 依日期排序並去除重複或重新載入
-                        // 簡單起見，先依日期排序
                         db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
                         saveDB();
                         render();
