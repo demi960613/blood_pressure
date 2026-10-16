@@ -80,12 +80,18 @@
             </form>
         </section>
 
-        <!-- 3. 歷史測量紀錄清單（包含匯出與匯入按鈕） -->
+        <!-- 3. 歷史測量紀錄清單（包含月份篩選與匯出入按鈕） -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                <h2 class="text-lg font-semibold flex items-center gap-2">
-                    <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史測量紀錄
-                </h2>
+                <div class="flex items-center gap-3 flex-wrap">
+                    <h2 class="text-lg font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史測量紀錄
+                    </h2>
+                    <!-- 月份篩選下拉選單 -->
+                    <select id="monthFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <option value="all">顯示全部月份</option>
+                    </select>
+                </div>
                 <!-- 匯出與匯入按鈕 -->
                 <div class="flex items-center gap-2">
                     <button onclick="exportCSV()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-sm font-medium transition flex items-center gap-1.5 cursor-pointer">
@@ -118,7 +124,7 @@
         <!-- 4. 血壓趨勢圖 -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖
+                <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖 <span id="chartMonthLabel" class="text-xs text-slate-400 font-normal"></span>
             </h2>
             <div class="w-full h-64 sm:h-80">
                 <canvas id="bloodPressureChart"></canvas>
@@ -164,7 +170,14 @@
                     isSelected ? 'bg-rose-500 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
                 }`;
                 selectBtn.innerHTML = `<i class="fa-solid fa-user text-xs"></i> ${member}`;
-                selectBtn.onclick = () => switchMember(member);
+                selectBtn.onclick = () => {
+                    currentMember = member;
+                    db.currentMember = currentMember;
+                    saveDB();
+                    // 切換成員時重置月份篩選為全部或當前月份
+                    initMonthFilter(db.members[currentMember] || []);
+                    render();
+                };
                 btnWrapper.appendChild(selectBtn);
 
                 let renameBtn = document.createElement('button');
@@ -200,7 +213,32 @@
             currentMember = member;
             db.currentMember = currentMember;
             saveDB();
+            initMonthFilter(db.members[currentMember] || []);
             render();
+        }
+
+        function initMonthFilter(records) {
+            const select = document.getElementById('monthFilter');
+            const currentVal = select.value;
+            
+            // 找出所有出現過的年月 (YYYY-MM)
+            const months = [...new Set(records.map(r => r.date ? r.date.substring(0, 7) : null).filter(Boolean))].sort().reverse();
+            
+            select.innerHTML = `<option value="all">顯示全部月份 (${records.length}筆)</option>`;
+            months.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m;
+                let [y, mo] = m.split('-');
+                opt.textContent = `${y} 年 ${parseInt(mo)} 月`;
+                select.appendChild(opt);
+            });
+
+            // 若原本選的月份還存在則保持選取
+            if ([...select.options].some(o => o.value === currentVal)) {
+                select.value = currentVal;
+            } else {
+                select.value = "all";
+            }
         }
 
         function addMember() {
@@ -221,6 +259,7 @@
             db.currentMember = currentMember;
             saveDB();
             input.value = '';
+            initMonthFilter(db.members[currentMember]);
             render();
         }
 
@@ -254,6 +293,7 @@
                 currentMember = remaining[0];
                 db.currentMember = currentMember;
                 saveDB();
+                initMonthFilter(db.members[currentMember] || []);
                 render();
             }
         }
@@ -277,6 +317,7 @@
             db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
             
             saveDB();
+            initMonthFilter(db.members[currentMember]);
             render();
             
             document.getElementById('sysInput').value = '';
@@ -286,9 +327,22 @@
 
         function deleteRecord(index) {
             if (confirm('確定要刪除這筆紀錄嗎？')) {
-                db.members[currentMember].splice(index, 1);
-                saveDB();
-                render();
+                // 找出畫面上實際對應到原始陣列的索引
+                const records = db.members[currentMember] || [];
+                const selectedMonth = document.getElementById('monthFilter').value;
+                const filteredRecords = selectedMonth === 'all' 
+                    ? records 
+                    : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+                
+                const target = filteredRecords[index];
+                const realIndex = records.indexOf(target);
+                
+                if (realIndex > -1) {
+                    db.members[currentMember].splice(realIndex, 1);
+                    saveDB();
+                    initMonthFilter(records);
+                    render();
+                }
             }
         }
 
@@ -300,20 +354,28 @@
         }
 
         function render() {
-            initMembers();
             const records = db.members[currentMember] || [];
             
-            const now = new Date();
-            const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            // 初始化或更新月份選項
+            const monthSelect = document.getElementById('monthFilter');
+            if (monthSelect.options.length <= 1) {
+                initMonthFilter(records);
+            }
             
-            const monthRecords = records.filter(r => r.date && r.date.startsWith(currentYearMonth));
-            const count = monthRecords.length;
+            const selectedMonth = monthSelect.value;
             
+            // 過濾資料
+            const displayRecords = selectedMonth === 'all' 
+                ? records 
+                : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+
+            // 計算統計資訊（若有選特定月份則算該月，否則算全部或當前系統月）
+            const count = displayRecords.length;
             let avgSys = 0, avgDia = 0, avgPulse = 0;
             if (count > 0) {
-                const sumSys = monthRecords.reduce((acc, r) => acc + r.sys, 0);
-                const sumDia = monthRecords.reduce((acc, r) => acc + r.dia, 0);
-                const sumPulse = monthRecords.reduce((acc, r) => acc + (r.pulse || 0), 0);
+                const sumSys = displayRecords.reduce((acc, r) => acc + r.sys, 0);
+                const sumDia = displayRecords.reduce((acc, r) => acc + r.dia, 0);
+                const sumPulse = displayRecords.reduce((acc, r) => acc + (r.pulse || 0), 0);
                 avgSys = Math.round(sumSys / count);
                 avgDia = Math.round(sumDia / count);
                 avgPulse = Math.round(sumPulse / count);
@@ -323,12 +385,12 @@
             statsContainer.innerHTML = `
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-calendar-days text-rose-500"></i>
-                    <span class="text-slate-500 dark:text-slate-400">本月測量次數：</span>
-                    <span class="font-bold text-base text-rose-500">${count} 次</span>
+                    <span class="text-slate-500 dark:text-slate-400">顯示筆數/次數：</span>
+                    <span class="font-bold text-base text-rose-500">${count} 筆</span>
                 </div>
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-chart-pie text-blue-500"></i>
-                    <span class="text-slate-500 dark:text-slate-400">本月平均血壓：</span>
+                    <span class="text-slate-500 dark:text-slate-400">平均血壓：</span>
                     <span class="font-bold text-base">${count > 0 ? `${avgSys} /${avgDia} mmHg` : '尚無資料'}</span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -341,10 +403,10 @@
             const tbody = document.getElementById('recordTableBody');
             tbody.innerHTML = '';
 
-            if (records.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">目前尚無血壓紀錄</td></tr>`;
+            if (displayRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">此月份尚無血壓紀錄</td></tr>`;
             } else {
-                records.forEach((r, idx) => {
+                displayRecords.forEach((r, idx) => {
                     let tr = document.createElement('tr');
                     tr.className = "border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition";
                     tr.innerHTML = `
@@ -362,7 +424,7 @@
                 });
             }
 
-            updateChart(records);
+            updateChart(displayRecords);
         }
 
         function updateChart(records) {
@@ -464,6 +526,7 @@
                         
                         db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
                         saveDB();
+                        initMonthFilter(db.members[currentMember]);
                         render();
                         
                         alert(`🎉 成功匯入 ${importedCount} 筆血壓紀錄！`);
@@ -493,6 +556,7 @@
                         }
                         db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
                         saveDB();
+                        initMonthFilter(db.members[currentMember]);
                         render();
                         alert(`🎉 成功匯入 ${importedCount} 筆血壓紀錄！`);
                     } catch (error) {
