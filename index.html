@@ -11,6 +11,11 @@
     </script>
     <!-- Chart.js 趨勢圖表庫 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PWA Manifest 與行動端設定 -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="血壓記錄">
     <!-- 自訂樣式 -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -118,7 +123,16 @@
         <div id="historySection" class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hidden">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
                 <h2 class="text-lg font-semibold">📊 歷史測量紀錄</h2>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- 血壓分類篩選下拉選單 -->
+                    <select id="statusFilter" onchange="renderRecords()" class="text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg transition font-medium border-0 focus:ring-2 focus:ring-blue-500 text-slate-700 dark:text-slate-200">
+                        <option value="all">全部狀態</option>
+                        <option value="低血壓">低血壓</option>
+                        <option value="正常血壓">正常血壓</option>
+                        <option value="高血壓前期">高血壓前期</option>
+                        <option value="第一期高血壓">第一期高血壓</option>
+                        <option value="第二期高血壓">第二期高血壓</option>
+                    </select>
                     <!-- 匯出表格按鈕 -->
                     <button onclick="exportCSV()" class="text-xs bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 px-3 py-1.5 rounded-lg transition font-medium">匯出表格</button>
                     <!-- 匯入表格按鈕與隱藏的檔案上傳框 -->
@@ -380,13 +394,21 @@
             const tbody = document.getElementById('recordTableBody');
             tbody.innerHTML = '';
             const records = getFilteredRecords();
+            
+            const selectedFilter = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : 'all';
 
-            if (records.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">本月尚無血壓紀錄</td></tr>`;
+            const filteredRecords = records.filter(r => {
+                if (selectedFilter === 'all') return true;
+                const status = getBloodPressureStatus(r.sys, r.dia);
+                return status.text === selectedFilter;
+            });
+
+            if (filteredRecords.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-4 text-center text-slate-400">沒有符合條件的血壓紀錄</td></tr>`;
                 return;
             }
 
-            records.forEach(r => {
+            filteredRecords.forEach(r => {
                 const status = getBloodPressureStatus(r.sys, r.dia);
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition';
