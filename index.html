@@ -103,7 +103,7 @@
                 </div>
             </div>
 
-            <!-- 統計資訊 (已改為「測量次數」) -->
+            <!-- 統計資訊 -->
             <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl flex flex-wrap items-center justify-around gap-4 text-sm">
                 <!-- 動態載入統計 -->
             </div>
@@ -312,8 +312,32 @@
             }
 
             const records = db.members[currentMember];
-            const selectedMonth = document.getElementById('monthFilter').value;
 
+            // 💡【防呆機制】檢查同一天是否已經有記錄過（僅在「新增模式」下檢查）
+            if (editIndex === -1) {
+                const existRecord = records.find(r => r.date === date);
+                if (existRecord) {
+                    const confirmOverwrite = confirm(`⚠️ 提醒：成員「${currentMember}」在 ${date} 已經有一筆紀錄（${existRecord.sys}/${existRecord.dia} mmHg）了！\n\n請問要直接覆蓋該筆紀錄嗎？`);
+                    if (!confirmOverwrite) {
+                        return; // 使用者選擇取消，則不儲存
+                    } else {
+                        // 使用者選擇覆蓋，直接更新該筆資料
+                        existRecord.sys = sys;
+                        existRecord.dia = dia;
+                        existRecord.pulse = pulse;
+                        
+                        records.sort((a, b) => new Date(a.date) - new Date(b.date));
+                        saveDB();
+                        resetForm();
+                        initMonthFilter(records);
+                        render();
+                        alert("🎉 已成功更新該日期的血壓紀錄！");
+                        return;
+                    }
+                }
+            }
+
+            const selectedMonth = document.getElementById('monthFilter').value;
             if (editIndex > -1) {
                 const filteredRecords = selectedMonth === 'all' 
                     ? records 
