@@ -16,7 +16,7 @@
 <body class="text-slate-800 dark:text-slate-100 min-h-screen p-4 sm:p-6 transition-colors duration-300 bg-slate-50 dark:bg-slate-900">
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <!-- 頂部標題區 -->
+        <!-- 頂部標題 -->
         <header class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h1 class="text-2xl font-bold flex items-center gap-2">
                 <i class="fa-solid fa-heart-pulse text-rose-500"></i> 血壓記錄管理系統
@@ -80,14 +80,14 @@
             </form>
         </section>
 
-        <!-- 3. 歷史測量紀錄清單（包含匯出入按鈕） -->
+        <!-- 3. 歷史測量紀錄清單（包含匯出與匯入按鈕） -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
                 <h2 class="text-lg font-semibold flex items-center gap-2">
                     <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史測量紀錄
                 </h2>
-                <!-- 匯出入按鈕移至此處 -->
-                <div class="flex flex-wrap items-center gap-2">
+                <!-- 匯出與匯入按鈕 -->
+                <div class="flex items-center gap-2">
                     <button onclick="exportCSV()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-sm font-medium transition flex items-center gap-1.5 cursor-pointer">
                         <i class="fa-solid fa-file-arrow-down"></i> 匯出表格
                     </button>
