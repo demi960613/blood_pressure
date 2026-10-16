@@ -124,7 +124,7 @@
         <!-- 4. 血壓趨勢圖 -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖 <span id="chartMonthLabel" class="text-xs text-slate-400 font-normal"></span>
+                <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖
             </h2>
             <div class="w-full h-64 sm:h-80">
                 <canvas id="bloodPressureChart"></canvas>
@@ -174,7 +174,6 @@
                     currentMember = member;
                     db.currentMember = currentMember;
                     saveDB();
-                    // 切換成員時重置月份篩選為全部或當前月份
                     initMonthFilter(db.members[currentMember] || []);
                     render();
                 };
@@ -209,19 +208,10 @@
             document.getElementById('currentMemberName').textContent = currentMember;
         }
 
-        function switchMember(member) {
-            currentMember = member;
-            db.currentMember = currentMember;
-            saveDB();
-            initMonthFilter(db.members[currentMember] || []);
-            render();
-        }
-
         function initMonthFilter(records) {
             const select = document.getElementById('monthFilter');
             const currentVal = select.value;
             
-            // 找出所有出現過的年月 (YYYY-MM)
             const months = [...new Set(records.map(r => r.date ? r.date.substring(0, 7) : null).filter(Boolean))].sort().reverse();
             
             select.innerHTML = `<option value="all">顯示全部月份 (${records.length}筆)</option>`;
@@ -233,7 +223,6 @@
                 select.appendChild(opt);
             });
 
-            // 若原本選的月份還存在則保持選取
             if ([...select.options].some(o => o.value === currentVal)) {
                 select.value = currentVal;
             } else {
@@ -327,7 +316,6 @@
 
         function deleteRecord(index) {
             if (confirm('確定要刪除這筆紀錄嗎？')) {
-                // 找出畫面上實際對應到原始陣列的索引
                 const records = db.members[currentMember] || [];
                 const selectedMonth = document.getElementById('monthFilter').value;
                 const filteredRecords = selectedMonth === 'all' 
@@ -356,7 +344,6 @@
         function render() {
             const records = db.members[currentMember] || [];
             
-            // 初始化或更新月份選項
             const monthSelect = document.getElementById('monthFilter');
             if (monthSelect.options.length <= 1) {
                 initMonthFilter(records);
@@ -364,12 +351,10 @@
             
             const selectedMonth = monthSelect.value;
             
-            // 過濾資料
             const displayRecords = selectedMonth === 'all' 
                 ? records 
                 : records.filter(r => r.date && r.date.startsWith(selectedMonth));
 
-            // 計算統計資訊（若有選特定月份則算該月，否則算全部或當前系統月）
             const count = displayRecords.length;
             let avgSys = 0, avgDia = 0, avgPulse = 0;
             if (count > 0) {
@@ -491,14 +476,32 @@
                             db.members[currentMember] = [];
                         }
 
+                        // 輔助函式：正確解析 Excel 序列號或日期
+                        function parseExcelDate(val) {
+                            let num = Number(val);
+                            if (isNaN(num)) return null;
+
+                            if (num > 1000) {
+                                const excelEpoch = new Date(1899, 11, 30);
+                                const jsDate = new Date(excelEpoch.getTime() + num * 24 * 60 * 60 * 1000);
+                                const y = jsDate.getFullYear();
+                                const m = String(jsDate.getMonth() + 1).padStart(2, '0');
+                                const d = String(jsDate.getDate()).padStart(2, '0');
+                                return `${y}-${m}-${d}`;
+                            } else if (num >= 1 && num <= 31) {
+                                return `2026-07-${String(num).padStart(2, '0')}`;
+                            }
+                            return null;
+                        }
+
                         for (let i = 3; i < rows.length; i++) {
                             const row = rows[i];
                             if (!row) continue;
                             
+                            // 左半邊資料
                             if (row[0] !== undefined && row[1] !== undefined && row[2] !== undefined) {
-                                const dayNum = parseInt(row[0]);
-                                if (!isNaN(dayNum) && !isNaN(Number(row[1]))) {
-                                    const dateStr = `2026-07-${String(dayNum).padStart(2, '0')}`;
+                                const dateStr = parseExcelDate(row[0]);
+                                if (dateStr && !isNaN(Number(row[1]))) {
                                     db.members[currentMember].push({
                                         date: dateStr,
                                         sys: Number(row[1]),
@@ -509,10 +512,10 @@
                                 }
                             }
                             
+                            // 右半邊資料
                             if (row[4] !== undefined && row[5] !== undefined && row[6] !== undefined) {
-                                const dayNum = parseInt(row[4]);
-                                if (!isNaN(dayNum) && !isNaN(Number(row[5]))) {
-                                    const dateStr = `2026-07-${String(dayNum).padStart(2, '0')}`;
+                                const dateStr = parseExcelDate(row[4]);
+                                if (dateStr && !isNaN(Number(row[5]))) {
                                     db.members[currentMember].push({
                                         date: dateStr,
                                         sys: Number(row[5]),
