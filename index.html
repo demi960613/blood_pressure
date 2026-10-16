@@ -24,7 +24,7 @@
             <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">輕鬆記錄與追蹤您與家人的健康數據</p>
         </header>
 
-        <!-- 1. 成員管理與該月平均/次數統計面板 -->
+        <!-- 1. 成員管理面板 -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-4">
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
                 <h2 class="text-lg font-semibold flex items-center gap-2">
@@ -42,11 +42,6 @@
             <!-- 成員列表按鈕 -->
             <div id="memberListContainer" class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
                 <!-- 動態載入成員 -->
-            </div>
-
-            <!-- 該月測量次數與平均血壓統計資訊 -->
-            <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl flex flex-wrap items-center justify-around gap-4 text-sm">
-                <!-- 動態載入統計 -->
             </div>
         </section>
 
@@ -84,9 +79,9 @@
             </form>
         </section>
 
-        <!-- 3. 歷史測量紀錄清單（包含月份篩選與匯出入按鈕） -->
-        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
+        <!-- 3. 歷史測量紀錄清單（包含月份篩選、統計資訊與匯出入按鈕） -->
+        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3 flex-wrap">
                     <h2 class="text-lg font-semibold flex items-center gap-2">
                         <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史測量紀錄
@@ -107,6 +102,12 @@
                     </label>
                 </div>
             </div>
+
+            <!-- 移至歷史紀錄區塊內的統計資訊 -->
+            <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl flex flex-wrap items-center justify-around gap-4 text-sm">
+                <!-- 動態載入統計 -->
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm">
                     <thead>
@@ -314,7 +315,6 @@
             const selectedMonth = document.getElementById('monthFilter').value;
 
             if (editIndex > -1) {
-                // 編輯模式：找出過濾後清單中的目標，並對應到原始陣列更新
                 const filteredRecords = selectedMonth === 'all' 
                     ? records 
                     : records.filter(r => r.date && r.date.startsWith(selectedMonth));
@@ -326,7 +326,6 @@
                     records[realIndex] = { date, sys, dia, pulse };
                 }
             } else {
-                // 新增模式
                 records.push({ date, sys, dia, pulse });
             }
 
@@ -348,19 +347,16 @@
             const target = filteredRecords[index];
             if (!target) return;
 
-            // 將資料帶入表單
             document.getElementById('recordDate').value = target.date;
             document.getElementById('sysInput').value = target.sys;
             document.getElementById('diaInput').value = target.dia;
             document.getElementById('pulseInput').value = target.pulse;
             document.getElementById('editIndex').value = index;
 
-            // 切換表單狀態為「編輯中」
             document.getElementById('formTitleText').textContent = "編輯";
             document.getElementById('submitBtn').textContent = "更新記錄";
             document.getElementById('cancelEditBtn').classList.remove('hidden');
 
-            // 捲動至表單位置
             document.getElementById('recordForm').scrollIntoView({ behavior: 'smooth' });
         }
 
