@@ -53,9 +53,10 @@
         <!-- 2. 記錄該人員的血壓表單 -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-pen-nib text-rose-500"></i> 記錄 <span id="currentMemberName" class="text-rose-500 font-bold"></span> 的血壓
+                <i class="fa-solid fa-pen-nib text-rose-500"></i> <span id="formTitleText">記錄</span> <span id="currentMemberName" class="text-rose-500 font-bold"></span> 的血壓
             </h2>
-            <form id="recordForm" onsubmit="addRecord(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <form id="recordForm" onsubmit="saveRecord(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                <input type="hidden" id="editIndex" value="-1">
                 <div>
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">測量日期 (選填)</label>
                     <input type="date" id="recordDate" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
@@ -72,8 +73,11 @@
                     <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">脈搏 (Pulse bpm)</label>
                     <input type="number" id="pulseInput" placeholder="例如: 72" min="30" max="200" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
                 </div>
-                <div class="sm:col-span-4 flex justify-end mt-2">
-                    <button type="submit" class="bg-rose-500 hover:bg-rose-600 text-white font-medium px-6 py-2 rounded-xl text-sm transition shadow-sm cursor-pointer">
+                <div class="sm:col-span-4 flex justify-end gap-2 mt-2">
+                    <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium px-4 py-2 rounded-xl text-sm transition cursor-pointer">
+                        取消編輯
+                    </button>
+                    <button type="submit" id="submitBtn" class="bg-rose-500 hover:bg-rose-600 text-white font-medium px-6 py-2 rounded-xl text-sm transition shadow-sm cursor-pointer">
                         儲存記錄
                     </button>
                 </div>
@@ -174,6 +178,7 @@
                     currentMember = member;
                     db.currentMember = currentMember;
                     saveDB();
+                    resetForm();
                     initMonthFilter(db.members[currentMember] || []);
                     render();
                 };
@@ -248,6 +253,7 @@
             db.currentMember = currentMember;
             saveDB();
             input.value = '';
+            resetForm();
             initMonthFilter(db.members[currentMember]);
             render();
         }
@@ -282,6 +288,7 @@
                 currentMember = remaining[0];
                 db.currentMember = currentMember;
                 saveDB();
+                resetForm();
                 initMonthFilter(db.members[currentMember] || []);
                 render();
             }
@@ -291,27 +298,79 @@
             localStorage.setItem('blood_pressure_db', JSON.stringify(db));
         }
 
-        function addRecord(e) {
+        function saveRecord(e) {
             e.preventDefault();
             const date = document.getElementById('recordDate').value;
             const sys = Number(document.getElementById('sysInput').value);
             const dia = Number(document.getElementById('diaInput').value);
             const pulse = Number(document.getElementById('pulseInput').value) || 0;
+            const editIndex = Number(document.getElementById('editIndex').value);
 
             if (!db.members[currentMember]) {
                 db.members[currentMember] = [];
             }
 
-            db.members[currentMember].push({ date, sys, dia, pulse });
-            db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
+            const records = db.members[currentMember];
+            const selectedMonth = document.getElementById('monthFilter').value;
+
+            if (editIndex > -1) {
+                // 編輯模式：找出過濾後清單中的目標，並對應到原始陣列更新
+                const filteredRecords = selectedMonth === 'all' 
+                    ? records 
+                    : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+                
+                const target = filteredRecords[editIndex];
+                const realIndex = records.indexOf(target);
+
+                if (realIndex > -1) {
+                    records[realIndex] = { date, sys, dia, pulse };
+                }
+            } else {
+                // 新增模式
+                records.push({ date, sys, dia, pulse });
+            }
+
+            records.sort((a, b) => new Date(a.date) - new Date(b.date));
             
             saveDB();
-            initMonthFilter(db.members[currentMember]);
+            resetForm();
+            initMonthFilter(records);
             render();
-            
-            document.getElementById('sysInput').value = '';
-            document.getElementById('diaInput').value = '';
-            document.getElementById('pulseInput').value = '';
+        }
+
+        function editRecord(index) {
+            const records = db.members[currentMember] || [];
+            const selectedMonth = document.getElementById('monthFilter').value;
+            const filteredRecords = selectedMonth === 'all' 
+                ? records 
+                : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+
+            const target = filteredRecords[index];
+            if (!target) return;
+
+            // 將資料帶入表單
+            document.getElementById('recordDate').value = target.date;
+            document.getElementById('sysInput').value = target.sys;
+            document.getElementById('diaInput').value = target.dia;
+            document.getElementById('pulseInput').value = target.pulse;
+            document.getElementById('editIndex').value = index;
+
+            // 切換表單狀態為「編輯中」
+            document.getElementById('formTitleText').textContent = "編輯";
+            document.getElementById('submitBtn').textContent = "更新記錄";
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+            // 捲動至表單位置
+            document.getElementById('recordForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            document.getElementById('recordForm').reset();
+            document.getElementById('editIndex').value = "-1";
+            document.getElementById('formTitleText').textContent = "記錄";
+            document.getElementById('submitBtn').textContent = "儲存記錄";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+            document.getElementById('recordDate').valueAsDate = new Date();
         }
 
         function deleteRecord(index) {
@@ -328,6 +387,7 @@
                 if (realIndex > -1) {
                     db.members[currentMember].splice(realIndex, 1);
                     saveDB();
+                    resetForm();
                     initMonthFilter(records);
                     render();
                 }
@@ -399,8 +459,11 @@
                         <td class="py-3 px-4 font-semibold">${r.sys} / ${r.dia}</td>
                         <td class="py-3 px-4">${r.pulse ? r.pulse + ' bpm' : '-'}</td>
                         <td class="py-3 px-4">${getStatus(r.sys, r.dia)}</td>
-                        <td class="py-3 px-4 text-right">
-                            <button onclick="deleteRecord(${idx})" class="text-slate-400 hover:text-rose-500 transition cursor-pointer">
+                        <td class="py-3 px-4 text-right space-x-2">
+                            <button onclick="editRecord(${idx})" class="text-slate-400 hover:text-indigo-500 transition cursor-pointer" title="編輯紀錄">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteRecord(${idx})" class="text-slate-400 hover:text-rose-500 transition cursor-pointer" title="刪除紀錄">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </td>
@@ -476,7 +539,6 @@
                             db.members[currentMember] = [];
                         }
 
-                        // 輔助函式：正確解析 Excel 序列號或日期
                         function parseExcelDate(val) {
                             let num = Number(val);
                             if (isNaN(num)) return null;
@@ -498,7 +560,6 @@
                             const row = rows[i];
                             if (!row) continue;
                             
-                            // 左半邊資料
                             if (row[0] !== undefined && row[1] !== undefined && row[2] !== undefined) {
                                 const dateStr = parseExcelDate(row[0]);
                                 if (dateStr && !isNaN(Number(row[1]))) {
@@ -512,7 +573,6 @@
                                 }
                             }
                             
-                            // 右半邊資料
                             if (row[4] !== undefined && row[5] !== undefined && row[6] !== undefined) {
                                 const dateStr = parseExcelDate(row[4]);
                                 if (dateStr && !isNaN(Number(row[5]))) {
@@ -529,6 +589,7 @@
                         
                         db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
                         saveDB();
+                        resetForm();
                         initMonthFilter(db.members[currentMember]);
                         render();
                         
@@ -559,6 +620,7 @@
                         }
                         db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
                         saveDB();
+                        resetForm();
                         initMonthFilter(db.members[currentMember]);
                         render();
                         alert(`🎉 成功匯入 ${importedCount} 筆血壓紀錄！`);
