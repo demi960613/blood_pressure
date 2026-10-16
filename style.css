@@ -1,105 +1,32 @@
 /* ==========================================
-   1. 全域樣式與漸層背景
+   血壓紀錄追蹤系統 - 自定義樣式表
    ========================================== */
+
+/* 基礎平滑過渡設定 */
 body {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.dark body {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-}
-
-/* ==========================================
-   2. 卡片區塊與陰影微互動
-   ========================================== */
-.max-w-3xl > div, header {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.max-w-3xl > div:hover, header:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-}
-
-/* ==========================================
-   3. 按鈕與表單輸入互動升級
-   ========================================== */
-button {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-button:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
-}
-
-button:active {
-  transform: translateY(0);
-}
-
-/* 輸入框聚焦時的精緻藍色光暈 */
-input:focus, select:focus {
-  outline: none;
-  border-color: #3b82f6 !important;
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
-}
-
-/* ==========================================
-   4. 歷史紀錄表格列過渡動畫
-   ========================================== */
-tbody tr {
-  transition: background-color 0.15s ease;
-}
-
-/* ==========================================
-   5. 數據統計小卡左側裝飾邊框
-   ========================================== */
-#statsSection > div {
-  position: relative;
-  overflow: hidden;
-}
-
-#statsSection > div::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background-color: #3b82f6;
-  border-radius: 4px 0 0 4px;
-}
-
-/* 第二張舒張壓小卡：翠綠色裝飾條 */
-#statsSection > div:nth-child(2)::before {
-  background-color: #10b981;
-}
-
-/* 第三張總次數小卡：深灰色裝飾條 */
-#statsSection > div:nth-child(3)::before {
-  background-color: #64748b;
-}
-
-/* ==========================================
-   6. 自訂精美捲軸
-   ========================================== */
+/* 自定義捲軸樣式（讓介面更有質感） */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
-  border-radius: 4px;
-}
-
-.dark ::-webkit-scrollbar-thumb {
-  background: #475569;
+    background: rgba(150, 150, 150, 0.3);
+    border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+    background: rgba(150, 150, 150, 0.5);
+}
+
+/* 確保表單收合與展開的過渡流暢 */
+#formContainer {
+    transition: all 0.3s ease-in-out;
 }
