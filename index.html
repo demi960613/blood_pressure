@@ -16,7 +16,7 @@
 <body class="text-slate-800 dark:text-slate-100 min-h-screen p-4 sm:p-6 transition-colors duration-300 bg-slate-50 dark:bg-slate-900">
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <!-- 頂部標題與功能按鈕 -->
+        <!-- 頂部標題與匯出入按鈕 -->
         <header class="flex flex-col sm:flex-row justify-between items-center bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 gap-4">
             <div>
                 <h1 class="text-2xl font-bold flex items-center gap-2">
@@ -25,15 +25,8 @@
                 <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">輕鬆記錄與追蹤您與家人的健康數據</p>
             </div>
             
-            <!-- 成員切換與匯出入按鈕 -->
+            <!-- 匯出入按鈕 -->
             <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto justify-end">
-                <select id="memberSelect" onchange="switchMember()" class="bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500">
-                    <!-- 動態載入成員 -->
-                </select>
-                <!-- 重新命名按鈕 -->
-                <button onclick="renameMember()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-xl text-sm font-medium transition flex items-center gap-1.5 cursor-pointer" title="重新命名目前成員">
-                    <i class="fa-solid fa-pen"></i> 改名
-                </button>
                 <button onclick="exportCSV()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-2 rounded-xl text-sm font-medium transition flex items-center gap-1.5 cursor-pointer">
                     <i class="fa-solid fa-file-arrow-down"></i> 匯出表格
                 </button>
@@ -43,6 +36,26 @@
                 </label>
             </div>
         </header>
+
+        <!-- 獨立的成員管理面板 -->
+        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
+                <i class="fa-solid fa-users text-rose-500"></i> 成員管理
+            </h2>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                <!-- 成員列表清單 (按鈕切換) -->
+                <div id="memberListContainer" class="flex flex-wrap items-center gap-2">
+                    <!-- 動態載入成員按鈕 -->
+                </div>
+                <!-- 新增成員輸入區 -->
+                <div class="flex items-center gap-2">
+                    <input type="text" id="newMemberInput" placeholder="新成員名字" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                    <button onclick="addMember()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition cursor-pointer shrink-0">
+                        <i class="fa-solid fa-user-plus mr-1"></i> 新增
+                    </button>
+                </div>
+            </div>
+        </section>
 
         <!-- 圖表區塊 -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
@@ -119,58 +132,129 @@
 
         // 初始化
         window.onload = function() {
-            // 預設日期帶入今天
             document.getElementById('recordDate').valueAsDate = new Date();
             initMembers();
             render();
         };
 
         function initMembers() {
-            const select = document.getElementById('memberSelect');
-            select.innerHTML = '';
+            const container = document.getElementById('memberListContainer');
+            container.innerHTML = '';
+            
+            // 確保當前成員存在
+            if (!db.members[currentMember]) {
+                const firstKey = Object.keys(db.members)[0];
+                currentMember = firstKey || "平平";
+                db.currentMember = currentMember;
+            }
+
             for (let member in db.members) {
-                let opt = document.createElement('option');
-                opt.value = member;
-                opt.textContent = member;
-                if (member === currentMember) opt.selected = true;
-                select.appendChild(opt);
+                let isSelected = (member === currentMember);
+                let btnWrapper = document.createElement('div');
+                btnWrapper.className = "inline-flex items-center bg-slate-100 dark:bg-slate-700 rounded-xl p-1 border " + 
+                    (isSelected ? "border-rose-500 shadow-sm" : "border-transparent");
+
+                // 切換成員按鈕
+                let selectBtn = document.createElement('button');
+                selectBtn.type = "button";
+                selectBtn.className = `px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer flex items-center gap-1.5 ${
+                    isSelected ? 'bg-rose-500 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
+                }`;
+                selectBtn.innerHTML = `<i class="fa-solid fa-user text-xs"></i> ${member}`;
+                selectBtn.onclick = () => switchMember(member);
+                btnWrapper.appendChild(selectBtn);
+
+                // 改名按鈕
+                let renameBtn = document.createElement('button');
+                renameBtn.type = "button";
+                renameBtn.className = "px-2 py-1.5 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 text-xs transition cursor-pointer";
+                renameBtn.innerHTML = `<i class="fa-solid fa-pen"></i>`;
+                renameBtn.title = "重新命名";
+                renameBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    renameMember(member);
+                };
+                btnWrapper.appendChild(renameBtn);
+
+                // 刪除成員按鈕 (若只剩一個成員則不允許刪除)
+                if (Object.keys(db.members).length > 1) {
+                    let deleteBtn = document.createElement('button');
+                    deleteBtn.type = "button";
+                    deleteBtn.className = "px-2 py-1.5 text-slate-400 hover:text-rose-500 text-xs transition cursor-pointer";
+                    deleteBtn.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+                    deleteBtn.title = "刪除成員";
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        deleteMember(member);
+                    };
+                    btnWrapper.appendChild(deleteBtn);
+                }
+
+                container.appendChild(btnWrapper);
             }
             document.getElementById('currentMemberName').textContent = currentMember;
         }
 
-        function switchMember() {
-            currentMember = document.getElementById('memberSelect').value;
+        function switchMember(member) {
+            currentMember = member;
             db.currentMember = currentMember;
             saveDB();
             render();
         }
 
-        function renameMember() {
-            const oldName = currentMember;
+        function addMember() {
+            const input = document.getElementById('newMemberInput');
+            const name = input.value.trim();
+
+            if (!name) {
+                alert('請輸入成員名字！');
+                return;
+            }
+            if (db.members[name]) {
+                alert('此成員已經存在！');
+                return;
+            }
+
+            db.members[name] = [];
+            currentMember = name;
+            db.currentMember = currentMember;
+            saveDB();
+            input.value = '';
+            render();
+        }
+
+        function renameMember(oldName) {
             const newName = prompt(`請輸入「${oldName}」的新名字：`, oldName);
-            
-            if (!newName) return; 
+            if (!newName) return;
             const trimmedNewName = newName.trim();
-            
+
             if (trimmedNewName === "") {
                 alert("名字不能為空白！");
                 return;
             }
-            
             if (db.members[trimmedNewName]) {
-                alert("此名字已經存在，請換一個名字！");
+                alert("此名字已經存在！");
                 return;
             }
-            
+
             db.members[trimmedNewName] = db.members[oldName];
             delete db.members[oldName];
-            
+
             currentMember = trimmedNewName;
             db.currentMember = currentMember;
-            
             saveDB();
             render();
-            alert(`🎉 已經成功將成員重新命名為「${trimmedNewName}」！`);
+        }
+
+        function deleteMember(member) {
+            if (confirm(`確定要刪除成員「${member}」及其所有血壓紀錄嗎？`)) {
+                delete db.members[member];
+                const remaining = Object.keys(db.members);
+                currentMember = remaining[0];
+                db.currentMember = currentMember;
+                saveDB();
+                render();
+            }
         }
 
         function saveDB() {
