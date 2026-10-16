@@ -37,16 +37,12 @@
             </div>
         </header>
 
-        <!-- 獨立的成員管理面板 -->
-        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-            <h2 class="text-lg font-semibold mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-users text-rose-500"></i> 成員管理
-            </h2>
+        <!-- 1. 成員管理與該月平均/次數統計面板 -->
+        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-4">
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-                <!-- 成員列表清單 (按鈕切換) -->
-                <div id="memberListContainer" class="flex flex-wrap items-center gap-2">
-                    <!-- 動態載入成員按鈕 -->
-                </div>
+                <h2 class="text-lg font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-users text-rose-500"></i> 成員管理
+                </h2>
                 <!-- 新增成員輸入區 -->
                 <div class="flex items-center gap-2">
                     <input type="text" id="newMemberInput" placeholder="新成員名字" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
@@ -55,19 +51,19 @@
                     </button>
                 </div>
             </div>
-        </section>
 
-        <!-- 圖表區塊 -->
-        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-            <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖
-            </h2>
-            <div class="w-full h-64 sm:h-80">
-                <canvas id="bloodPressureChart"></canvas>
+            <!-- 成員列表按鈕 -->
+            <div id="memberListContainer" class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
+                <!-- 動態載入成員 -->
+            </div>
+
+            <!-- 該月測量次數與平均血壓統計資訊 -->
+            <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl flex flex-wrap items-center justify-around gap-4 text-sm">
+                <!-- 動態載入統計 -->
             </div>
         </section>
 
-        <!-- 新增紀錄表單 -->
+        <!-- 2. 記錄該人員的血壓表單 -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-pen-nib text-rose-500"></i> 記錄 <span id="currentMemberName" class="text-rose-500 font-bold"></span> 的血壓
@@ -97,7 +93,7 @@
             </form>
         </section>
 
-        <!-- 歷史紀錄清單 -->
+        <!-- 3. 歷史測量紀錄清單 -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
             <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史測量紀錄
@@ -119,6 +115,17 @@
                 </table>
             </div>
         </section>
+
+        <!-- 4. 血壓趨勢圖 -->
+        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+            <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖
+            </h2>
+            <div class="w-full h-64 sm:h-80">
+                <canvas id="bloodPressureChart"></canvas>
+            </div>
+        </section>
+
     </div>
 
     <!-- JavaScript 邏輯 -->
@@ -130,7 +137,6 @@
         let currentMember = db.currentMember || "平平";
         let chartInstance = null;
 
-        // 初始化
         window.onload = function() {
             document.getElementById('recordDate').valueAsDate = new Date();
             initMembers();
@@ -141,7 +147,6 @@
             const container = document.getElementById('memberListContainer');
             container.innerHTML = '';
             
-            // 確保當前成員存在
             if (!db.members[currentMember]) {
                 const firstKey = Object.keys(db.members)[0];
                 currentMember = firstKey || "平平";
@@ -154,7 +159,6 @@
                 btnWrapper.className = "inline-flex items-center bg-slate-100 dark:bg-slate-700 rounded-xl p-1 border " + 
                     (isSelected ? "border-rose-500 shadow-sm" : "border-transparent");
 
-                // 切換成員按鈕
                 let selectBtn = document.createElement('button');
                 selectBtn.type = "button";
                 selectBtn.className = `px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer flex items-center gap-1.5 ${
@@ -164,7 +168,6 @@
                 selectBtn.onclick = () => switchMember(member);
                 btnWrapper.appendChild(selectBtn);
 
-                // 改名按鈕
                 let renameBtn = document.createElement('button');
                 renameBtn.type = "button";
                 renameBtn.className = "px-2 py-1.5 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 text-xs transition cursor-pointer";
@@ -176,7 +179,6 @@
                 };
                 btnWrapper.appendChild(renameBtn);
 
-                // 刪除成員按鈕 (若只剩一個成員則不允許刪除)
                 if (Object.keys(db.members).length > 1) {
                     let deleteBtn = document.createElement('button');
                     deleteBtn.type = "button";
@@ -301,11 +303,49 @@
         function render() {
             initMembers();
             const records = db.members[currentMember] || [];
+            
+            // 計算當月統計 (預設取目前系統月份或最新有資料的月份，這裡以當前年月為例)
+            const now = new Date();
+            const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+            
+            const monthRecords = records.filter(r => r.date && r.date.startsWith(currentYearMonth));
+            const count = monthRecords.length;
+            
+            let avgSys = 0, avgDia = 0, avgPulse = 0;
+            if (count > 0) {
+                const sumSys = monthRecords.reduce((acc, r) => acc + r.sys, 0);
+                const sumDia = monthRecords.reduce((acc, r) => acc + r.dia, 0);
+                const sumPulse = monthRecords.reduce((acc, r) => acc + (r.pulse || 0), 0);
+                avgSys = Math.round(sumSys / count);
+                avgDia = Math.round(sumDia / count);
+                avgPulse = Math.round(sumPulse / count);
+            }
+
+            // 渲染統計面板
+            const statsContainer = document.getElementById('monthlyStats');
+            statsContainer.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-calendar-days text-rose-500"></i>
+                    <span class="text-slate-500 dark:text-slate-400">本月測量次數：</span>
+                    <span class="font-bold text-base text-rose-500">${count} 次</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-blue-500"></i>
+                    <span class="text-slate-500 dark:text-slate-400">本月平均血壓：</span>
+                    <span class="font-bold text-base">${count > 0 ? `${avgSys} /${avgDia} mmHg` : '尚無資料'}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-heart-pulse text-indigo-500"></i>
+                    <span class="text-slate-500 dark:text-slate-400">平均脈搏：</span>
+                    <span class="font-bold text-base">${count > 0 && avgPulse > 0 ? `${avgPulse} bpm` : '-'}</span>
+                </div>
+            `;
+
             const tbody = document.getElementById('recordTableBody');
             tbody.innerHTML = '';
 
             if (records.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">本月尚無血壓紀錄</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">目前尚無血壓紀錄</td></tr>`;
             } else {
                 records.forEach((r, idx) => {
                     let tr = document.createElement('tr');
@@ -371,7 +411,6 @@
             });
         }
 
-        // 支援左右並排與正確解析 Excel 格式
         function importCSV(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -393,12 +432,10 @@
                             db.members[currentMember] = [];
                         }
 
-                        // 從第 3 列開始讀取（索引從 3 開始，跳過標題與表頭）
                         for (let i = 3; i < rows.length; i++) {
                             const row = rows[i];
                             if (!row) continue;
                             
-                            // 1. 處理左半邊資料 (欄位 0: 日期, 1: 收縮壓, 2: 舒張壓, 3: 脈搏)
                             if (row[0] !== undefined && row[1] !== undefined && row[2] !== undefined) {
                                 const dayNum = parseInt(row[0]);
                                 if (!isNaN(dayNum) && !isNaN(Number(row[1]))) {
@@ -413,7 +450,6 @@
                                 }
                             }
                             
-                            // 2. 處理右半邊資料 (欄位 4: 日期, 5: 收縮壓, 6: 舒張壓, 7: 脈搏)
                             if (row[4] !== undefined && row[5] !== undefined && row[6] !== undefined) {
                                 const dayNum = parseInt(row[4]);
                                 if (!isNaN(dayNum) && !isNaN(Number(row[5]))) {
