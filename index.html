@@ -148,12 +148,16 @@
         let chartInstance = null;
 
         window.onload = function() {
+            // 💡【防呆】取得今天的日期並設定 max，讓未來日期自動變灰無法選取
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('recordDate').max = todayStr;
             document.getElementById('recordDate').valueAsDate = new Date();
+            
             initMembers();
             render();
         };
 
-        // 💡【防呆 4】當表單有填寫數據但尚未儲存時，防止不小心關閉網頁或重新整理導致資料遺失
+        // 💡【防呆】當表單有填寫數據但尚未儲存時，防止不小心關閉網頁或重新整理導致資料遺失
         window.addEventListener('beforeunload', function (e) {
             const sysVal = document.getElementById('sysInput').value;
             const diaVal = document.getElementById('diaInput').value;
