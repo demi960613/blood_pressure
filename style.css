@@ -1,16 +1,17 @@
 /* ==========================================
-   血壓紀錄追蹤系統 - 自定義極簡樣式表
+   血壓紀錄追蹤系統 - 裝置模擬與 RWD 樣式表
    ========================================== */
 
 /* 基礎平滑過渡設定 */
 body {
     transition: background-color 0.3s ease, color 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
 }
 
 /* 自定義精細捲軸 */
 ::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
+    width: 4px;
+    height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -18,20 +19,55 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(150, 150, 150, 0.25);
+    background: rgba(150, 150, 150, 0.3);
     border-radius: 9999px;
 }
 
-::-webkit-scrollbar-thumb:hover {
-    background: rgba(150, 150, 150, 0.4);
-}
-
-/* 確保彈窗 (Modal) 與下拉選單過渡平滑 */
+/* Modal 彈窗背景 Blur 與過渡 */
 .modal-backdrop {
     backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     transition: all 0.2s ease-in-out;
 }
 
 #formContainer {
     transition: all 0.3s ease-in-out;
+}
+
+.table-responsive {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 📱 裝置模擬樣式 (Device Simulator) */
+#appViewportContainer {
+    transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+}
+
+/* 手機模擬框 */
+.viewport-mobile {
+    max-width: 395px !important;
+    border: 8px solid #334155;
+    border-radius: 32px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    background-clip: padding-box;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* 平板模擬框 */
+.viewport-tablet {
+    max-width: 768px !important;
+    border: 10px solid #334155;
+    border-radius: 28px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* 電腦模式（預設滿版） */
+.viewport-desktop {
+    max-width: 56rem !important; /* max-w-4xl */
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
 }
