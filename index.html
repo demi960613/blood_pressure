@@ -15,126 +15,123 @@
     <!-- 自定義樣式表 -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body id="appBody" class="text-slate-800 dark:text-slate-100 min-h-screen p-3 sm:p-6 bg-slate-50 dark:bg-slate-900 flex flex-col items-center">
-    
-    <!-- 💡 裝置檢視切換條 (Device Viewport Switcher) -->
-    <div class="w-full max-w-4xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md p-2.5 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 shadow-sm mb-4 flex flex-wrap items-center justify-between gap-2 z-40">
-        <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400 pl-1">
-            <i class="fa-solid fa-display text-indigo-500"></i> 檢視模式：
-        </div>
-        
-        <!-- 裝置切換按鈕組 -->
-        <div class="inline-flex bg-slate-100 dark:bg-slate-700/60 p-1 rounded-xl border border-slate-200/60 dark:border-slate-600/60 text-xs">
-            <button onclick="setDeviceView('mobile')" id="btnDeviceMobile" class="px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
-                <i class="fa-solid fa-mobile-screen-button"></i> 手機
-            </button>
-            <button onclick="setDeviceView('tablet')" id="btnDeviceTablet" class="px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white">
-                <i class="fa-solid fa-tablet-screen-button"></i> 平板
-            </button>
-            <button onclick="setDeviceView('desktop')" id="btnDeviceDesktop" class="px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer bg-white dark:bg-slate-800 text-rose-500 font-bold shadow-xs">
-                <i class="fa-solid fa-desktop"></i> 電腦 (預設)
-            </button>
-        </div>
-    </div>
+<body id="appBody" class="text-slate-800 dark:text-slate-100 min-h-screen p-2 sm:p-6 bg-slate-50 dark:bg-slate-900 flex flex-col items-center">
 
-    <!-- 主程式容器（動態切換裝置外框與寬度） -->
-    <div id="appViewportContainer" class="w-full viewport-desktop space-y-4 sm:space-y-6 transition-all duration-300">
+    <!-- 主程式容器 -->
+    <div id="appViewportContainer" class="w-full viewport-desktop space-y-4 transition-all duration-300">
         
-        <!-- 頂部標題與風格主題選單 -->
-        <header class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+        <!-- 頂部標題與控制下拉選單區（裝置檢視與風格主題並排） -->
+        <header class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
-                <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                <h1 class="text-lg sm:text-xl font-bold flex items-center gap-2">
                     <i class="fa-solid fa-heart-pulse text-rose-500"></i> 血壓記錄管理系統
                 </h1>
-                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">輕鬆記錄與追蹤您與家人的健康數據</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">輕鬆記錄與追蹤您與家人的健康數據</p>
             </div>
             
-            <!-- 主題選擇 -->
-            <div class="flex items-center justify-between sm:justify-end gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/60">
-                <label for="themeSelector" class="text-xs font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1 shrink-0">
-                    <i id="themeIcon" class="fa-solid fa-palette"></i> 風格主題：
-                </label>
-                <select id="themeSelector" onchange="changeTheme(this.value)" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer w-full sm:w-auto">
-                    <option value="slate">預設石墨灰 (日間)</option>
-                    <option value="rose">柔和粉紅 (日間)</option>
-                    <option value="blue">清新天藍 (日間)</option>
-                    <option value="emerald">薄荷翠綠 (日間)</option>
-                    <option value="amber">暖心琥珀 (日間)</option>
-                    <option value="dark">🌙 深夜模式 (深色)</option>
-                </select>
+            <!-- 右側並排下拉選單群組 -->
+            <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/60">
+                <!-- 1. 裝置檢視下拉選單 -->
+                <div class="flex items-center gap-1 flex-1 sm:flex-none">
+                    <label for="deviceSelector" class="text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0">
+                        <i class="fa-solid fa-display text-indigo-500"></i>
+                    </label>
+                    <select id="deviceSelector" onchange="setDeviceView(this.value)" class="w-full sm:w-auto bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
+                        <option value="desktop">💻 電腦模式</option>
+                        <option value="tablet">📱 平板模式</option>
+                        <option value="mobile">📱 手機模式</option>
+                    </select>
+                </div>
+
+                <!-- 2. 風格主題下拉選單 -->
+                <div class="flex items-center gap-1 flex-1 sm:flex-none">
+                    <label for="themeSelector" class="text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0">
+                        <i id="themeIcon" class="fa-solid fa-palette text-rose-500"></i>
+                    </label>
+                    <select id="themeSelector" onchange="changeTheme(this.value)" class="w-full sm:w-auto bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
+                        <option value="slate">預設石墨灰</option>
+                        <option value="rose">柔和粉紅</option>
+                        <option value="blue">清新天藍</option>
+                        <option value="emerald">薄荷翠綠</option>
+                        <option value="amber">暖心琥珀</option>
+                        <option value="dark">🌙 深夜模式</option>
+                    </select>
+                </div>
             </div>
         </header>
 
         <!-- 1. 成員選擇 -->
-        <section class="bg-white dark:bg-slate-800 p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            <div class="flex items-center justify-between sm:justify-start gap-2 w-full sm:w-auto">
+        <section class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex flex-col gap-3">
+            <div class="flex items-center justify-between gap-2">
                 <span class="text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0">當前檢視：</span>
                 
-                <div class="relative flex-1 sm:flex-initial">
-                    <button onclick="toggleMemberDropdown()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center justify-between sm:justify-start gap-2 cursor-pointer border border-slate-200 dark:border-slate-600">
-                        <span class="flex items-center gap-2 truncate">
-                            <i class="fa-solid fa-circle-user text-rose-500 text-sm"></i>
+                <div class="relative flex-1 max-w-[200px]">
+                    <button onclick="toggleMemberDropdown()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center justify-between gap-2 cursor-pointer border border-slate-200 dark:border-slate-600">
+                        <span class="flex items-center gap-1.5 truncate">
+                            <i class="fa-solid fa-circle-user text-rose-500"></i>
                             <span id="selectedMemberLabel" class="truncate">平平</span>
                         </span>
-                        <i class="fa-solid fa-chevron-down text-xs opacity-50 ml-1"></i>
+                        <i class="fa-solid fa-chevron-down text-[10px] opacity-50"></i>
                     </button>
 
-                    <div id="memberDropdown" class="hidden absolute left-0 sm:left-0 right-0 sm:right-auto mt-2 w-full sm:w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 z-30 py-2 text-xs">
+                    <div id="memberDropdown" class="hidden absolute left-0 right-0 mt-1 w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 z-30 py-2 text-xs">
                         <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">切換成員</div>
-                        <div id="memberDropdownList" class="max-h-48 overflow-y-auto"></div>
+                        <div id="memberDropdownList" class="max-h-40 overflow-y-auto"></div>
                         <div class="my-1 border-t border-slate-100 dark:border-slate-700/60"></div>
-                        <button onclick="openMemberModal(); toggleMemberDropdown();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-semibold cursor-pointer">
-                            <i class="fa-solid fa-gear w-4"></i> 管理與新增成員...
+                        <button onclick="openMemberModal(); toggleMemberDropdown();" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-semibold cursor-pointer">
+                            <i class="fa-solid fa-gear w-3"></i> 管理與新增...
                         </button>
                     </div>
                 </div>
             </div>
 
-            <button onclick="openMemberModal()" class="w-full sm:w-auto justify-center text-xs font-medium text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 flex items-center gap-1.5 transition cursor-pointer py-1.5 sm:py-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-700/60">
+            <button onclick="openMemberModal()" class="w-full justify-center text-xs font-medium text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 flex items-center gap-1.5 transition cursor-pointer py-1.5 border-t border-slate-100 dark:border-slate-700/60">
                 <i class="fa-solid fa-users-gear"></i> 管理與新增成員
             </button>
         </section>
 
         <!-- 2. 可收納式血壓輸入表單 -->
         <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 overflow-hidden">
-            <div onclick="toggleForm()" class="p-4 sm:p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition gap-2">
-                <h2 class="text-sm sm:text-base font-semibold flex items-center gap-1.5 truncate">
+            <div onclick="toggleForm()" class="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition gap-2">
+                <h2 class="text-xs sm:text-sm font-semibold flex items-center gap-1.5 truncate">
                     <i class="fa-solid fa-pen-nib text-rose-500 shrink-0"></i> 
                     <span class="truncate"><span id="formTitleText">記錄</span> <span id="currentMemberName" class="text-rose-500 font-bold"></span> 的血壓</span>
                 </h2>
-                <button type="button" class="bg-rose-500 hover:bg-rose-600 text-white text-xs font-medium px-3 py-1.5 rounded-xl flex items-center gap-1 shadow-sm transition shrink-0">
+                <button type="button" class="bg-rose-500 hover:bg-rose-600 text-white text-xs font-medium px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm transition shrink-0">
                     <i id="toggleFormIcon" class="fa-solid fa-plus text-[10px]"></i>
-                    <span id="toggleFormText">新增紀錄</span>
+                    <span id="toggleFormText">新增</span>
                 </button>
             </div>
 
-            <div id="formContainer" class="hidden px-4 sm:px-6 pb-5 sm:pb-6 pt-2 border-t border-slate-100 dark:border-slate-700/60">
-                <form id="recordForm" onsubmit="saveRecord(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-3 sm:gap-4">
+            <div id="formContainer" class="hidden px-4 pb-4 pt-1 border-t border-slate-100 dark:border-slate-700/60">
+                <form id="recordForm" onsubmit="saveRecord(event)" class="flex flex-col gap-3">
                     <input type="hidden" id="editIndex" value="-1">
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 dark:text-slate-400 mb-1">測量日期</label>
-                        <input type="date" id="recordDate" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <label class="block text-[11px] font-medium text-slate-400 dark:text-slate-400 mb-0.5">測量日期</label>
+                        <input type="date" id="recordDate" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-400 dark:text-slate-400 mb-0.5">收縮壓 (SYS)</label>
+                            <input type="number" id="sysInput" placeholder="120" required min="50" max="250" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-medium text-slate-400 dark:text-slate-400 mb-0.5">舒張壓 (DIA)</label>
+                            <input type="number" id="diaInput" placeholder="80" required min="30" max="150" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 dark:text-slate-400 mb-1">收縮壓 (SYS mmHg)</label>
-                        <input type="number" id="sysInput" placeholder="例如: 120" required min="50" max="250" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <label class="block text-[11px] font-medium text-slate-400 dark:text-slate-400 mb-0.5">脈搏 (Pulse bpm)</label>
+                        <input type="number" id="pulseInput" placeholder="72" min="30" max="200" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
                     </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 dark:text-slate-400 mb-1">舒張壓 (DIA mmHg)</label>
-                        <input type="number" id="diaInput" placeholder="例如: 80" required min="30" max="150" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 dark:text-slate-400 mb-1">脈搏 (Pulse bpm)</label>
-                        <input type="number" id="pulseInput" placeholder="例如: 72" min="30" max="200" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
-                    </div>
-                    <div class="sm:col-span-4 flex justify-end gap-2 mt-1 sm:mt-2">
-                        <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-medium px-3.5 py-2 rounded-xl text-xs transition cursor-pointer">
-                            取消編輯
+                    <div class="flex flex-wrap justify-end gap-2 pt-1">
+                        <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-medium px-3 py-1.5 rounded-xl text-xs transition cursor-pointer">
+                            取消
                         </button>
-                        <button type="button" onclick="clearFormInputs()" class="flex-1 sm:flex-none bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-medium px-3.5 py-2 rounded-xl text-xs transition cursor-pointer border border-slate-200 dark:border-slate-600">
-                            <i class="fa-solid fa-rotate-left mr-1"></i> 清空
+                        <button type="button" onclick="clearFormInputs()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-medium px-3 py-1.5 rounded-xl text-xs transition cursor-pointer border border-slate-200 dark:border-slate-600">
+                            清空
                         </button>
-                        <button type="submit" id="submitBtn" class="flex-1 sm:flex-none bg-rose-500 hover:bg-rose-600 text-white font-medium px-6 py-2 rounded-xl text-xs transition shadow-sm cursor-pointer">
+                        <button type="submit" id="submitBtn" class="bg-rose-500 hover:bg-rose-600 text-white font-medium px-5 py-1.5 rounded-xl text-xs transition shadow-sm cursor-pointer">
                             儲存記錄
                         </button>
                     </div>
@@ -143,40 +140,40 @@
         </section>
 
         <!-- 3. 歷史測量紀錄清單 -->
-        <section class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 space-y-4">
-            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
-                <div class="flex items-center justify-between sm:justify-start gap-2">
-                    <h2 class="text-sm sm:text-base font-semibold flex items-center gap-1.5 shrink-0">
+        <section class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 space-y-3">
+            <div class="flex flex-col gap-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <h2 class="text-xs sm:text-sm font-semibold flex items-center gap-1.5 shrink-0">
                         <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史紀錄
                     </h2>
-                    <select id="monthFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500">
+                    <select id="monthFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 max-w-[130px]">
                         <option value="all">全部月份</option>
                     </select>
                 </div>
 
-                <div class="relative w-full sm:w-auto">
-                    <button onclick="toggleBackupMenu()" class="w-full sm:w-auto justify-between sm:justify-start bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3.5 py-2 rounded-xl text-xs font-medium transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600">
-                        <span class="flex items-center gap-1.5">
+                <div class="relative w-full">
+                    <button onclick="toggleBackupMenu()" class="w-full justify-between bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600">
+                        <span class="flex items-center gap-1.5 truncate">
                             <i class="fa-solid fa-arrows-up-down text-rose-500"></i> 資料備份與匯出入
                         </span>
                         <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                     </button>
                     
-                    <div id="backupDropdown" class="hidden absolute right-0 left-0 sm:left-auto mt-2 w-full sm:w-52 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 z-20 py-2 text-xs">
-                        <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">個人紀錄</div>
-                        <button onclick="exportSingleMemberCSV(); toggleBackupMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                    <div id="backupDropdown" class="hidden absolute right-0 left-0 mt-1 w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 z-20 py-2 text-xs">
+                        <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">個人紀錄</div>
+                        <button onclick="exportSingleMemberCSV(); toggleBackupMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200">
                             <i class="fa-solid fa-user-arrow-down text-rose-500 w-4"></i> 匯出個人紀錄
                         </button>
-                        <label class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200 cursor-pointer">
+                        <label class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200 cursor-pointer">
                             <i class="fa-solid fa-user-arrow-up text-rose-500 w-4"></i> 匯入個人紀錄
                             <input type="file" id="importSingleFile" accept=".csv" onchange="importSingleMemberCSV(event); toggleBackupMenu();" class="hidden">
                         </label>
                         <div class="my-1 border-t border-slate-100 dark:border-slate-700/60"></div>
-                        <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">全家總打包</div>
-                        <button onclick="exportAllMembersCSV(); toggleBackupMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-medium">
+                        <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">全家總打包</div>
+                        <button onclick="exportAllMembersCSV(); toggleBackupMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-medium">
                             <i class="fa-solid fa-users-rectangle w-4"></i> 匯出全家總表
                         </button>
-                        <label class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-medium cursor-pointer">
+                        <label class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-medium cursor-pointer">
                             <i class="fa-solid fa-file-arrow-up w-4"></i> 智慧匯入全家總表
                             <input type="file" id="importAllFile" accept=".csv" onchange="importAllMembersCSV(event); toggleBackupMenu();" class="hidden">
                         </label>
@@ -185,18 +182,18 @@
             </div>
 
             <!-- 月統計卡片 -->
-            <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/30 p-3 sm:p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-around gap-2.5 text-xs"></div>
+            <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/30 p-3 rounded-xl flex flex-col gap-2 text-xs"></div>
 
             <!-- 歷史表格區域 -->
-            <div class="overflow-x-auto table-responsive -mx-4 sm:mx-0 px-4 sm:px-0">
-                <table class="w-full text-left text-xs min-w-[500px]">
+            <div class="overflow-x-auto table-responsive -mx-4 px-4">
+                <table class="w-full text-left text-xs min-w-[420px]">
                     <thead>
                         <tr class="border-b border-slate-100 dark:border-slate-700/60 text-slate-400 font-medium">
-                            <th class="py-2.5 px-3">日期</th>
-                            <th class="py-2.5 px-3">收縮壓 / 舒張壓</th>
-                            <th class="py-2.5 px-3">脈搏</th>
-                            <th class="py-2.5 px-3">狀態</th>
-                            <th class="py-2.5 px-3 text-right">操作</th>
+                            <th class="py-2 px-2">日期</th>
+                            <th class="py-2 px-2">收縮/舒張</th>
+                            <th class="py-2 px-2">脈搏</th>
+                            <th class="py-2 px-2">狀態</th>
+                            <th class="py-2 px-2 text-right">操作</th>
                         </tr>
                     </thead>
                     <tbody id="recordTableBody"></tbody>
@@ -205,46 +202,46 @@
         </section>
 
         <!-- 4. 血壓趨勢圖 -->
-        <section class="bg-white dark:bg-slate-800 p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60">
-            <h2 class="text-sm sm:text-base font-semibold mb-3 sm:mb-4 flex items-center gap-2">
+        <section class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60">
+            <h2 class="text-xs sm:text-sm font-semibold mb-3 flex items-center gap-2">
                 <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖
             </h2>
-            <div class="w-full h-56 sm:h-80">
+            <div class="w-full h-48 sm:h-64">
                 <canvas id="bloodPressureChart"></canvas>
             </div>
         </section>
 
     </div>
 
-    <!-- 獨立成員管理 Modal 對話框 -->
-    <div id="memberModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/40 modal-backdrop">
-        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 w-[92vw] max-w-md p-5 sm:p-6 space-y-4 sm:space-y-5">
-            <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700/60">
-                <h3 class="text-sm sm:text-base font-bold flex items-center gap-2">
+    <!-- 成員管理 Modal 對話框 -->
+    <div id="memberModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-3 bg-slate-900/40 modal-backdrop">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 w-full max-w-sm p-4 space-y-3">
+            <div class="flex items-center justify-between border-b pb-2.5 border-slate-100 dark:border-slate-700/60">
+                <h3 class="text-xs font-bold flex items-center gap-1.5">
                     <i class="fa-solid fa-users-gear text-rose-500"></i> 成員管理與新增
                 </h3>
                 <button onclick="closeMemberModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer p-1">
-                    <i class="fa-solid fa-xmark text-base"></i>
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
 
-            <div class="space-y-1.5">
-                <label class="block text-xs font-medium text-slate-400 dark:text-slate-400">新增成員</label>
+            <div class="space-y-1">
+                <label class="block text-[11px] font-medium text-slate-400">新增成員</label>
                 <div class="flex gap-2">
-                    <input type="text" id="newMemberInputModal" placeholder="輸入成員名字" class="flex-1 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
-                    <button onclick="addMemberFromModal()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer shrink-0 shadow-sm">
+                    <input type="text" id="newMemberInputModal" placeholder="輸入名字" class="flex-1 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+                    <button onclick="addMemberFromModal()" class="bg-rose-500 hover:bg-rose-600 text-white px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer shrink-0 shadow-sm">
                         新增
                     </button>
                 </div>
             </div>
 
-            <div class="space-y-1.5">
-                <label class="block text-xs font-medium text-slate-400 dark:text-slate-400">現有成員清單</label>
-                <div id="modalMemberList" class="space-y-2 max-h-52 overflow-y-auto pr-1"></div>
+            <div class="space-y-1">
+                <label class="block text-[11px] font-medium text-slate-400">現有成員清單</label>
+                <div id="modalMemberList" class="space-y-1.5 max-h-44 overflow-y-auto pr-0.5"></div>
             </div>
 
             <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex justify-end">
-                <button onclick="closeMemberModal()" class="w-full sm:w-auto bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer">
+                <button onclick="closeMemberModal()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer">
                     完成
                 </button>
             </div>
@@ -273,33 +270,20 @@
             render();
         };
 
-        // 💡 裝置模擬切換邏輯
+        // 裝置檢視下拉選單切換邏輯
         function setDeviceView(mode) {
             const container = document.getElementById('appViewportContainer');
-            const btnMobile = document.getElementById('btnDeviceMobile');
-            const btnTablet = document.getElementById('btnDeviceTablet');
-            const btnDesktop = document.getElementById('btnDeviceDesktop');
-
-            // 清除現有 class
             container.classList.remove('viewport-mobile', 'viewport-tablet', 'viewport-desktop');
-            [btnMobile, btnTablet, btnDesktop].forEach(b => {
-                b.className = "px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 cursor-pointer text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white";
-            });
-
-            const activeBtnStyle = "px-3 py-1.5 rounded-lg font-bold transition flex items-center gap-1.5 cursor-pointer bg-white dark:bg-slate-800 text-rose-500 shadow-xs";
 
             if (mode === 'mobile') {
                 container.classList.add('viewport-mobile');
-                btnMobile.className = activeBtnStyle;
             } else if (mode === 'tablet') {
                 container.classList.add('viewport-tablet');
-                btnTablet.className = activeBtnStyle;
             } else {
                 container.classList.add('viewport-desktop');
-                btnDesktop.className = activeBtnStyle;
             }
 
-            // 重新繪製 Chart 避免尺寸變更拉伸
+            // 重新重設 Chart.js 畫布寬度，防止變形
             if (chartInstance) {
                 setTimeout(() => { chartInstance.resize(); }, 350);
             }
@@ -344,11 +328,11 @@
             if (forceOpen || container.classList.contains('hidden')) {
                 container.classList.remove('hidden');
                 icon.className = "fa-solid fa-minus text-[10px]";
-                text.textContent = "收合表單";
+                text.textContent = "收合";
             } else {
                 container.classList.add('hidden');
                 icon.className = "fa-solid fa-plus text-[10px]";
-                text.textContent = "新增紀錄";
+                text.textContent = "新增";
             }
         }
 
@@ -367,10 +351,10 @@
             if (themeName === 'dark') {
                 htmlRoot.classList.add('dark');
                 body.classList.add('bg-slate-900');
-                icon.className = "fa-solid fa-moon";
+                icon.className = "fa-solid fa-moon text-indigo-400";
             } else {
                 htmlRoot.classList.remove('dark');
-                icon.className = "fa-solid fa-palette";
+                icon.className = "fa-solid fa-palette text-rose-500";
                 switch(themeName) {
                     case 'rose': body.classList.add('bg-rose-50'); break;
                     case 'blue': body.classList.add('bg-blue-50'); break;
@@ -408,14 +392,14 @@
                 let isSelected = (member === currentMember);
                 let btn = document.createElement('button');
                 btn.type = "button";
-                btn.className = `w-full text-left px-3.5 py-2 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer ${
+                btn.className = `w-full text-left px-3 py-1.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer ${
                     isSelected ? 'text-rose-500 font-bold bg-rose-50/50 dark:bg-rose-950/30' : 'text-slate-700 dark:text-slate-200'
                 }`;
                 btn.innerHTML = `
-                    <span class="flex items-center gap-2 truncate">
-                        <i class="fa-solid fa-user text-xs ${isSelected ? 'text-rose-500' : 'text-slate-400'}"></i> ${member}
+                    <span class="flex items-center gap-1.5 truncate">
+                        <i class="fa-solid fa-user text-[10px] ${isSelected ? 'text-rose-500' : 'text-slate-400'}"></i> ${member}
                     </span>
-                    ${isSelected ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                    ${isSelected ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
                 `;
                 btn.onclick = () => {
                     currentMember = member;
@@ -437,17 +421,17 @@
 
             for (let member in db.members) {
                 let div = document.createElement('div');
-                div.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/60";
+                div.className = "flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/60";
                 div.innerHTML = `
-                    <span class="text-xs font-semibold flex items-center gap-2 truncate">
-                        <i class="fa-solid fa-user text-slate-400"></i> ${member}
+                    <span class="text-xs font-semibold flex items-center gap-1.5 truncate">
+                        <i class="fa-solid fa-user text-slate-400 text-[10px]"></i> ${member}
                     </span>
                     <div class="flex items-center gap-1 shrink-0">
                         <button onclick="renameMember('${member}')" class="p-1 text-slate-400 hover:text-indigo-500 transition cursor-pointer text-xs" title="重新命名">
                             <i class="fa-solid fa-pen"></i>
                         </button>
                         ${Object.keys(db.members).length > 1 ? `
-                            <button onclick="deleteMember('${member}')" class="p-1 text-slate-400 hover:text-rose-500 transition cursor-pointer text-xs" title="刪除成員">
+                            <button onclick="deleteMember('${member}')" class="p-1 text-slate-400 hover:text-rose-500 transition cursor-pointer text-xs" title="刪除">
                                 <i class="fa-solid fa-xmark"></i>
                             </button>
                         ` : ''}
@@ -460,8 +444,8 @@
         function addMemberFromModal() {
             const input = document.getElementById('newMemberInputModal');
             const name = input.value.trim();
-            if (!name) return alert('請輸入成員名字！');
-            if (db.members[name]) return alert('此成員已經存在！');
+            if (!name) return alert('請輸入名字！');
+            if (db.members[name]) return alert('此成員已存在！');
 
             db.members[name] = [];
             currentMember = name;
@@ -479,7 +463,7 @@
             if (!newName) return;
             const trimmedNewName = newName.trim();
             if (trimmedNewName === "") return alert("名字不能為空白！");
-            if (db.members[trimmedNewName]) return alert("此名字已經存在！");
+            if (db.members[trimmedNewName]) return alert("此名字已存在！");
 
             db.members[trimmedNewName] = db.members[oldName];
             delete db.members[oldName];
@@ -493,7 +477,7 @@
         }
 
         function deleteMember(member) {
-            if (confirm(`確定要刪除成員「${member}」及其所有血壓紀錄嗎？`)) {
+            if (confirm(`確定要刪除「${member}」及其所有紀錄嗎？`)) {
                 delete db.members[member];
                 const remaining = Object.keys(db.members);
                 if (currentMember === member) currentMember = remaining[0];
@@ -522,12 +506,12 @@
             const pulse = Number(document.getElementById('pulseInput').value) || 0;
             const editIndex = Number(document.getElementById('editIndex').value);
 
-            if (sys <= dia) return alert("⚠️ 防呆提示：收縮壓（SYS）必須大於舒張壓（DIA）！");
+            if (sys <= dia) return alert("⚠️ 收縮壓（SYS）必須大於舒張壓（DIA）！");
             const todayStr = new Date().toISOString().split('T')[0];
-            if (date > todayStr) return alert("⚠️ 防呆提示：測量日期不能選擇未來的日期！");
+            if (date > todayStr) return alert("⚠️ 不能選擇未來的日期！");
 
             if (pulse > 0 && (pulse < 40 || pulse > 180)) {
-                if (!confirm(`⚠️ 提醒：脈搏為 ${pulse} bpm 似乎偏離常人範圍。確定要儲存嗎？`)) return;
+                if (!confirm(`⚠️ 脈搏為 ${pulse} bpm 似乎偏離常人範圍。確定儲存嗎？`)) return;
             }
 
             if (!db.members[currentMember]) db.members[currentMember] = [];
@@ -536,11 +520,11 @@
             if (editIndex === -1) {
                 const existRecord = records.find(r => r.date === date);
                 if (existRecord) {
-                    if (!confirm(`⚠️ 提醒：成員「${currentMember}」在 ${date} 已經有紀錄了！要直接覆蓋嗎？`)) return;
+                    if (!confirm(`⚠️ 「${currentMember}」在 ${date} 已有紀錄，要直接覆蓋嗎？`)) return;
                     existRecord.sys = sys; existRecord.dia = dia; existRecord.pulse = pulse;
                     records.sort((a, b) => new Date(a.date) - new Date(b.date));
                     saveDB(); resetForm(); initMonthFilter(records); render(); toggleForm(false);
-                    alert("🎉 已成功更新紀錄！");
+                    alert("🎉 更新成功！");
                     return;
                 }
             }
@@ -573,7 +557,7 @@
             document.getElementById('editIndex').value = index;
 
             document.getElementById('formTitleText').textContent = "編輯";
-            document.getElementById('submitBtn').textContent = "更新記錄";
+            document.getElementById('submitBtn').textContent = "更新";
             document.getElementById('cancelEditBtn').classList.remove('hidden');
             toggleForm(true);
             document.getElementById('recordForm').scrollIntoView({ behavior: 'smooth' });
@@ -606,12 +590,12 @@
             const select = document.getElementById('monthFilter');
             const currentVal = select.value;
             const months = [...new Set(records.map(r => r.date ? r.date.substring(0, 7) : null).filter(Boolean))].sort().reverse();
-            select.innerHTML = `<option value="all">全部月份 (${records.length}筆)</option>`;
+            select.innerHTML = `<option value="all">全部月份 (${records.length})</option>`;
             months.forEach(m => {
                 let opt = document.createElement('option');
                 opt.value = m;
                 let [y, mo] = m.split('-');
-                opt.textContent = `${y} 年 ${parseInt(mo)} 月`;
+                opt.textContent = `${y}/${parseInt(mo)}`;
                 select.appendChild(opt);
             });
             if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
@@ -619,19 +603,11 @@
         }
 
         function getStatus(sys, dia) {
-            if (sys < 90 || dia < 60) {
-                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-800">低血壓</span>';
-            }
-            if (sys < 120 && dia < 80) {
-                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800">正常</span>';
-            }
-            if (sys < 130 && dia < 85) {
-                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800">正常高值</span>';
-            }
-            if (sys < 140 || dia < 90) {
-                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-400 dark:border-orange-800">輕度高血壓</span>';
-            }
-            return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-400 dark:border-rose-800">偏高/危險</span>';
+            if (sys < 90 || dia < 60) return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-400">低血壓</span>';
+            if (sys < 120 && dia < 80) return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400">正常</span>';
+            if (sys < 130 && dia < 85) return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400">正常高值</span>';
+            if (sys < 140 || dia < 90) return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-400">輕度高血壓</span>';
+            return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-400">偏高/危險</span>';
         }
 
         function render() {
@@ -651,16 +627,16 @@
 
             const statsContainer = document.getElementById('monthlyStats');
             statsContainer.innerHTML = `
-                <div class="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
-                    <span class="text-slate-400 dark:text-slate-400 flex items-center gap-1"><i class="fa-solid fa-calendar-days text-rose-500"></i> 測量次數：</span>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400"><i class="fa-solid fa-calendar-days text-rose-500 mr-1"></i> 測量次數：</span>
                     <span class="font-bold text-rose-500">${count} 次</span>
                 </div>
-                <div class="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
-                    <span class="text-slate-400 dark:text-slate-400 flex items-center gap-1"><i class="fa-solid fa-chart-pie text-blue-500"></i> 平均血壓：</span>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400"><i class="fa-solid fa-chart-pie text-blue-500 mr-1"></i> 平均血壓：</span>
                     <span class="font-bold">${count > 0 ? `${avgSys} /${avgDia} mmHg` : '尚無資料'}</span>
                 </div>
-                <div class="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-start">
-                    <span class="text-slate-400 dark:text-slate-400 flex items-center gap-1"><i class="fa-solid fa-heart-pulse text-indigo-500"></i> 平均脈搏：</span>
+                <div class="flex items-center justify-between">
+                    <span class="text-slate-400"><i class="fa-solid fa-heart-pulse text-indigo-500 mr-1"></i> 平均脈搏：</span>
                     <span class="font-bold">${count > 0 && avgPulse > 0 ? `${avgPulse} bpm` : '-'}</span>
                 </div>
             `;
@@ -669,17 +645,17 @@
             tbody.innerHTML = '';
 
             if (displayRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-8 text-center text-slate-400">此月份尚無血壓紀錄</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">尚無血壓紀錄</td></tr>`;
             } else {
                 displayRecords.forEach((r, idx) => {
                     let tr = document.createElement('tr');
                     tr.className = "border-b border-slate-100 dark:border-slate-700/60 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition";
                     tr.innerHTML = `
-                        <td class="py-2.5 px-3">${r.date}</td>
-                        <td class="py-2.5 px-3 font-semibold">${r.sys} / ${r.dia}</td>
-                        <td class="py-2.5 px-3">${r.pulse ? r.pulse + ' bpm' : '-'}</td>
-                        <td class="py-2.5 px-3">${getStatus(r.sys, r.dia)}</td>
-                        <td class="py-2.5 px-3 text-right space-x-1 sm:space-x-2">
+                        <td class="py-2 px-2 text-[11px]">${r.date}</td>
+                        <td class="py-2 px-2 font-semibold text-[11px]">${r.sys}/${r.dia}</td>
+                        <td class="py-2 px-2 text-[11px]">${r.pulse ? r.pulse : '-'}</td>
+                        <td class="py-2 px-2">${getStatus(r.sys, r.dia)}</td>
+                        <td class="py-2 px-2 text-right space-x-1">
                             <button onclick="editRecord(${idx})" class="text-slate-400 hover:text-indigo-500 transition cursor-pointer p-1" title="編輯">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
@@ -707,8 +683,8 @@
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: '收縮壓 (SYS)', data: sysData, borderColor: '#f43f5e', backgroundColor: '#f43f5e', tension: 0.3 },
-                        { label: '舒張壓 (DIA)', data: diaData, borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3 }
+                        { label: '收縮壓', data: sysData, borderColor: '#f43f5e', backgroundColor: '#f43f5e', tension: 0.3, pointRadius: 3 },
+                        { label: '舒張壓', data: diaData, borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 3 }
                     ]
                 },
                 options: {
@@ -721,7 +697,7 @@
 
         function exportSingleMemberCSV() {
             const records = db.members[currentMember] || [];
-            if (records.length === 0) return alert(`目前「${currentMember}」沒有資料可供匯出！`);
+            if (records.length === 0) return alert(`目前「${currentMember}」沒有資料！`);
             let csvContent = "\uFEFF日期,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
             records.forEach(r => { csvContent += `${r.date},${r.sys},${r.dia},${r.pulse}\r\n`; });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -739,28 +715,28 @@
             reader.onload = function(event) {
                 try {
                     const lines = event.target.result.split(/\r\n|\n/);
-                    let importedCount = 0;
+                    let count = 0;
                     if (!db.members[currentMember]) db.members[currentMember] = [];
                     for (let i = 1; i < lines.length; i++) {
                         const cols = lines[i].split(',');
                         if (cols.length >= 3 && cols[0].trim() !== '') {
                             db.members[currentMember].push({ date: cols[0].trim(), sys: Number(cols[1]), dia: Number(cols[2]), pulse: Number(cols[3]) || 0 });
-                            importedCount++;
+                            count++;
                         }
                     }
                     db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
                     saveDB(); resetForm(); initMonthFilter(db.members[currentMember]); render();
-                    alert(`🎉 成功為「${currentMember}」匯入 ${importedCount} 筆血壓紀錄！`);
-                } catch (error) { alert('CSV 讀取失敗！'); }
+                    alert(`🎉 成功匯入 ${count} 筆紀錄！`);
+                } catch (error) { alert('讀取失敗！'); }
                 e.target.value = '';
             };
             reader.readAsText(file);
         }
 
         function exportAllMembersCSV() {
-            let totalCount = 0;
-            for (let m in db.members) totalCount += (db.members[m] || []).length;
-            if (totalCount === 0) return alert('目前所有成員都沒有資料可供匯出！');
+            let total = 0;
+            for (let m in db.members) total += (db.members[m] || []).length;
+            if (total === 0) return alert('沒有資料可供匯出！');
             let csvContent = "\uFEFF成員名稱,日期,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
             for (let member in db.members) {
                 (db.members[member] || []).forEach(r => { csvContent += `${member},${r.date},${r.sys},${r.dia},${r.pulse}\r\n`; });
@@ -780,20 +756,20 @@
             reader.onload = function(event) {
                 try {
                     const lines = event.target.result.split(/\r\n|\n/);
-                    let importedCount = 0;
+                    let count = 0;
                     for (let i = 1; i < lines.length; i++) {
                         const cols = lines[i].split(',');
                         if (cols.length >= 4 && cols[0].trim() !== '' && cols[1].trim() !== '') {
-                            const memberName = cols[0].trim();
-                            if (!db.members[memberName]) db.members[memberName] = [];
-                            db.members[memberName].push({ date: cols[1].trim(), sys: Number(cols[2]), dia: Number(cols[3]), pulse: Number(cols[4]) || 0 });
-                            importedCount++;
+                            const name = cols[0].trim();
+                            if (!db.members[name]) db.members[name] = [];
+                            db.members[name].push({ date: cols[1].trim(), sys: Number(cols[2]), dia: Number(cols[3]), pulse: Number(cols[4]) || 0 });
+                            count++;
                         }
                     }
-                    for (let member in db.members) db.members[member].sort((a, b) => new Date(a.date) - new Date(b.date));
+                    for (let m in db.members) db.members[m].sort((a, b) => new Date(a.date) - new Date(b.date));
                     saveDB(); resetForm(); initMembers(); initMonthFilter(db.members[currentMember]); render();
-                    alert(`🎉 成功智慧匯入全家總表共 ${importedCount} 筆血壓紀錄，並已自動分流！`);
-                } catch (error) { alert('全家總表讀取失敗！'); }
+                    alert(`🎉 成功智慧匯入共 ${count} 筆！`);
+                } catch (error) { alert('總表讀取失敗！'); }
                 e.target.value = '';
             };
             reader.readAsText(file);

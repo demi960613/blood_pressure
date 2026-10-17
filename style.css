@@ -1,5 +1,5 @@
 /* ==========================================
-   血壓紀錄追蹤系統 - 裝置模擬與 RWD 樣式表
+   血壓紀錄追蹤系統 - 精簡並排 Layout 樣式表
    ========================================== */
 
 /* 基礎平滑過渡設定 */
@@ -38,7 +38,7 @@ body {
     -webkit-overflow-scrolling: touch;
 }
 
-/* 📱 裝置模擬樣式 (Device Simulator) */
+/* 📱 裝置模擬外框樣式 (Device Simulator) */
 #appViewportContainer {
     transition: max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
 }
@@ -52,6 +52,7 @@ body {
     background-clip: padding-box;
     margin-top: 1rem;
     margin-bottom: 1rem;
+    overflow-x: hidden;
 }
 
 /* 平板模擬框 */
@@ -62,9 +63,10 @@ body {
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.2);
     margin-top: 1rem;
     margin-bottom: 1rem;
+    overflow-x: hidden;
 }
 
-/* 電腦模式（預設滿版） */
+/* 電腦模式（預設） */
 .viewport-desktop {
     max-width: 56rem !important; /* max-w-4xl */
     border: none;
