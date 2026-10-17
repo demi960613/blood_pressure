@@ -20,7 +20,7 @@
     <!-- 主程式容器 -->
     <div id="appViewportContainer" class="w-full viewport-desktop space-y-4 transition-all duration-300">
         
-        <!-- 頂部標題與控制下拉選單區（裝置檢視與風格主題並排） -->
+        <!-- 頂部標題與控制下拉選單區 -->
         <header class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div>
                 <h1 class="text-lg sm:text-xl font-bold flex items-center gap-2">
@@ -60,21 +60,21 @@
             </div>
         </header>
 
-        <!-- 1. 成員選擇 -->
-        <section class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex flex-col gap-3">
-            <div class="flex items-center justify-between gap-2">
+        <!-- 1. 成員選擇（單一行橫排顯示） -->
+        <section class="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
                 <span class="text-xs font-medium text-slate-400 dark:text-slate-500 shrink-0">當前檢視：</span>
                 
-                <div class="relative flex-1 max-w-[200px]">
-                    <button onclick="toggleMemberDropdown()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center justify-between gap-2 cursor-pointer border border-slate-200 dark:border-slate-600">
+                <div class="relative flex-1 min-w-0 max-w-[160px] sm:max-w-[200px]">
+                    <button onclick="toggleMemberDropdown()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center justify-between gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600">
                         <span class="flex items-center gap-1.5 truncate">
-                            <i class="fa-solid fa-circle-user text-rose-500"></i>
+                            <i class="fa-solid fa-circle-user text-rose-500 text-xs"></i>
                             <span id="selectedMemberLabel" class="truncate">平平</span>
                         </span>
-                        <i class="fa-solid fa-chevron-down text-[10px] opacity-50"></i>
+                        <i class="fa-solid fa-chevron-down text-[10px] opacity-50 shrink-0"></i>
                     </button>
 
-                    <div id="memberDropdown" class="hidden absolute left-0 right-0 mt-1 w-full bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 z-30 py-2 text-xs">
+                    <div id="memberDropdown" class="hidden absolute left-0 right-0 mt-1 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 z-30 py-2 text-xs">
                         <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">切換成員</div>
                         <div id="memberDropdownList" class="max-h-40 overflow-y-auto"></div>
                         <div class="my-1 border-t border-slate-100 dark:border-slate-700/60"></div>
@@ -85,8 +85,10 @@
                 </div>
             </div>
 
-            <button onclick="openMemberModal()" class="w-full justify-center text-xs font-medium text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 flex items-center gap-1.5 transition cursor-pointer py-1.5 border-t border-slate-100 dark:border-slate-700/60">
-                <i class="fa-solid fa-users-gear"></i> 管理與新增成員
+            <button onclick="openMemberModal()" class="text-xs font-medium text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 flex items-center gap-1.5 transition cursor-pointer px-2.5 py-1.5 bg-slate-50 dark:bg-slate-700/40 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl border border-slate-200/60 dark:border-slate-600/60 shrink-0">
+                <i class="fa-solid fa-users-gear text-xs text-indigo-500"></i>
+                <span class="hidden sm:inline">管理與新增成員</span>
+                <span class="inline sm:hidden">管理</span>
             </button>
         </section>
 
@@ -95,7 +97,7 @@
             <div onclick="toggleForm()" class="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition gap-2">
                 <h2 class="text-xs sm:text-sm font-semibold flex items-center gap-1.5 truncate">
                     <i class="fa-solid fa-pen-nib text-rose-500 shrink-0"></i> 
-                    <span class="truncate"><span id="formTitleText">記錄</span> <span id="currentMemberName" class="text-rose-500 font-bold"></span> 的血壓</span>
+                    <span class="truncate"><span id="formTitleText">記錄</span> <span id="currentMemberName" class="font-bold transition-colors duration-300 text-rose-500"></span> 的血壓</span>
                 </h2>
                 <button type="button" class="bg-rose-500 hover:bg-rose-600 text-white text-xs font-medium px-2.5 py-1 rounded-xl flex items-center gap-1 shadow-sm transition shrink-0">
                     <i id="toggleFormIcon" class="fa-solid fa-plus text-[10px]"></i>
@@ -139,22 +141,37 @@
             </div>
         </section>
 
-        <!-- 3. 歷史測量紀錄清單 -->
+        <!-- 3. 歷史測量紀錄清單（整合月份與狀態雙重篩選） -->
         <section class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 space-y-3">
             <div class="flex flex-col gap-2.5">
-                <div class="flex items-center justify-between gap-2">
+                <div class="flex flex-wrap items-center justify-between gap-2">
                     <h2 class="text-xs sm:text-sm font-semibold flex items-center gap-1.5 shrink-0">
                         <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史紀錄
                     </h2>
-                    <select id="monthFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 max-w-[130px]">
-                        <option value="all">全部月份</option>
-                    </select>
+                    
+                    <!-- 篩選選單群組 (月份 + 狀態) -->
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <!-- 月份篩選 -->
+                        <select id="monthFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 max-w-[120px]">
+                            <option value="all">全部月份</option>
+                        </select>
+
+                        <!-- 狀態過濾選單 -->
+                        <select id="statusFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 max-w-[120px]">
+                            <option value="all">全部狀態</option>
+                            <option value="normal">正常</option>
+                            <option value="normal-high">正常高值</option>
+                            <option value="stage1">輕度高血壓</option>
+                            <option value="danger">偏高/危險</option>
+                            <option value="low">低血壓</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="relative w-full">
                     <button onclick="toggleBackupMenu()" class="w-full justify-between bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600">
                         <span class="flex items-center gap-1.5 truncate">
-                            <i class="fa-solid fa-arrows-up-down text-rose-500"></i> 資料備份與匯出入
+                            <i class="fa-solid fa-arrows-up-down text-rose-500"></i> 資料備份
                         </span>
                         <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                     </button>
@@ -201,11 +218,20 @@
             </div>
         </section>
 
-        <!-- 4. 血壓趨勢圖 -->
+        <!-- 4. 血壓趨勢圖（含時間範圍切換） -->
         <section class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60">
-            <h2 class="text-xs sm:text-sm font-semibold mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖
-            </h2>
+            <div class="flex items-center justify-between gap-2 mb-3">
+                <h2 class="text-xs sm:text-sm font-semibold flex items-center gap-1.5 shrink-0">
+                    <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖
+                </h2>
+                
+                <div class="inline-flex bg-slate-100 dark:bg-slate-700/60 p-0.5 rounded-xl border border-slate-200/60 dark:border-slate-600/60 text-[11px] shrink-0">
+                    <button onclick="setChartRange('7')" id="btnChart7" class="px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">7天</button>
+                    <button onclick="setChartRange('30')" id="btnChart30" class="px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-blue-500 shadow-xs">30天</button>
+                    <button onclick="setChartRange('90')" id="btnChart90" class="px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">90天</button>
+                    <button onclick="setChartRange('all')" id="btnChartAll" class="px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">全部</button>
+                </div>
+            </div>
             <div class="w-full h-48 sm:h-64">
                 <canvas id="bloodPressureChart"></canvas>
             </div>
@@ -256,6 +282,7 @@
         };
         let currentMember = db.currentMember || "平平";
         let chartInstance = null;
+        let currentChartRange = '30';
 
         window.onload = function() {
             const savedTheme = localStorage.getItem('blood_pressure_theme') || 'slate';
@@ -270,7 +297,6 @@
             render();
         };
 
-        // 裝置檢視下拉選單切換邏輯
         function setDeviceView(mode) {
             const container = document.getElementById('appViewportContainer');
             container.classList.remove('viewport-mobile', 'viewport-tablet', 'viewport-desktop');
@@ -283,10 +309,27 @@
                 container.classList.add('viewport-desktop');
             }
 
-            // 重新重設 Chart.js 畫布寬度，防止變形
             if (chartInstance) {
                 setTimeout(() => { chartInstance.resize(); }, 350);
             }
+        }
+
+        function setChartRange(range) {
+            currentChartRange = range;
+            const ranges = ['7', '30', '90', 'all'];
+            ranges.forEach(r => {
+                const btn = document.getElementById(`btnChart${r === 'all' ? 'All' : r}`);
+                if (btn) {
+                    if (r === range) {
+                        btn.className = "px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-blue-500 shadow-xs";
+                    } else {
+                        btn.className = "px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
+                    }
+                }
+            });
+
+            const records = db.members[currentMember] || [];
+            updateChart(records);
         }
 
         function toggleBackupMenu() {
@@ -345,22 +388,44 @@
             const htmlRoot = document.getElementById('htmlRoot');
             const body = document.getElementById('appBody');
             const icon = document.getElementById('themeIcon');
+            const memberNameSpan = document.getElementById('currentMemberName');
 
             body.classList.remove('bg-slate-50', 'bg-rose-50', 'bg-blue-50', 'bg-emerald-50', 'bg-amber-50');
             
+            if (memberNameSpan) {
+                memberNameSpan.classList.remove('text-slate-700', 'dark:text-slate-300', 'text-rose-500', 'text-blue-500', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
+            }
+
             if (themeName === 'dark') {
                 htmlRoot.classList.add('dark');
                 body.classList.add('bg-slate-900');
                 icon.className = "fa-solid fa-moon text-indigo-400";
+                if (memberNameSpan) memberNameSpan.classList.add('text-indigo-400');
             } else {
                 htmlRoot.classList.remove('dark');
                 icon.className = "fa-solid fa-palette text-rose-500";
                 switch(themeName) {
-                    case 'rose': body.classList.add('bg-rose-50'); break;
-                    case 'blue': body.classList.add('bg-blue-50'); break;
-                    case 'emerald': body.classList.add('bg-emerald-50'); break;
-                    case 'amber': body.classList.add('bg-amber-50'); break;
-                    case 'slate': default: body.classList.add('bg-slate-50'); break;
+                    case 'rose': 
+                        body.classList.add('bg-rose-50'); 
+                        if (memberNameSpan) memberNameSpan.classList.add('text-rose-500');
+                        break;
+                    case 'blue': 
+                        body.classList.add('bg-blue-50'); 
+                        if (memberNameSpan) memberNameSpan.classList.add('text-blue-500');
+                        break;
+                    case 'emerald': 
+                        body.classList.add('bg-emerald-50'); 
+                        if (memberNameSpan) memberNameSpan.classList.add('text-emerald-600');
+                        break;
+                    case 'amber': 
+                        body.classList.add('bg-amber-50'); 
+                        if (memberNameSpan) memberNameSpan.classList.add('text-amber-600');
+                        break;
+                    case 'slate': 
+                    default: 
+                        body.classList.add('bg-slate-50'); 
+                        if (memberNameSpan) memberNameSpan.classList.add('text-slate-700', 'dark:text-slate-300');
+                        break;
                 }
             }
         }
@@ -530,8 +595,12 @@
             }
 
             const selectedMonth = document.getElementById('monthFilter').value;
+            const selectedStatus = document.getElementById('statusFilter').value;
             if (editIndex > -1) {
-                const filteredRecords = selectedMonth === 'all' ? records : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+                let filteredRecords = records;
+                if (selectedMonth !== 'all') filteredRecords = filteredRecords.filter(r => r.date && r.date.startsWith(selectedMonth));
+                if (selectedStatus !== 'all') filteredRecords = filteredRecords.filter(r => getStatusCode(r.sys, r.dia) === selectedStatus);
+                
                 const target = filteredRecords[editIndex];
                 const realIndex = records.indexOf(target);
                 if (realIndex > -1) records[realIndex] = { date, sys, dia, pulse };
@@ -546,7 +615,12 @@
         function editRecord(index) {
             const records = db.members[currentMember] || [];
             const selectedMonth = document.getElementById('monthFilter').value;
-            const filteredRecords = selectedMonth === 'all' ? records : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+            const selectedStatus = document.getElementById('statusFilter').value;
+            
+            let filteredRecords = records;
+            if (selectedMonth !== 'all') filteredRecords = filteredRecords.filter(r => r.date && r.date.startsWith(selectedMonth));
+            if (selectedStatus !== 'all') filteredRecords = filteredRecords.filter(r => getStatusCode(r.sys, r.dia) === selectedStatus);
+
             const target = filteredRecords[index];
             if (!target) return;
 
@@ -576,7 +650,12 @@
             if (confirm('確定要刪除這筆紀錄嗎？')) {
                 const records = db.members[currentMember] || [];
                 const selectedMonth = document.getElementById('monthFilter').value;
-                const filteredRecords = selectedMonth === 'all' ? records : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+                const selectedStatus = document.getElementById('statusFilter').value;
+
+                let filteredRecords = records;
+                if (selectedMonth !== 'all') filteredRecords = filteredRecords.filter(r => r.date && r.date.startsWith(selectedMonth));
+                if (selectedStatus !== 'all') filteredRecords = filteredRecords.filter(r => getStatusCode(r.sys, r.dia) === selectedStatus);
+
                 const target = filteredRecords[index];
                 const realIndex = records.indexOf(target);
                 if (realIndex > -1) {
@@ -602,20 +681,42 @@
             else select.value = "all";
         }
 
+        function getStatusCode(sys, dia) {
+            if (sys < 90 || dia < 60) return "low";
+            if (sys < 120 && dia < 80) return "normal";
+            if (sys < 130 && dia < 85) return "normal-high";
+            if (sys < 140 || dia < 90) return "stage1";
+            return "danger";
+        }
+
         function getStatus(sys, dia) {
-            if (sys < 90 || dia < 60) return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-400">低血壓</span>';
-            if (sys < 120 && dia < 80) return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400">正常</span>';
-            if (sys < 130 && dia < 85) return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400">正常高值</span>';
-            if (sys < 140 || dia < 90) return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-400">輕度高血壓</span>';
-            return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-400">偏高/危險</span>';
+            const code = getStatusCode(sys, dia);
+            switch(code) {
+                case "low": return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-400">低血壓</span>';
+                case "normal": return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400">正常</span>';
+                case "normal-high": return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400">正常高值</span>';
+                case "stage1": return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-400">輕度高血壓</span>';
+                case "danger": default: return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-400">偏高/危險</span>';
+            }
         }
 
         function render() {
             const records = db.members[currentMember] || [];
             const monthSelect = document.getElementById('monthFilter');
+            const statusSelect = document.getElementById('statusFilter');
+
             if (monthSelect.options.length <= 1) initMonthFilter(records);
+            
             const selectedMonth = monthSelect.value;
-            const displayRecords = selectedMonth === 'all' ? records : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+            const selectedStatus = statusSelect ? statusSelect.value : 'all';
+
+            let displayRecords = records;
+            if (selectedMonth !== 'all') {
+                displayRecords = displayRecords.filter(r => r.date && r.date.startsWith(selectedMonth));
+            }
+            if (selectedStatus !== 'all') {
+                displayRecords = displayRecords.filter(r => getStatusCode(r.sys, r.dia) === selectedStatus);
+            }
 
             const count = displayRecords.length;
             let avgSys = 0, avgDia = 0, avgPulse = 0;
@@ -628,7 +729,7 @@
             const statsContainer = document.getElementById('monthlyStats');
             statsContainer.innerHTML = `
                 <div class="flex items-center justify-between">
-                    <span class="text-slate-400"><i class="fa-solid fa-calendar-days text-rose-500 mr-1"></i> 測量次數：</span>
+                    <span class="text-slate-400"><i class="fa-solid fa-calendar-days text-rose-500 mr-1"></i> 檢視比數：</span>
                     <span class="font-bold text-rose-500">${count} 次</span>
                 </div>
                 <div class="flex items-center justify-between">
@@ -645,7 +746,7 @@
             tbody.innerHTML = '';
 
             if (displayRecords.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">尚無血壓紀錄</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-slate-400">無符合條件之血壓紀錄</td></tr>`;
             } else {
                 displayRecords.forEach((r, idx) => {
                     let tr = document.createElement('tr');
@@ -667,14 +768,25 @@
                     tbody.appendChild(tr);
                 });
             }
-            updateChart(displayRecords);
+            updateChart(records);
         }
 
         function updateChart(records) {
             const ctx = document.getElementById('bloodPressureChart').getContext('2d');
-            const labels = records.map(r => r.date);
-            const sysData = records.map(r => r.sys);
-            const diaData = records.map(r => r.dia);
+            
+            let filteredRecords = [...records];
+            if (currentChartRange !== 'all') {
+                const days = Number(currentChartRange);
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - days);
+                const cutoffStr = cutoffDate.toISOString().split('T')[0];
+                
+                filteredRecords = filteredRecords.filter(r => r.date >= cutoffStr);
+            }
+
+            const labels = filteredRecords.map(r => r.date);
+            const sysData = filteredRecords.map(r => r.sys);
+            const diaData = filteredRecords.map(r => r.dia);
 
             if (chartInstance) chartInstance.destroy();
 
