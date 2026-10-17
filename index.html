@@ -187,11 +187,11 @@
                         </label>
                         <div class="my-1 border-t border-slate-100 dark:border-slate-700/60"></div>
                         <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 uppercase tracking-wider">全家總打包</div>
-                        <button onclick="exportAllMembersCSV(); toggleBackupMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-medium">
-                            <i class="fa-solid fa-users-rectangle w-4"></i> 匯出全家總表
+                        <button onclick="exportAllMembersCSV(); toggleBackupMenu();" class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-users-rectangle text-rose-500 w-4"></i> 匯出全家總表
                         </button>
-                        <label class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-medium cursor-pointer">
-                            <i class="fa-solid fa-file-arrow-up w-4"></i> 智慧匯入全家總表
+                        <label class="w-full text-left px-3 py-1.5 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200 cursor-pointer">
+                            <i class="fa-solid fa-file-arrow-up text-rose-500 w-4"></i> 智慧匯入全家總表
                             <input type="file" id="importAllFile" accept=".csv" onchange="importAllMembersCSV(event); toggleBackupMenu();" class="hidden">
                         </label>
                     </div>
