@@ -4,35 +4,35 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>血壓紀錄追蹤系統</title>
-    <!-- 引入 Tailwind CSS CDN -->
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <!-- 引入 Chart.js 用於畫圖表 -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 引入 SheetJS (xlsx) 用於解析 Excel 檔案 -->
+    <!-- SheetJS (xlsx) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- 引入 FontAwesome 圖示 -->
+    <!-- FontAwesome 圖示 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- 引入獨立的 style.css 樣式表 -->
+    <!-- 自定義樣式表 -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body id="appBody" class="text-slate-800 dark:text-slate-100 min-h-screen p-4 sm:p-6 bg-slate-50 dark:bg-slate-900">
     <div class="max-w-4xl mx-auto space-y-6">
         
-        <!-- 頂部標題與主題選擇選單 -->
-        <header class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <!-- 頂部標題與風格主題選單 -->
+        <header class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold flex items-center gap-2">
+                <h1 class="text-2xl font-bold flex items-center gap-2.5">
                     <i class="fa-solid fa-heart-pulse text-rose-500"></i> 血壓記錄管理系統
                 </h1>
-                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">輕鬆記錄與追蹤您與家人的健康數據</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">輕鬆記錄與追蹤您與家人的健康數據</p>
             </div>
             
-            <!-- 整合後的統一主題與模式選單 -->
+            <!-- 統一主題選擇選單 -->
             <div class="flex items-center gap-2 shrink-0">
-                <label for="themeSelector" class="text-xs font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                <label for="themeSelector" class="text-xs font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1">
                     <i id="themeIcon" class="fa-solid fa-palette"></i> 風格主題：
                 </label>
-                <select id="themeSelector" onchange="changeTheme(this.value)" class="bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
+                <select id="themeSelector" onchange="changeTheme(this.value)" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 cursor-pointer">
                     <option value="slate">預設石墨灰 (日間)</option>
                     <option value="rose">柔和粉紅 (日間)</option>
                     <option value="blue">清新天藍 (日間)</option>
@@ -43,70 +43,67 @@
             </div>
         </header>
 
-        <!-- 1. 成員管理面板 -->
-        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-4">
+        <!-- 1. 成員管理面板 (清爽型卡片：管理按鈕 Hover 浮現) -->
+        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 space-y-4">
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-                <h2 class="text-lg font-semibold flex items-center gap-2">
-                    <i class="fa-solid fa-users text-rose-500"></i> 成員管理
+                <h2 class="text-base font-semibold flex items-center gap-2">
+                    <i class="fa-solid fa-users text-rose-500"></i> 成員切換
                 </h2>
                 <!-- 新增成員輸入區 -->
                 <div class="flex items-center gap-2">
-                    <input type="text" id="newMemberInput" placeholder="新成員名字" class="bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
-                    <button onclick="addMember()" class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-xl text-sm font-medium transition cursor-pointer shrink-0 shadow-sm">
-                        <i class="fa-solid fa-user-plus mr-1"></i> 新增
+                    <input type="text" id="newMemberInput" placeholder="輸入成員名字" class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+                    <button onclick="addMember()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer shrink-0 border border-slate-200 dark:border-slate-600">
+                        <i class="fa-solid fa-plus mr-1"></i> 新增成員
                     </button>
                 </div>
             </div>
 
-            <!-- 成員列表按鈕 -->
-            <div id="memberListContainer" class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700">
-                <!-- 動態載入成員 -->
+            <!-- 成員列表按鈕容器 -->
+            <div id="memberListContainer" class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+                <!-- 動態載入成員卡片 -->
             </div>
         </section>
 
         <!-- 2. 可收納式血壓輸入表單 -->
-        <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
-            <!-- 標題與收納/展開按鈕列 -->
-            <div onclick="toggleForm()" class="p-6 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition">
-                <h2 class="text-lg font-semibold flex items-center gap-2">
+        <section class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 overflow-hidden">
+            <div onclick="toggleForm()" class="p-5 flex items-center justify-between cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition">
+                <h2 class="text-base font-semibold flex items-center gap-2">
                     <i class="fa-solid fa-pen-nib text-rose-500"></i> <span id="formTitleText">記錄</span> <span id="currentMemberName" class="text-rose-500 font-bold"></span> 的血壓
                 </h2>
-                <button type="button" class="bg-rose-500 hover:bg-rose-600 text-white text-sm font-medium px-4 py-2 rounded-xl flex items-center gap-2 shadow-sm transition">
+                <button type="button" class="bg-rose-500 hover:bg-rose-600 text-white text-xs font-medium px-3.5 py-1.5 rounded-xl flex items-center gap-1.5 shadow-sm transition">
                     <i id="toggleFormIcon" class="fa-solid fa-plus"></i>
                     <span id="toggleFormText">新增血壓紀錄</span>
                 </button>
             </div>
 
-            <!-- 表單內容（預設隱藏 hidden） -->
-            <div id="formContainer" class="hidden px-6 pb-6 pt-2 border-t border-slate-100 dark:border-slate-700">
+            <!-- 表單內容 -->
+            <div id="formContainer" class="hidden px-6 pb-6 pt-2 border-t border-slate-100 dark:border-slate-700/60">
                 <form id="recordForm" onsubmit="saveRecord(event)" class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <input type="hidden" id="editIndex" value="-1">
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">測量日期 (選填)</label>
-                        <input type="date" id="recordDate" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <label class="block text-xs font-medium text-slate-400 dark:text-slate-400 mb-1">測量日期</label>
+                        <input type="date" id="recordDate" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">收縮壓 (SYS mmHg)</label>
-                        <input type="number" id="sysInput" placeholder="例如: 120" required min="50" max="250" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <label class="block text-xs font-medium text-slate-400 dark:text-slate-400 mb-1">收縮壓 (SYS mmHg)</label>
+                        <input type="number" id="sysInput" placeholder="例如: 120" required min="50" max="250" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">舒張壓 (DIA mmHg)</label>
-                        <input type="number" id="diaInput" placeholder="例如: 80" required min="30" max="150" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <label class="block text-xs font-medium text-slate-400 dark:text-slate-400 mb-1">舒張壓 (DIA mmHg)</label>
+                        <input type="number" id="diaInput" placeholder="例如: 80" required min="30" max="150" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">脈搏 (Pulse bpm)</label>
-                        <input type="number" id="pulseInput" placeholder="例如: 72" min="30" max="200" class="w-full bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                        <label class="block text-xs font-medium text-slate-400 dark:text-slate-400 mb-1">脈搏 (Pulse bpm)</label>
+                        <input type="number" id="pulseInput" placeholder="例如: 72" min="30" max="200" class="w-full bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
                     </div>
                     <div class="sm:col-span-4 flex justify-end gap-2 mt-2">
-                        <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium px-4 py-2 rounded-xl text-sm transition cursor-pointer">
+                        <button type="button" id="cancelEditBtn" onclick="resetForm()" class="hidden bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-medium px-4 py-2 rounded-xl text-xs transition cursor-pointer">
                             取消編輯
                         </button>
-                        <!-- 清空紀錄按鈕 -->
-                        <button type="button" onclick="clearFormInputs()" class="bg-amber-500 hover:bg-amber-600 text-white font-medium px-4 py-2 rounded-xl text-sm transition cursor-pointer shadow-sm">
-                            <i class="fa-solid fa-rotate-left mr-1"></i> 清空紀錄
+                        <button type="button" onclick="clearFormInputs()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 font-medium px-4 py-2 rounded-xl text-xs transition cursor-pointer border border-slate-200 dark:border-slate-600">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> 清空輸入
                         </button>
-                        <!-- 儲存記錄按鈕 -->
-                        <button type="submit" id="submitBtn" class="bg-rose-500 hover:bg-rose-600 text-white font-medium px-6 py-2 rounded-xl text-sm transition shadow-sm cursor-pointer">
+                        <button type="submit" id="submitBtn" class="bg-rose-500 hover:bg-rose-600 text-white font-medium px-6 py-2 rounded-xl text-xs transition shadow-sm cursor-pointer">
                             儲存記錄
                         </button>
                     </div>
@@ -114,54 +111,56 @@
             </div>
         </section>
 
-        <!-- 3. 歷史測量紀錄清單（包含月份篩選、統計資訊與雙軌匯出入按鈕） -->
-        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 space-y-4">
+        <!-- 3. 歷史測量紀錄清單（整合版匯出入選單） -->
+        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3 flex-wrap">
-                    <h2 class="text-lg font-semibold flex items-center gap-2">
-                        <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史測量紀錄
+                    <h2 class="text-base font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史紀錄
                     </h2>
-                    <!-- 月份篩選下拉選單 -->
-                    <select id="monthFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-300 dark:border-slate-600 rounded-xl px-3 py-1.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-rose-500">
+                    <select id="monthFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500">
                         <option value="all">顯示全部月份</option>
                     </select>
                 </div>
 
-                <!-- 「個人」與「全家總打包」兩組清晰的按鈕 -->
-                <div class="flex items-center gap-2 flex-wrap">
-                    <!-- 個人專區 -->
-                    <div class="inline-flex rounded-xl shadow-sm">
-                        <button onclick="exportSingleMemberCSV()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-l-xl text-sm font-medium transition flex items-center gap-1 cursor-pointer border-r border-slate-200 dark:border-slate-600" title="僅匯出當前選中成員">
-                            <i class="fa-solid fa-user-arrow-down text-rose-500"></i> 匯出個人
+                <!-- 整合型匯出入選單 -->
+                <div class="relative inline-block text-left">
+                    <button onclick="toggleBackupMenu()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600">
+                        <i class="fa-solid fa-arrows-up-down text-rose-500"></i> 資料備份與匯出入 <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
+                    </button>
+                    
+                    <!-- 下拉選單選單 (預設隱藏 hidden) -->
+                    <div id="backupDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700/80 z-20 py-1.5 text-xs">
+                        <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">個人紀錄</div>
+                        <button onclick="exportSingleMemberCSV(); toggleBackupMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200">
+                            <i class="fa-solid fa-user-arrow-down text-rose-500 w-4"></i> 匯出個人紀錄
                         </button>
-                        <label class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-r-xl text-sm font-medium transition flex items-center gap-1 cursor-pointer" title="匯入至當前選中成員">
-                            <i class="fa-solid fa-user-arrow-up text-rose-500"></i> 匯入個人
-                            <input type="file" id="importSingleFile" accept=".csv" onchange="importSingleMemberCSV(event)" class="hidden">
+                        <label class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200 cursor-pointer">
+                            <i class="fa-solid fa-user-arrow-up text-rose-500 w-4"></i> 匯入個人紀錄
+                            <input type="file" id="importSingleFile" accept=".csv" onchange="importSingleMemberCSV(event); toggleBackupMenu();" class="hidden">
                         </label>
-                    </div>
-
-                    <!-- 全家總打包專區 -->
-                    <div class="inline-flex rounded-xl shadow-sm">
-                        <button onclick="exportAllMembersCSV()" class="bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-3 py-1.5 rounded-l-xl text-sm font-medium transition flex items-center gap-1 cursor-pointer border-r border-indigo-200 dark:border-indigo-800" title="一鍵打包所有成員">
-                            <i class="fa-solid fa-users-rectangle"></i> 匯出全家
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-700/60"></div>
+                        <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">全家總打包</div>
+                        <button onclick="exportAllMembersCSV(); toggleBackupMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-medium">
+                            <i class="fa-solid fa-users-rectangle w-4"></i> 匯出全家總表
                         </button>
-                        <label class="bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/50 text-indigo-700 dark:text-indigo-300 px-3 py-1.5 rounded-r-xl text-sm font-medium transition flex items-center gap-1 cursor-pointer" title="智慧匯入全家總表並自動分流">
-                            <i class="fa-solid fa-file-arrow-up"></i> 匯入全家
-                            <input type="file" id="importAllFile" accept=".csv" onchange="importAllMembersCSV(event)" class="hidden">
+                        <label class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-medium cursor-pointer">
+                            <i class="fa-solid fa-file-arrow-up w-4"></i> 智慧匯入全家總表
+                            <input type="file" id="importAllFile" accept=".csv" onchange="importAllMembersCSV(event); toggleBackupMenu();" class="hidden">
                         </label>
                     </div>
                 </div>
             </div>
 
-            <!-- 統計資訊 -->
-            <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/50 p-4 rounded-xl flex flex-wrap items-center justify-around gap-4 text-sm">
+            <!-- 月統計卡片 -->
+            <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/30 p-4 rounded-xl flex flex-wrap items-center justify-around gap-4 text-xs">
                 <!-- 動態載入統計 -->
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-sm">
+                <table class="w-full text-left text-xs">
                     <thead>
-                        <tr class="border-b border-slate-100 dark:border-slate-700 text-slate-400 font-medium">
+                        <tr class="border-b border-slate-100 dark:border-slate-700/60 text-slate-400 font-medium">
                             <th class="py-3 px-4">日期</th>
                             <th class="py-3 px-4">收縮壓 / 舒張壓</th>
                             <th class="py-3 px-4">脈搏</th>
@@ -177,8 +176,8 @@
         </section>
 
         <!-- 4. 血壓趨勢圖 -->
-        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-            <h2 class="text-lg font-semibold mb-4 flex items-center gap-2">
+        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60">
+            <h2 class="text-base font-semibold mb-4 flex items-center gap-2">
                 <i class="fa-solid fa-chart-line text-blue-500"></i> 血壓趨勢圖
             </h2>
             <div class="w-full h-64 sm:h-80">
@@ -210,7 +209,21 @@
             render();
         };
 
-        // 開啟 / 收合表單邏輯
+        // 開啟/關閉備份選單
+        function toggleBackupMenu() {
+            const menu = document.getElementById('backupDropdown');
+            menu.classList.toggle('hidden');
+        }
+
+        // 點擊選單外部時自動關閉選單
+        document.addEventListener('click', function(e) {
+            const menu = document.getElementById('backupDropdown');
+            const btn = e.target.closest('button[onclick="toggleBackupMenu()"]');
+            if (!btn && !menu.contains(e.target) && !menu.classList.contains('hidden')) {
+                menu.classList.add('hidden');
+            }
+        });
+
         function toggleForm(forceOpen = false) {
             const container = document.getElementById('formContainer');
             const icon = document.getElementById('toggleFormIcon');
@@ -219,7 +232,7 @@
             if (forceOpen || container.classList.contains('hidden')) {
                 container.classList.remove('hidden');
                 icon.className = "fa-solid fa-minus";
-                text.textContent = "收合輸入表單";
+                text.textContent = "收合表單";
             } else {
                 container.classList.add('hidden');
                 icon.className = "fa-solid fa-plus";
@@ -247,22 +260,11 @@
                 htmlRoot.classList.remove('dark');
                 icon.className = "fa-solid fa-palette";
                 switch(themeName) {
-                    case 'rose':
-                        body.classList.add('bg-rose-50');
-                        break;
-                    case 'blue':
-                        body.classList.add('bg-blue-50');
-                        break;
-                    case 'emerald':
-                        body.classList.add('bg-emerald-50');
-                        break;
-                    case 'amber':
-                        body.classList.add('bg-amber-50');
-                        break;
-                    case 'slate':
-                    default:
-                        body.classList.add('bg-slate-50');
-                        break;
+                    case 'rose': body.classList.add('bg-rose-50'); break;
+                    case 'blue': body.classList.add('bg-blue-50'); break;
+                    case 'emerald': body.classList.add('bg-emerald-50'); break;
+                    case 'amber': body.classList.add('bg-amber-50'); break;
+                    case 'slate': default: body.classList.add('bg-slate-50'); break;
                 }
             }
         }
@@ -271,13 +273,13 @@
             const sysVal = document.getElementById('sysInput').value;
             const diaVal = document.getElementById('diaInput').value;
             const editIndex = document.getElementById('editIndex').value;
-            
             if ((sysVal !== '' || diaVal !== '') && editIndex === '-1') {
                 e.preventDefault();
                 e.returnValue = '';
             }
         });
 
+        // 精爽型成員藥丸卡片（管理按鈕滑動浮現）
         function initMembers() {
             const container = document.getElementById('memberListContainer');
             container.innerHTML = '';
@@ -291,15 +293,17 @@
             for (let member in db.members) {
                 let isSelected = (member === currentMember);
                 let btnWrapper = document.createElement('div');
-                btnWrapper.className = "inline-flex items-center bg-slate-100 dark:bg-slate-700 rounded-xl p-1 border " + 
-                    (isSelected ? "border-rose-500 shadow-sm" : "border-transparent");
+                btnWrapper.className = `member-card inline-flex items-center rounded-xl px-2.5 py-1 transition-all border ${
+                    isSelected 
+                        ? 'is-selected bg-rose-500 text-white border-rose-500 shadow-sm' 
+                        : 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border-transparent hover:border-slate-300 dark:hover:border-slate-600'
+                }`;
 
                 let selectBtn = document.createElement('button');
                 selectBtn.type = "button";
-                selectBtn.className = `px-3 py-1.5 rounded-lg text-sm font-medium transition cursor-pointer flex items-center gap-1.5 ${
-                    isSelected ? 'bg-rose-500 text-white' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-600'
-                }`;
-                selectBtn.innerHTML = `<i class="fa-solid fa-user text-xs"></i> ${member}`;
+                selectBtn.className = "py-1 text-xs font-medium transition cursor-pointer flex items-center gap-1.5";
+                const radioIconClass = isSelected ? "fa-solid fa-circle-check" : "fa-regular fa-circle text-slate-400";
+                selectBtn.innerHTML = `<i class="${radioIconClass} text-[11px]"></i> ${member}`;
                 selectBtn.onclick = () => {
                     currentMember = member;
                     db.currentMember = currentMember;
@@ -310,30 +314,34 @@
                 };
                 btnWrapper.appendChild(selectBtn);
 
+                // Hover 浮現的管理按鈕組
+                let actionGroup = document.createElement('div');
+                actionGroup.className = "action-btns flex items-center ml-1 border-l pl-1 border-slate-300 dark:border-slate-600 gap-0.5";
+                if(isSelected) actionGroup.className = "action-btns flex items-center ml-1 border-l pl-1 border-white/30 gap-0.5";
+
                 let renameBtn = document.createElement('button');
                 renameBtn.type = "button";
-                renameBtn.className = "px-2 py-1.5 text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 text-xs transition cursor-pointer";
+                renameBtn.className = `p-1 text-[10px] transition cursor-pointer ${
+                    isSelected ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-500'
+                }`;
                 renameBtn.innerHTML = `<i class="fa-solid fa-pen"></i>`;
                 renameBtn.title = "重新命名";
-                renameBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    renameMember(member);
-                };
-                btnWrapper.appendChild(renameBtn);
+                renameBtn.onclick = (e) => { e.stopPropagation(); renameMember(member); };
+                actionGroup.appendChild(renameBtn);
 
                 if (Object.keys(db.members).length > 1) {
                     let deleteBtn = document.createElement('button');
                     deleteBtn.type = "button";
-                    deleteBtn.className = "px-2 py-1.5 text-slate-400 hover:text-rose-500 text-xs transition cursor-pointer";
+                    deleteBtn.className = `p-1 text-[10px] transition cursor-pointer ${
+                        isSelected ? 'text-white/80 hover:text-rose-200' : 'text-slate-400 hover:text-rose-500'
+                    }`;
                     deleteBtn.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
                     deleteBtn.title = "刪除成員";
-                    deleteBtn.onclick = (e) => {
-                        e.stopPropagation();
-                        deleteMember(member);
-                    };
-                    btnWrapper.appendChild(deleteBtn);
+                    deleteBtn.onclick = (e) => { e.stopPropagation(); deleteMember(member); };
+                    actionGroup.appendChild(deleteBtn);
                 }
 
+                btnWrapper.appendChild(actionGroup);
                 container.appendChild(btnWrapper);
             }
             document.getElementById('currentMemberName').textContent = currentMember;
@@ -342,9 +350,7 @@
         function initMonthFilter(records) {
             const select = document.getElementById('monthFilter');
             const currentVal = select.value;
-            
             const months = [...new Set(records.map(r => r.date ? r.date.substring(0, 7) : null).filter(Boolean))].sort().reverse();
-            
             select.innerHTML = `<option value="all">顯示全部月份 (${records.length}筆)</option>`;
             months.forEach(m => {
                 let opt = document.createElement('option');
@@ -353,27 +359,15 @@
                 opt.textContent = `${y} 年 ${parseInt(mo)} 月`;
                 select.appendChild(opt);
             });
-
-            if ([...select.options].some(o => o.value === currentVal)) {
-                select.value = currentVal;
-            } else {
-                select.value = "all";
-            }
+            if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
+            else select.value = "all";
         }
 
         function addMember() {
             const input = document.getElementById('newMemberInput');
             const name = input.value.trim();
-
-            if (!name) {
-                alert('請輸入成員名字！');
-                return;
-            }
-            if (db.members[name]) {
-                alert('此成員已經存在！');
-                return;
-            }
-
+            if (!name) return alert('請輸入成員名字！');
+            if (db.members[name]) return alert('此成員已經存在！');
             db.members[name] = [];
             currentMember = name;
             db.currentMember = currentMember;
@@ -388,19 +382,10 @@
             const newName = prompt(`請輸入「${oldName}」的新名字：`, oldName);
             if (!newName) return;
             const trimmedNewName = newName.trim();
-
-            if (trimmedNewName === "") {
-                alert("名字不能為空白！");
-                return;
-            }
-            if (db.members[trimmedNewName]) {
-                alert("此名字已經存在！");
-                return;
-            }
-
+            if (trimmedNewName === "") return alert("名字不能為空白！");
+            if (db.members[trimmedNewName]) return alert("此名字已經存在！");
             db.members[trimmedNewName] = db.members[oldName];
             delete db.members[oldName];
-
             currentMember = trimmedNewName;
             db.currentMember = currentMember;
             saveDB();
@@ -420,10 +405,7 @@
             }
         }
 
-        function saveDB() {
-            localStorage.setItem('blood_pressure_db', JSON.stringify(db));
-        }
-
+        function saveDB() { localStorage.setItem('blood_pressure_db', JSON.stringify(db)); }
         function clearFormInputs() {
             document.getElementById('sysInput').value = '';
             document.getElementById('diaInput').value = '';
@@ -438,85 +420,47 @@
             const pulse = Number(document.getElementById('pulseInput').value) || 0;
             const editIndex = Number(document.getElementById('editIndex').value);
 
-            if (sys <= dia) {
-                alert("⚠️ 防呆提示：收縮壓（SYS）必須大於舒張壓（DIA）！請重新檢查輸入的數值。");
-                return;
-            }
-
+            if (sys <= dia) return alert("⚠️ 防呆提示：收縮壓（SYS）必須大於舒張壓（DIA）！");
             const todayStr = new Date().toISOString().split('T')[0];
-            if (date > todayStr) {
-                alert("⚠️ 防呆提示：測量日期不能選擇未來的日期！");
-                return;
-            }
+            if (date > todayStr) return alert("⚠️ 防呆提示：測量日期不能選擇未來的日期！");
 
             if (pulse > 0 && (pulse < 40 || pulse > 180)) {
-                const confirmPulse = confirm(`⚠️ 提醒：您輸入的脈搏為 ${pulse} bpm，數值似乎偏離常人安靜時的心跳範圍（約 60-100）。確定要儲存嗎？`);
-                if (!confirmPulse) {
-                    return;
-                }
+                if (!confirm(`⚠️ 提醒：脈搏為 ${pulse} bpm 似乎偏離常人範圍。確定要儲存嗎？`)) return;
             }
 
-            if (!db.members[currentMember]) {
-                db.members[currentMember] = [];
-            }
-
+            if (!db.members[currentMember]) db.members[currentMember] = [];
             const records = db.members[currentMember];
 
             if (editIndex === -1) {
                 const existRecord = records.find(r => r.date === date);
                 if (existRecord) {
-                    const confirmOverwrite = confirm(`⚠️ 提醒：成員「${currentMember}」在 ${date} 已經有一筆紀錄（${existRecord.sys}/${existRecord.dia} mmHg）了！\n\n請問要直接覆蓋該筆紀錄嗎？`);
-                    if (!confirmOverwrite) {
-                        return; 
-                    } else {
-                        existRecord.sys = sys;
-                        existRecord.dia = dia;
-                        existRecord.pulse = pulse;
-                        
-                        records.sort((a, b) => new Date(a.date) - new Date(b.date));
-                        saveDB();
-                        resetForm();
-                        initMonthFilter(records);
-                        render();
-                        toggleForm(false);
-                        alert("🎉 已成功更新該日期的血壓紀錄！");
-                        return;
-                    }
+                    if (!confirm(`⚠️ 提醒：成員「${currentMember}」在 ${date} 已經有紀錄了！要直接覆蓋嗎？`)) return;
+                    existRecord.sys = sys; existRecord.dia = dia; existRecord.pulse = pulse;
+                    records.sort((a, b) => new Date(a.date) - new Date(b.date));
+                    saveDB(); resetForm(); initMonthFilter(records); render(); toggleForm(false);
+                    alert("🎉 已成功更新紀錄！");
+                    return;
                 }
             }
 
             const selectedMonth = document.getElementById('monthFilter').value;
             if (editIndex > -1) {
-                const filteredRecords = selectedMonth === 'all' 
-                    ? records 
-                    : records.filter(r => r.date && r.date.startsWith(selectedMonth));
-                
+                const filteredRecords = selectedMonth === 'all' ? records : records.filter(r => r.date && r.date.startsWith(selectedMonth));
                 const target = filteredRecords[editIndex];
                 const realIndex = records.indexOf(target);
-
-                if (realIndex > -1) {
-                    records[realIndex] = { date, sys, dia, pulse };
-                }
+                if (realIndex > -1) records[realIndex] = { date, sys, dia, pulse };
             } else {
                 records.push({ date, sys, dia, pulse });
             }
 
             records.sort((a, b) => new Date(a.date) - new Date(b.date));
-            
-            saveDB();
-            resetForm();
-            initMonthFilter(records);
-            render();
-            toggleForm(false);
+            saveDB(); resetForm(); initMonthFilter(records); render(); toggleForm(false);
         }
 
         function editRecord(index) {
             const records = db.members[currentMember] || [];
             const selectedMonth = document.getElementById('monthFilter').value;
-            const filteredRecords = selectedMonth === 'all' 
-                ? records 
-                : records.filter(r => r.date && r.date.startsWith(selectedMonth));
-
+            const filteredRecords = selectedMonth === 'all' ? records : records.filter(r => r.date && r.date.startsWith(selectedMonth));
             const target = filteredRecords[index];
             if (!target) return;
 
@@ -529,7 +473,6 @@
             document.getElementById('formTitleText').textContent = "編輯";
             document.getElementById('submitBtn').textContent = "更新記錄";
             document.getElementById('cancelEditBtn').classList.remove('hidden');
-
             toggleForm(true);
             document.getElementById('recordForm').scrollIntoView({ behavior: 'smooth' });
         }
@@ -547,81 +490,64 @@
             if (confirm('確定要刪除這筆紀錄嗎？')) {
                 const records = db.members[currentMember] || [];
                 const selectedMonth = document.getElementById('monthFilter').value;
-                const filteredRecords = selectedMonth === 'all' 
-                    ? records 
-                    : records.filter(r => r.date && r.date.startsWith(selectedMonth));
-                
+                const filteredRecords = selectedMonth === 'all' ? records : records.filter(r => r.date && r.date.startsWith(selectedMonth));
                 const target = filteredRecords[index];
                 const realIndex = records.indexOf(target);
-                
                 if (realIndex > -1) {
                     db.members[currentMember].splice(realIndex, 1);
-                    saveDB();
-                    resetForm();
-                    initMonthFilter(records);
-                    render();
+                    saveDB(); resetForm(); initMonthFilter(records); render();
                 }
             }
         }
 
-        // 💡 擴充版：彩色外框小藥丸膠囊標籤（包含低血壓藍色系）
+        // 健康狀態膠囊標籤
         function getStatus(sys, dia) {
             if (sys < 90 || dia < 60) {
-                return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-800">低血壓</span>';
+                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-800">低血壓</span>';
             }
             if (sys < 120 && dia < 80) {
-                return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800">正常</span>';
+                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-400 dark:border-emerald-800">正常</span>';
             }
             if (sys < 130 && dia < 85) {
-                return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800">正常高值</span>';
+                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/50 dark:text-amber-400 dark:border-amber-800">正常高值</span>';
             }
             if (sys < 140 || dia < 90) {
-                return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-400 dark:border-orange-800">輕度高血壓</span>';
+                return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-orange-50 text-orange-700 border border-orange-200 dark:bg-orange-950/50 dark:text-orange-400 dark:border-orange-800">輕度高血壓</span>';
             }
-            return '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-400 dark:border-rose-800">偏高/危險</span>';
+            return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/50 dark:text-rose-400 dark:border-rose-800">偏高/危險</span>';
         }
 
         function render() {
             const records = db.members[currentMember] || [];
-            
             const monthSelect = document.getElementById('monthFilter');
-            if (monthSelect.options.length <= 1) {
-                initMonthFilter(records);
-            }
-            
+            if (monthSelect.options.length <= 1) initMonthFilter(records);
             const selectedMonth = monthSelect.value;
-            
-            const displayRecords = selectedMonth === 'all' 
-                ? records 
-                : records.filter(r => r.date && r.date.startsWith(selectedMonth));
+            const displayRecords = selectedMonth === 'all' ? records : records.filter(r => r.date && r.date.startsWith(selectedMonth));
 
             const count = displayRecords.length;
             let avgSys = 0, avgDia = 0, avgPulse = 0;
             if (count > 0) {
-                const sumSys = displayRecords.reduce((acc, r) => acc + r.sys, 0);
-                const sumDia = displayRecords.reduce((acc, r) => acc + r.dia, 0);
-                const sumPulse = displayRecords.reduce((acc, r) => acc + (r.pulse || 0), 0);
-                avgSys = Math.round(sumSys / count);
-                avgDia = Math.round(sumDia / count);
-                avgPulse = Math.round(sumPulse / count);
+                avgSys = Math.round(displayRecords.reduce((acc, r) => acc + r.sys, 0) / count);
+                avgDia = Math.round(displayRecords.reduce((acc, r) => acc + r.dia, 0) / count);
+                avgPulse = Math.round(displayRecords.reduce((acc, r) => acc + (r.pulse || 0), 0) / count);
             }
 
             const statsContainer = document.getElementById('monthlyStats');
             statsContainer.innerHTML = `
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                     <i class="fa-solid fa-calendar-days text-rose-500"></i>
-                    <span class="text-slate-500 dark:text-slate-400">測量次數：</span>
-                    <span class="font-bold text-base text-rose-500">${count} 次</span>
+                    <span class="text-slate-400 dark:text-slate-400">測量次數：</span>
+                    <span class="font-bold text-rose-500">${count} 次</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                     <i class="fa-solid fa-chart-pie text-blue-500"></i>
-                    <span class="text-slate-500 dark:text-slate-400">平均血壓：</span>
-                    <span class="font-bold text-base">${count > 0 ? `${avgSys} /${avgDia} mmHg` : '尚無資料'}</span>
+                    <span class="text-slate-400 dark:text-slate-400">平均血壓：</span>
+                    <span class="font-bold">${count > 0 ? `${avgSys} /${avgDia} mmHg` : '尚無資料'}</span>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-1.5">
                     <i class="fa-solid fa-heart-pulse text-indigo-500"></i>
-                    <span class="text-slate-500 dark:text-slate-400">平均脈搏：</span>
-                    <span class="font-bold text-base">${count > 0 && avgPulse > 0 ? `${avgPulse} bpm` : '-'}</span>
+                    <span class="text-slate-400 dark:text-slate-400">平均脈搏：</span>
+                    <span class="font-bold">${count > 0 && avgPulse > 0 ? `${avgPulse} bpm` : '-'}</span>
                 </div>
             `;
 
@@ -633,17 +559,17 @@
             } else {
                 displayRecords.forEach((r, idx) => {
                     let tr = document.createElement('tr');
-                    tr.className = "border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50/50 dark:hover:bg-slate-700/50 transition";
+                    tr.className = "border-b border-slate-100 dark:border-slate-700/60 hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition";
                     tr.innerHTML = `
-                        <td class="py-3 px-4">${r.date}</td>
-                        <td class="py-3 px-4 font-semibold">${r.sys} / ${r.dia}</td>
-                        <td class="py-3 px-4">${r.pulse ? r.pulse + ' bpm' : '-'}</td>
-                        <td class="py-3 px-4">${getStatus(r.sys, r.dia)}</td>
-                        <td class="py-3 px-4 text-right space-x-2">
-                            <button onclick="editRecord(${idx})" class="text-slate-400 hover:text-indigo-500 transition cursor-pointer" title="編輯紀錄">
+                        <td class="py-2.5 px-4">${r.date}</td>
+                        <td class="py-2.5 px-4 font-semibold">${r.sys} / ${r.dia}</td>
+                        <td class="py-2.5 px-4">${r.pulse ? r.pulse + ' bpm' : '-'}</td>
+                        <td class="py-2.5 px-4">${getStatus(r.sys, r.dia)}</td>
+                        <td class="py-2.5 px-4 text-right space-x-2">
+                            <button onclick="editRecord(${idx})" class="text-slate-400 hover:text-indigo-500 transition cursor-pointer" title="編輯">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </button>
-                            <button onclick="deleteRecord(${idx})" class="text-slate-400 hover:text-rose-500 transition cursor-pointer" title="刪除紀錄">
+                            <button onclick="deleteRecord(${idx})" class="text-slate-400 hover:text-rose-500 transition cursor-pointer" title="刪除">
                                 <i class="fa-solid fa-trash-can"></i>
                             </button>
                         </td>
@@ -651,7 +577,6 @@
                     tbody.appendChild(tr);
                 });
             }
-
             updateChart(displayRecords);
         }
 
@@ -661,182 +586,101 @@
             const sysData = records.map(r => r.sys);
             const diaData = records.map(r => r.dia);
 
-            if (chartInstance) {
-                chartInstance.destroy();
-            }
+            if (chartInstance) chartInstance.destroy();
 
             chartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                        {
-                            label: '收縮壓 (SYS)',
-                            data: sysData,
-                            borderColor: '#f43f5e',
-                            backgroundColor: '#f43f5e',
-                            tension: 0.3
-                        },
-                        {
-                            label: '舒張壓 (DIA)',
-                            data: diaData,
-                            borderColor: '#3b82f6',
-                            backgroundColor: '#3b82f6',
-                            tension: 0.3
-                        }
+                        { label: '收縮壓 (SYS)', data: sysData, borderColor: '#f43f5e', backgroundColor: '#f43f5e', tension: 0.3 },
+                        { label: '舒張壓 (DIA)', data: diaData, borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3 }
                     ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
-                    }
+                    scales: { y: { beginAtZero: false } }
                 }
             });
         }
 
-        // 1️⃣ 匯出單一成員
+        // CSV 匯出入功能
         function exportSingleMemberCSV() {
             const records = db.members[currentMember] || [];
             if (records.length === 0) return alert(`目前「${currentMember}」沒有資料可供匯出！`);
-
             let csvContent = "\uFEFF日期,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
-            records.forEach(r => {
-                csvContent += `${r.date},${r.sys},${r.dia},${r.pulse}\r\n`;
-            });
-
+            records.forEach(r => { csvContent += `${r.date},${r.sys},${r.dia},${r.pulse}\r\n`; });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
             a.setAttribute('download', `${currentMember}_血壓紀錄.csv`);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
-        // 2️⃣ 匯入單一成員
         function importSingleMemberCSV(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(event) {
                 try {
-                    const text = event.target.result;
-                    const lines = text.split(/\r\n|\n/);
+                    const lines = event.target.result.split(/\r\n|\n/);
                     let importedCount = 0;
-
-                    if (!db.members[currentMember]) {
-                        db.members[currentMember] = [];
-                    }
-
+                    if (!db.members[currentMember]) db.members[currentMember] = [];
                     for (let i = 1; i < lines.length; i++) {
                         const cols = lines[i].split(',');
                         if (cols.length >= 3 && cols[0].trim() !== '') {
-                            db.members[currentMember].push({
-                                date: cols[0].trim(),
-                                sys: Number(cols[1]),
-                                dia: Number(cols[2]),
-                                pulse: Number(cols[3]) || 0
-                            });
+                            db.members[currentMember].push({ date: cols[0].trim(), sys: Number(cols[1]), dia: Number(cols[2]), pulse: Number(cols[3]) || 0 });
                             importedCount++;
                         }
                     }
-
                     db.members[currentMember].sort((a, b) => new Date(a.date) - new Date(b.date));
-                    saveDB();
-                    resetForm();
-                    initMonthFilter(db.members[currentMember]);
-                    render();
+                    saveDB(); resetForm(); initMonthFilter(db.members[currentMember]); render();
                     alert(`🎉 成功為「${currentMember}」匯入 ${importedCount} 筆血壓紀錄！`);
-                } catch (error) {
-                    alert('CSV 讀取失敗！');
-                }
+                } catch (error) { alert('CSV 讀取失敗！'); }
                 e.target.value = '';
             };
             reader.readAsText(file);
         }
 
-        // 3️⃣ 匯出全家總表
         function exportAllMembersCSV() {
             let totalCount = 0;
-            for (let m in db.members) {
-                totalCount += (db.members[m] || []).length;
-            }
+            for (let m in db.members) totalCount += (db.members[m] || []).length;
             if (totalCount === 0) return alert('目前所有成員都沒有資料可供匯出！');
-
             let csvContent = "\uFEFF成員名稱,日期,收縮壓(mmHg),舒張壓(mmHg),脈搏(bpm)\r\n";
             for (let member in db.members) {
-                const records = db.members[member] || [];
-                records.forEach(r => {
-                    csvContent += `${member},${r.date},${r.sys},${r.dia},${r.pulse}\r\n`;
-                });
+                (db.members[member] || []).forEach(r => { csvContent += `${member},${r.date},${r.sys},${r.dia},${r.pulse}\r\n`; });
             }
-
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.setAttribute('href', url);
             a.setAttribute('download', `全家總表_血壓紀錄.csv`);
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
         }
 
-        // 4️⃣ 智慧匯入全家總表（自動分流對應成員）
         function importAllMembersCSV(e) {
             const file = e.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(event) {
                 try {
-                    const text = event.target.result;
-                    const lines = text.split(/\r\n|\n/);
+                    const lines = event.target.result.split(/\r\n|\n/);
                     let importedCount = 0;
-
                     for (let i = 1; i < lines.length; i++) {
                         const cols = lines[i].split(',');
                         if (cols.length >= 4 && cols[0].trim() !== '' && cols[1].trim() !== '') {
                             const memberName = cols[0].trim();
-                            const dateStr = cols[1].trim();
-                            const sysVal = Number(cols[2]);
-                            const diaVal = Number(cols[3]);
-                            const pulseVal = Number(cols[4]) || 0;
-
-                            if (!db.members[memberName]) {
-                                db.members[memberName] = [];
-                            }
-
-                            db.members[memberName].push({
-                                date: dateStr,
-                                sys: sysVal,
-                                dia: diaVal,
-                                pulse: pulseVal
-                            });
+                            if (!db.members[memberName]) db.members[memberName] = [];
+                            db.members[memberName].push({ date: cols[1].trim(), sys: Number(cols[2]), dia: Number(cols[3]), pulse: Number(cols[4]) || 0 });
                             importedCount++;
                         }
                     }
-
-                    for (let member in db.members) {
-                        db.members[member].sort((a, b) => new Date(a.date) - new Date(b.date));
-                    }
-
-                    saveDB();
-                    resetForm();
-                    initMembers();
-                    initMonthFilter(db.members[currentMember]);
-                    render();
-
-                    alert(`🎉 成功智慧匯入全家總表共 ${importedCount} 筆血壓紀錄，並已自動分流至對應成員！`);
-                } catch (error) {
-                    console.error(error);
-                    alert('全家總表讀取失敗，檔案格式可能有誤！');
-                }
+                    for (let member in db.members) db.members[member].sort((a, b) => new Date(a.date) - new Date(b.date));
+                    saveDB(); resetForm(); initMembers(); initMonthFilter(db.members[currentMember]); render();
+                    alert(`🎉 成功智慧匯入全家總表共 ${importedCount} 筆血壓紀錄，並已自動分流！`);
+                } catch (error) { alert('全家總表讀取失敗！'); }
                 e.target.value = '';
             };
             reader.readAsText(file);

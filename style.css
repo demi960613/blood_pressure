@@ -1,5 +1,5 @@
 /* ==========================================
-   血壓紀錄追蹤系統 - 自定義樣式表
+   血壓紀錄追蹤系統 - 自定義精爽樣式表
    ========================================== */
 
 /* 基礎平滑過渡設定 */
@@ -7,10 +7,10 @@ body {
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* 自定義捲軸樣式（讓介面更有質感） */
+/* 自定義精細捲軸 */
 ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -18,15 +18,28 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: rgba(150, 150, 150, 0.3);
+    background: rgba(150, 150, 150, 0.25);
     border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(150, 150, 150, 0.5);
+    background: rgba(150, 150, 150, 0.4);
 }
 
-/* 確保表單收合與展開的過渡流暢 */
+/* 成員卡片微動畫與 Hover 顯現管理按鈕 */
+.member-card .action-btns {
+    opacity: 0;
+    transform: translateX(4px);
+    transition: all 0.2s ease;
+}
+
+.member-card:hover .action-btns,
+.member-card.is-selected .action-btns {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* 確保下拉選單與表單展開動畫平滑 */
 #formContainer {
     transition: all 0.3s ease-in-out;
 }
