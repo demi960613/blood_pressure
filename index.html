@@ -27,7 +27,7 @@
                 <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">輕鬆記錄與追蹤您與家人的健康數據</p>
             </div>
             
-            <!-- 統一主題選擇選單 -->
+            <!-- 主題選擇 -->
             <div class="flex items-center gap-2 shrink-0">
                 <label for="themeSelector" class="text-xs font-medium text-slate-400 dark:text-slate-500 flex items-center gap-1">
                     <i id="themeIcon" class="fa-solid fa-palette"></i> 風格主題：
@@ -43,25 +43,37 @@
             </div>
         </header>
 
-        <!-- 1. 成員管理面板 (清爽型卡片：管理按鈕 Hover 浮現) -->
-        <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 space-y-4">
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-                <h2 class="text-base font-semibold flex items-center gap-2">
-                    <i class="fa-solid fa-users text-rose-500"></i> 成員切換
-                </h2>
-                <!-- 新增成員輸入區 -->
-                <div class="flex items-center gap-2">
-                    <input type="text" id="newMemberInput" placeholder="輸入成員名字" class="bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
-                    <button onclick="addMember()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3 py-1.5 rounded-xl text-xs font-medium transition cursor-pointer shrink-0 border border-slate-200 dark:border-slate-600">
-                        <i class="fa-solid fa-plus mr-1"></i> 新增成員
+        <!-- 1. 成員選擇（極簡下拉卡片式） -->
+        <section class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 flex items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-slate-400 dark:text-slate-500">當前檢視對象：</span>
+                
+                <!-- 下拉選單開關按鈕 -->
+                <div class="relative inline-block text-left">
+                    <button onclick="toggleMemberDropdown()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center gap-2 cursor-pointer border border-slate-200 dark:border-slate-600">
+                        <i class="fa-solid fa-circle-user text-rose-500 text-base"></i>
+                        <span id="selectedMemberLabel">平平</span>
+                        <i class="fa-solid fa-chevron-down text-xs opacity-50 ml-1"></i>
                     </button>
+
+                    <!-- 下拉選單卡片 (預設隱藏 hidden) -->
+                    <div id="memberDropdown" class="hidden absolute left-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700/80 z-30 py-2 text-xs">
+                        <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">切換成員</div>
+                        <div id="memberDropdownList" class="max-h-48 overflow-y-auto">
+                            <!-- 動態填入成員列表 -->
+                        </div>
+                        <div class="my-1 border-t border-slate-100 dark:border-slate-700/60"></div>
+                        <button onclick="openMemberModal(); toggleMemberDropdown();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-indigo-500 font-semibold cursor-pointer">
+                            <i class="fa-solid fa-gear w-4"></i> 管理與新增成員...
+                        </button>
+                    </div>
                 </div>
             </div>
 
-            <!-- 成員列表按鈕容器 -->
-            <div id="memberListContainer" class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-700/60">
-                <!-- 動態載入成員卡片 -->
-            </div>
+            <!-- 快捷管理按鈕 -->
+            <button onclick="openMemberModal()" class="text-xs font-medium text-slate-500 hover:text-indigo-500 dark:text-slate-400 dark:hover:text-indigo-400 flex items-center gap-1 transition cursor-pointer">
+                <i class="fa-solid fa-users-gear"></i> 管理成員
+            </button>
         </section>
 
         <!-- 2. 可收納式血壓輸入表單 -->
@@ -111,7 +123,7 @@
             </div>
         </section>
 
-        <!-- 3. 歷史測量紀錄清單（整合版匯出入選單） -->
+        <!-- 3. 歷史測量紀錄清單（整合版備份選單） -->
         <section class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/60 space-y-4">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div class="flex items-center gap-3 flex-wrap">
@@ -123,13 +135,12 @@
                     </select>
                 </div>
 
-                <!-- 整合型匯出入選單 -->
+                <!-- 整合型備份與匯出入選單 -->
                 <div class="relative inline-block text-left">
                     <button onclick="toggleBackupMenu()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-3.5 py-1.5 rounded-xl text-xs font-medium transition flex items-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600">
                         <i class="fa-solid fa-arrows-up-down text-rose-500"></i> 資料備份與匯出入 <i class="fa-solid fa-chevron-down text-[10px] opacity-60"></i>
                     </button>
                     
-                    <!-- 下拉選單選單 (預設隱藏 hidden) -->
                     <div id="backupDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-2xl shadow-lg border border-slate-100 dark:border-slate-700/80 z-20 py-1.5 text-xs">
                         <div class="px-3 py-1 text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">個人紀錄</div>
                         <button onclick="exportSingleMemberCSV(); toggleBackupMenu();" class="w-full text-left px-3.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 flex items-center gap-2 text-slate-700 dark:text-slate-200">
@@ -187,6 +198,45 @@
 
     </div>
 
+    <!-- 💡 獨立成員管理 Modal 對話框 (預設隱藏 hidden) -->
+    <div id="memberModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 modal-backdrop">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-700 max-w-md w-full p-6 space-y-5">
+            <div class="flex items-center justify-between border-b pb-3 border-slate-100 dark:border-slate-700/60">
+                <h3 class="text-base font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-users-gear text-rose-500"></i> 成員管理與新增
+                </h3>
+                <button onclick="closeMemberModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <!-- 新增成員區塊 -->
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-slate-400 dark:text-slate-400">新增成員</label>
+                <div class="flex gap-2">
+                    <input type="text" id="newMemberInputModal" placeholder="輸入成員名字" class="flex-1 bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-rose-500">
+                    <button onclick="addMemberFromModal()" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer shrink-0 shadow-sm">
+                        新增
+                    </button>
+                </div>
+            </div>
+
+            <!-- 現有成員列表 (可重新命名與刪除) -->
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-slate-400 dark:text-slate-400">現有成員清單</label>
+                <div id="modalMemberList" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                    <!-- 動態載入成員編輯列 -->
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-700/60 flex justify-end">
+                <button onclick="closeMemberModal()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 px-4 py-2 rounded-xl text-xs font-medium transition cursor-pointer">
+                    完成
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript 邏輯 -->
     <script>
         let db = JSON.parse(localStorage.getItem('blood_pressure_db')) || {
@@ -211,18 +261,38 @@
 
         // 開啟/關閉備份選單
         function toggleBackupMenu() {
-            const menu = document.getElementById('backupDropdown');
-            menu.classList.toggle('hidden');
+            document.getElementById('backupDropdown').classList.toggle('hidden');
         }
 
-        // 點擊選單外部時自動關閉選單
+        // 開啟/關閉成員下拉選單
+        function toggleMemberDropdown() {
+            document.getElementById('memberDropdown').classList.toggle('hidden');
+        }
+
+        // 點擊選單外部自動收起
         document.addEventListener('click', function(e) {
-            const menu = document.getElementById('backupDropdown');
-            const btn = e.target.closest('button[onclick="toggleBackupMenu()"]');
-            if (!btn && !menu.contains(e.target) && !menu.classList.contains('hidden')) {
-                menu.classList.add('hidden');
+            const backupMenu = document.getElementById('backupDropdown');
+            const backupBtn = e.target.closest('button[onclick="toggleBackupMenu()"]');
+            if (!backupBtn && backupMenu && !backupMenu.contains(e.target) && !backupMenu.classList.contains('hidden')) {
+                backupMenu.classList.add('hidden');
+            }
+
+            const memberMenu = document.getElementById('memberDropdown');
+            const memberBtn = e.target.closest('button[onclick="toggleMemberDropdown()"]');
+            if (!memberBtn && memberMenu && !memberMenu.contains(e.target) && !memberMenu.classList.contains('hidden')) {
+                memberMenu.classList.add('hidden');
             }
         });
+
+        // Modal 彈窗控制
+        function openMemberModal() {
+            renderModalMemberList();
+            document.getElementById('memberModal').classList.remove('hidden');
+        }
+
+        function closeMemberModal() {
+            document.getElementById('memberModal').classList.add('hidden');
+        }
 
         function toggleForm(forceOpen = false) {
             const container = document.getElementById('formContainer');
@@ -279,101 +349,87 @@
             }
         });
 
-        // 精爽型成員藥丸卡片（管理按鈕滑動浮現）
+        // 初始化成員選單（下拉清單式）
         function initMembers() {
-            const container = document.getElementById('memberListContainer');
-            container.innerHTML = '';
-            
+            const dropdownList = document.getElementById('memberDropdownList');
+            dropdownList.innerHTML = '';
+
             if (!db.members[currentMember]) {
                 const firstKey = Object.keys(db.members)[0];
                 currentMember = firstKey || "平平";
                 db.currentMember = currentMember;
             }
 
+            document.getElementById('selectedMemberLabel').textContent = currentMember;
+            document.getElementById('currentMemberName').textContent = currentMember;
+
             for (let member in db.members) {
                 let isSelected = (member === currentMember);
-                let btnWrapper = document.createElement('div');
-                btnWrapper.className = `member-card inline-flex items-center rounded-xl px-2.5 py-1 transition-all border ${
-                    isSelected 
-                        ? 'is-selected bg-rose-500 text-white border-rose-500 shadow-sm' 
-                        : 'bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border-transparent hover:border-slate-300 dark:hover:border-slate-600'
+                let btn = document.createElement('button');
+                btn.type = "button";
+                btn.className = `w-full text-left px-3.5 py-2 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer ${
+                    isSelected ? 'text-rose-500 font-bold bg-rose-50/50 dark:bg-rose-950/30' : 'text-slate-700 dark:text-slate-200'
                 }`;
-
-                let selectBtn = document.createElement('button');
-                selectBtn.type = "button";
-                selectBtn.className = "py-1 text-xs font-medium transition cursor-pointer flex items-center gap-1.5";
-                const radioIconClass = isSelected ? "fa-solid fa-circle-check" : "fa-regular fa-circle text-slate-400";
-                selectBtn.innerHTML = `<i class="${radioIconClass} text-[11px]"></i> ${member}`;
-                selectBtn.onclick = () => {
+                btn.innerHTML = `
+                    <span class="flex items-center gap-2">
+                        <i class="fa-solid fa-user text-xs ${isSelected ? 'text-rose-500' : 'text-slate-400'}"></i> ${member}
+                    </span>
+                    ${isSelected ? '<i class="fa-solid fa-check text-xs"></i>' : ''}
+                `;
+                btn.onclick = () => {
                     currentMember = member;
                     db.currentMember = currentMember;
                     saveDB();
                     resetForm();
+                    initMembers();
                     initMonthFilter(db.members[currentMember] || []);
                     render();
+                    toggleMemberDropdown();
                 };
-                btnWrapper.appendChild(selectBtn);
-
-                // Hover 浮現的管理按鈕組
-                let actionGroup = document.createElement('div');
-                actionGroup.className = "action-btns flex items-center ml-1 border-l pl-1 border-slate-300 dark:border-slate-600 gap-0.5";
-                if(isSelected) actionGroup.className = "action-btns flex items-center ml-1 border-l pl-1 border-white/30 gap-0.5";
-
-                let renameBtn = document.createElement('button');
-                renameBtn.type = "button";
-                renameBtn.className = `p-1 text-[10px] transition cursor-pointer ${
-                    isSelected ? 'text-white/80 hover:text-white' : 'text-slate-400 hover:text-indigo-500'
-                }`;
-                renameBtn.innerHTML = `<i class="fa-solid fa-pen"></i>`;
-                renameBtn.title = "重新命名";
-                renameBtn.onclick = (e) => { e.stopPropagation(); renameMember(member); };
-                actionGroup.appendChild(renameBtn);
-
-                if (Object.keys(db.members).length > 1) {
-                    let deleteBtn = document.createElement('button');
-                    deleteBtn.type = "button";
-                    deleteBtn.className = `p-1 text-[10px] transition cursor-pointer ${
-                        isSelected ? 'text-white/80 hover:text-rose-200' : 'text-slate-400 hover:text-rose-500'
-                    }`;
-                    deleteBtn.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
-                    deleteBtn.title = "刪除成員";
-                    deleteBtn.onclick = (e) => { e.stopPropagation(); deleteMember(member); };
-                    actionGroup.appendChild(deleteBtn);
-                }
-
-                btnWrapper.appendChild(actionGroup);
-                container.appendChild(btnWrapper);
+                dropdownList.appendChild(btn);
             }
-            document.getElementById('currentMemberName').textContent = currentMember;
         }
 
-        function initMonthFilter(records) {
-            const select = document.getElementById('monthFilter');
-            const currentVal = select.value;
-            const months = [...new Set(records.map(r => r.date ? r.date.substring(0, 7) : null).filter(Boolean))].sort().reverse();
-            select.innerHTML = `<option value="all">顯示全部月份 (${records.length}筆)</option>`;
-            months.forEach(m => {
-                let opt = document.createElement('option');
-                opt.value = m;
-                let [y, mo] = m.split('-');
-                opt.textContent = `${y} 年 ${parseInt(mo)} 月`;
-                select.appendChild(opt);
-            });
-            if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
-            else select.value = "all";
+        // 渲染 Modal 內的成員管理列表
+        function renderModalMemberList() {
+            const listContainer = document.getElementById('modalMemberList');
+            listContainer.innerHTML = '';
+
+            for (let member in db.members) {
+                let div = document.createElement('div');
+                div.className = "flex items-center justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/60";
+                div.innerHTML = `
+                    <span class="text-xs font-semibold flex items-center gap-2">
+                        <i class="fa-solid fa-user text-slate-400"></i> ${member}
+                    </span>
+                    <div class="flex items-center gap-1">
+                        <button onclick="renameMember('${member}')" class="p-1 text-slate-400 hover:text-indigo-500 transition cursor-pointer text-xs" title="重新命名">
+                            <i class="fa-solid fa-pen"></i>
+                        </button>
+                        ${Object.keys(db.members).length > 1 ? `
+                            <button onclick="deleteMember('${member}')" class="p-1 text-slate-400 hover:text-rose-500 transition cursor-pointer text-xs" title="刪除成員">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+                listContainer.appendChild(div);
+            }
         }
 
-        function addMember() {
-            const input = document.getElementById('newMemberInput');
+        function addMemberFromModal() {
+            const input = document.getElementById('newMemberInputModal');
             const name = input.value.trim();
             if (!name) return alert('請輸入成員名字！');
             if (db.members[name]) return alert('此成員已經存在！');
+
             db.members[name] = [];
             currentMember = name;
             db.currentMember = currentMember;
             saveDB();
             input.value = '';
-            resetForm();
+            initMembers();
+            renderModalMemberList();
             initMonthFilter(db.members[currentMember]);
             render();
         }
@@ -384,11 +440,15 @@
             const trimmedNewName = newName.trim();
             if (trimmedNewName === "") return alert("名字不能為空白！");
             if (db.members[trimmedNewName]) return alert("此名字已經存在！");
+
             db.members[trimmedNewName] = db.members[oldName];
             delete db.members[oldName];
-            currentMember = trimmedNewName;
+
+            if (currentMember === oldName) currentMember = trimmedNewName;
             db.currentMember = currentMember;
             saveDB();
+            initMembers();
+            renderModalMemberList();
             render();
         }
 
@@ -396,10 +456,12 @@
             if (confirm(`確定要刪除成員「${member}」及其所有血壓紀錄嗎？`)) {
                 delete db.members[member];
                 const remaining = Object.keys(db.members);
-                currentMember = remaining[0];
+                if (currentMember === member) currentMember = remaining[0];
                 db.currentMember = currentMember;
                 saveDB();
                 resetForm();
+                initMembers();
+                renderModalMemberList();
                 initMonthFilter(db.members[currentMember] || []);
                 render();
             }
@@ -500,7 +562,22 @@
             }
         }
 
-        // 健康狀態膠囊標籤
+        function initMonthFilter(records) {
+            const select = document.getElementById('monthFilter');
+            const currentVal = select.value;
+            const months = [...new Set(records.map(r => r.date ? r.date.substring(0, 7) : null).filter(Boolean))].sort().reverse();
+            select.innerHTML = `<option value="all">顯示全部月份 (${records.length}筆)</option>`;
+            months.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m;
+                let [y, mo] = m.split('-');
+                opt.textContent = `${y} 年 ${parseInt(mo)} 月`;
+                select.appendChild(opt);
+            });
+            if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
+            else select.value = "all";
+        }
+
         function getStatus(sys, dia) {
             if (sys < 90 || dia < 60) {
                 return '<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-sky-50 text-sky-700 border border-sky-200 dark:bg-sky-950/50 dark:text-sky-400 dark:border-sky-800">低血壓</span>';
@@ -605,7 +682,6 @@
             });
         }
 
-        // CSV 匯出入功能
         function exportSingleMemberCSV() {
             const records = db.members[currentMember] || [];
             if (records.length === 0) return alert(`目前「${currentMember}」沒有資料可供匯出！`);

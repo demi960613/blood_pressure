@@ -1,5 +1,5 @@
 /* ==========================================
-   血壓紀錄追蹤系統 - 自定義精爽樣式表
+   血壓紀錄追蹤系統 - 自定義極簡樣式表
    ========================================== */
 
 /* 基礎平滑過渡設定 */
@@ -26,20 +26,12 @@ body {
     background: rgba(150, 150, 150, 0.4);
 }
 
-/* 成員卡片微動畫與 Hover 顯現管理按鈕 */
-.member-card .action-btns {
-    opacity: 0;
-    transform: translateX(4px);
-    transition: all 0.2s ease;
+/* 確保彈窗 (Modal) 與下拉選單過渡平滑 */
+.modal-backdrop {
+    backdrop-filter: blur(4px);
+    transition: all 0.2s ease-in-out;
 }
 
-.member-card:hover .action-btns,
-.member-card.is-selected .action-btns {
-    opacity: 1;
-    transform: translateX(0);
-}
-
-/* 確保下拉選單與表單展開動畫平滑 */
 #formContainer {
     transition: all 0.3s ease-in-out;
 }
