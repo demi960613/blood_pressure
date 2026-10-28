@@ -5,6 +5,7 @@ let db = JSON.parse(localStorage.getItem('blood_pressure_db')) || {
 let currentMember = db.currentMember || "平平";
 let chartInstance = null;
 let currentChartRange = '30';
+let shouldCollapseAfterSave = false; // 用於判斷儲存後是否要收合表單
 
 window.onload = function() {
     const savedTheme = localStorage.getItem('blood_pressure_theme') || 'slate';
@@ -43,7 +44,7 @@ function setChartRange(range) {
         const btn = document.getElementById(`btnChart${r === 'all' ? 'All' : r}`);
         if (btn) {
             if (r === range) {
-                btn.className = "px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-blue-500 shadow-xs";
+                btn.className = "px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-xs";
             } else {
                 btn.className = "px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
             }
@@ -129,10 +130,10 @@ function applyTheme(themeName) {
     const icon = document.getElementById('themeIcon');
     const memberNameSpan = document.getElementById('currentMemberName');
 
-    body.classList.remove('bg-slate-50', 'bg-rose-50', 'bg-blue-50', 'bg-emerald-50', 'bg-amber-50');
+    body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-emerald-50', 'bg-amber-50');
     
     if (memberNameSpan) {
-        memberNameSpan.classList.remove('text-slate-700', 'dark:text-slate-300', 'text-rose-500', 'text-blue-500', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
+        memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
     }
 
     if (themeName === 'dark') {
@@ -142,15 +143,15 @@ function applyTheme(themeName) {
         if (memberNameSpan) memberNameSpan.classList.add('text-indigo-400');
     } else {
         htmlRoot.classList.remove('dark');
-        icon.className = "fa-solid fa-palette text-rose-500";
+        icon.className = "fa-solid fa-palette text-slate-500";
         switch(themeName) {
             case 'rose': 
                 body.classList.add('bg-rose-50'); 
-                if (memberNameSpan) memberNameSpan.classList.add('text-rose-500');
+                if (memberNameSpan) memberNameSpan.classList.add('text-rose-600');
                 break;
             case 'blue': 
                 body.classList.add('bg-blue-50'); 
-                if (memberNameSpan) memberNameSpan.classList.add('text-blue-500');
+                if (memberNameSpan) memberNameSpan.classList.add('text-blue-600');
                 break;
             case 'emerald': 
                 body.classList.add('bg-emerald-50'); 
@@ -162,8 +163,8 @@ function applyTheme(themeName) {
                 break;
             case 'slate': 
             default: 
-                body.classList.add('bg-slate-50'); 
-                if (memberNameSpan) memberNameSpan.classList.add('text-slate-700', 'dark:text-slate-300');
+                body.classList.add('bg-slate-100'); 
+                if (memberNameSpan) memberNameSpan.classList.add('text-slate-600', 'dark:text-slate-300');
                 break;
         }
     }
@@ -196,12 +197,12 @@ function initMembers() {
         let isSelected = (member === currentMember);
         let btn = document.createElement('button');
         btn.type = "button";
-        btn.className = `w-full text-left px-3 py-1.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-700/50 transition cursor-pointer ${
-            isSelected ? 'text-rose-500 font-bold bg-rose-50/50 dark:bg-rose-950/30' : 'text-slate-700 dark:text-slate-200'
+        btn.className = `w-full text-left px-3 py-1.5 flex items-center justify-between hover:bg-slate-100 dark:hover:bg-slate-700/50 transition cursor-pointer ${
+            isSelected ? 'text-slate-800 dark:text-white font-bold bg-slate-100 dark:bg-slate-700/80' : 'text-slate-700 dark:text-slate-200'
         }`;
         btn.innerHTML = `
             <span class="flex items-center gap-1.5 truncate">
-                <i class="fa-solid fa-user text-[10px] ${isSelected ? 'text-rose-500' : 'text-slate-400'}"></i> ${member}
+                <i class="fa-solid fa-user text-[10px] ${isSelected ? 'text-slate-600 dark:text-slate-300' : 'text-slate-400'}"></i> ${member}
             </span>
             ${isSelected ? '<i class="fa-solid fa-check text-[10px]"></i>' : ''}
         `;
@@ -225,13 +226,13 @@ function renderModalMemberList() {
 
     for (let member in db.members) {
         let div = document.createElement('div');
-        div.className = "flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-100 dark:border-slate-700/60";
+        div.className = "flex items-center justify-between p-2 rounded-xl bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-700/60";
         div.innerHTML = `
             <span class="text-xs font-semibold flex items-center gap-1.5 truncate">
                 <i class="fa-solid fa-user text-slate-400 text-[10px]"></i> ${member}
             </span>
             <div class="flex items-center gap-1 shrink-0">
-                <button onclick="renameMember('${member}')" class="p-1 text-slate-400 hover:text-indigo-500 transition cursor-pointer text-xs" title="重新命名">
+                <button onclick="renameMember('${member}')" class="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer text-xs" title="重新命名">
                     <i class="fa-solid fa-pen"></i>
                 </button>
                 ${Object.keys(db.members).length > 1 ? `
@@ -302,6 +303,11 @@ function clearFormInputs() {
     document.getElementById('pulseInput').value = '';
 }
 
+function saveAndCollapseRecord(e) {
+    shouldCollapseAfterSave = true;
+    saveRecord(e);
+}
+
 function saveRecord(e) {
     e.preventDefault();
     const date = document.getElementById('recordDate').value;
@@ -324,10 +330,16 @@ function saveRecord(e) {
     if (editIndex === -1) {
         const existRecord = records.find(r => r.date === date);
         if (existRecord) {
-            if (!confirm(`⚠️ 「${currentMember}」在 ${date} 已有紀錄，要直接覆蓋嗎？`)) return;
+            if (!confirm(`⚠️ 「${currentMember}」在 ${date} 已有紀錄，要直接覆蓋嗎？`)) {
+                shouldCollapseAfterSave = false;
+                return;
+            }
             existRecord.sys = sys; existRecord.dia = dia; existRecord.pulse = pulse;
             records.sort((a, b) => new Date(a.date) - new Date(b.date));
-            saveDB(); resetForm(); initMonthFilter(records); render(); toggleForm(false);
+            saveDB(); resetForm(); initMonthFilter(records); render(); 
+            
+            toggleForm(false);
+            shouldCollapseAfterSave = false;
             alert("🎉 更新成功！");
             return;
         }
@@ -348,7 +360,12 @@ function saveRecord(e) {
     }
 
     records.sort((a, b) => new Date(a.date) - new Date(b.date));
-    saveDB(); resetForm(); initMonthFilter(records); render(); toggleForm(false);
+    saveDB(); resetForm(); initMonthFilter(records); render(); 
+
+    if (shouldCollapseAfterSave) {
+        toggleForm(false);
+        shouldCollapseAfterSave = false;
+    }
 }
 
 function editRecord(index) {
@@ -383,6 +400,7 @@ function resetForm() {
     document.getElementById('submitBtn').textContent = "儲存記錄";
     document.getElementById('cancelEditBtn').classList.add('hidden');
     document.getElementById('recordDate').valueAsDate = new Date();
+    shouldCollapseAfterSave = false;
 }
 
 function deleteRecord(index) {
@@ -468,15 +486,15 @@ function render() {
     const statsContainer = document.getElementById('monthlyStats');
     statsContainer.innerHTML = `
         <div class="flex items-center justify-between">
-            <span class="text-slate-400"><i class="fa-solid fa-calendar-days text-rose-500 mr-1"></i> 檢視比數：</span>
-            <span class="font-bold text-rose-500">${count} 次</span>
+            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-calendar-days text-slate-500 mr-1"></i> 測量次數：</span>
+            <span class="font-bold text-slate-700 dark:text-slate-200">${count} 次</span>
         </div>
         <div class="flex items-center justify-between">
-            <span class="text-slate-400"><i class="fa-solid fa-chart-pie text-blue-500 mr-1"></i> 平均血壓：</span>
+            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-chart-pie text-slate-500 mr-1"></i> 平均血壓：</span>
             <span class="font-bold">${count > 0 ? `${avgSys} /${avgDia} mmHg` : '尚無資料'}</span>
         </div>
         <div class="flex items-center justify-between">
-            <span class="text-slate-400"><i class="fa-solid fa-heart-pulse text-indigo-500 mr-1"></i> 平均脈搏：</span>
+            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-heart-pulse text-slate-500 mr-1"></i> 平均脈搏：</span>
             <span class="font-bold">${count > 0 && avgPulse > 0 ? `${avgPulse} bpm` : '-'}</span>
         </div>
     `;
@@ -495,8 +513,8 @@ function render() {
             card.innerHTML = `
                 <div class="space-y-1 min-w-0 flex-1">
                     <div class="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-2">
-                        <span><i class="fa-regular fa-calendar text-rose-500 mr-1"></i>${r.date}</span>
-                        ${r.pulse ? `<span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-heart-pulse text-indigo-500 mr-1"></i>${r.pulse} bpm</span>` : ''}
+                        <span><i class="fa-regular fa-calendar text-slate-500 mr-1"></i>${r.date}</span>
+                        ${r.pulse ? `<span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-heart-pulse text-slate-400 mr-1"></i>${r.pulse} bpm</span>` : ''}
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-base font-bold text-slate-800 dark:text-slate-100">${r.sys} / ${r.dia} <span class="text-[10px] font-normal text-slate-400">mmHg</span></span>
@@ -504,7 +522,7 @@ function render() {
                     </div>
                 </div>
                 <div class="flex items-center gap-1 shrink-0 border-l pl-2 border-slate-200 dark:border-slate-600/60">
-                    <button onclick="editRecord(${idx})" class="p-1.5 text-slate-400 hover:text-indigo-500 transition cursor-pointer text-xs" title="編輯">
+                    <button onclick="editRecord(${idx})" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer text-xs" title="編輯">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
                     <button onclick="deleteRecord(${idx})" class="p-1.5 text-slate-400 hover:text-rose-500 transition cursor-pointer text-xs" title="刪除">
@@ -543,8 +561,8 @@ function updateChart(records) {
         data: {
             labels: labels,
             datasets: [
-                { label: '收縮壓', data: sysData, borderColor: '#f43f5e', backgroundColor: '#f43f5e', tension: 0.3, pointRadius: 3 },
-                { label: '舒張壓', data: diaData, borderColor: '#3b82f6', backgroundColor: '#3b82f6', tension: 0.3, pointRadius: 3 }
+                { label: '收縮壓', data: sysData, borderColor: '#64748b', backgroundColor: '#64748b', tension: 0.3, pointRadius: 3 },
+                { label: '舒張壓', data: diaData, borderColor: '#94a3b8', backgroundColor: '#94a3b8', tension: 0.3, pointRadius: 3 }
             ]
         },
         options: {
