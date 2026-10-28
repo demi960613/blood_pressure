@@ -54,6 +54,23 @@ function setChartRange(range) {
     updateChart(records);
 }
 
+// 控制歷史紀錄清單收合與展開
+function toggleRecordList() {
+    const container = document.getElementById('recordCardContainer');
+    const toggleText = document.getElementById('toggleText');
+    const toggleIcon = document.getElementById('toggleIcon');
+
+    const isCollapsed = container.classList.toggle('collapsed');
+
+    if (isCollapsed) {
+        toggleText.textContent = '展開';
+        toggleIcon.style.transform = 'rotate(180deg)';
+    } else {
+        toggleText.textContent = '折疊';
+        toggleIcon.style.transform = 'rotate(0deg)';
+    }
+}
+
 function toggleBackupMenu() {
     document.getElementById('backupDropdown').classList.toggle('hidden');
 }

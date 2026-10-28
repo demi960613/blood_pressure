@@ -34,6 +34,24 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
+/* 歷史紀錄清單平滑收合動畫樣式 */
+.collapsible-content {
+    max-height: 2000px;
+    opacity: 1;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0, 1, 0, 1), opacity 0.25s ease-in-out;
+}
+
+.collapsible-content.collapsed {
+    max-height: 0;
+    opacity: 0;
+    pointer-events: none;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
 .table-responsive {
     -webkit-overflow-scrolling: touch;
 }

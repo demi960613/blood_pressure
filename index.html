@@ -149,7 +149,7 @@
                         <i class="fa-solid fa-table-list text-indigo-500"></i> 歷史紀錄
                     </h2>
                     
-                    <!-- 篩選選單群組 (月份 + 狀態) -->
+                    <!-- 篩選與折疊按鈕群組 -->
                     <div class="flex items-center gap-1.5 flex-wrap">
                         <!-- 月份篩選 -->
                         <select id="monthFilter" onchange="render()" class="bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-rose-500 max-w-[120px]">
@@ -165,6 +165,12 @@
                             <option value="danger">偏高/危險</option>
                             <option value="low">低血壓</option>
                         </select>
+
+                        <!-- 歷史紀錄收合/展開按鈕 -->
+                        <button id="toggleListBtn" onclick="toggleRecordList()" class="flex items-center gap-1 px-2.5 py-1 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 border border-slate-200 dark:border-slate-600 rounded-xl transition cursor-pointer">
+                            <span id="toggleText">折疊</span>
+                            <span id="toggleIcon" class="inline-block transition-transform duration-300 text-[10px]">▲</span>
+                        </button>
                     </div>
                 </div>
 
@@ -201,8 +207,8 @@
             <!-- 月統計卡片 -->
             <div id="monthlyStats" class="bg-slate-50 dark:bg-slate-700/30 p-3 rounded-xl flex flex-col gap-2 text-xs"></div>
 
-            <!-- 歷史紀錄卡片清單區域（支援雙欄並排與自適應捲動） -->
-            <div id="recordCardContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[450px] overflow-y-auto pr-1">
+            <!-- 歷史紀錄卡片清單區域（加入收合動畫 class） -->
+            <div id="recordCardContainer" class="collapsible-content grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[450px] overflow-y-auto pr-1">
                 <!-- 動態生成的卡片會放在這裡 -->
             </div>
         </section>
