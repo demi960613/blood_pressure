@@ -221,6 +221,7 @@ function toggleForm(forceOpen = false) {
 
 function changeTheme(themeName) {
     applyTheme(themeName);
+    updateChart(db.members[currentMember] || []);
     try {
         localStorage.setItem('blood_pressure_theme', themeName);
     } catch (error) {
@@ -710,6 +711,9 @@ function updateChart(records) {
     const labels = filteredRecords.map(r => r.date);
     const sysData = filteredRecords.map(r => r.sys);
     const diaData = filteredRecords.map(r => r.dia);
+    const themeStyles = getComputedStyle(document.documentElement);
+    const sysColor = themeStyles.getPropertyValue('--chart-sys').trim() || '#64748b';
+    const diaColor = themeStyles.getPropertyValue('--chart-dia').trim() || '#94a3b8';
 
     if (chartInstance) chartInstance.destroy();
 
@@ -718,8 +722,8 @@ function updateChart(records) {
         data: {
             labels: labels,
             datasets: [
-                { label: '收縮壓', data: sysData, borderColor: '#64748b', backgroundColor: '#64748b', tension: 0.3, pointRadius: 3 },
-                { label: '舒張壓', data: diaData, borderColor: '#94a3b8', backgroundColor: '#94a3b8', tension: 0.3, pointRadius: 3 }
+                { label: '收縮壓', data: sysData, borderColor: sysColor, backgroundColor: sysColor, tension: 0.3, pointRadius: 3 },
+                { label: '舒張壓', data: diaData, borderColor: diaColor, backgroundColor: diaColor, tension: 0.3, pointRadius: 3 }
             ]
         },
         options: {
