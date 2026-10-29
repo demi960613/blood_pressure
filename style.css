@@ -128,30 +128,3 @@ button.primary-action:hover,
 button#toggleFormButton:hover {
     background-color: var(--action-hover);
 }
-
-html.theme-blue #memberDropdownList button.bg-slate-100 {
-    background-color: #bfdbfe;
-    color: #1e3a8a;
-}
-
-html.theme-blue #memberDropdownList button.bg-slate-100 i {
-    color: #2563eb;
-}
-
-html.theme-blue #btnChart7.bg-white,
-html.theme-blue #btnChart30.bg-white,
-html.theme-blue #btnChart90.bg-white,
-html.theme-blue #btnChartAll.bg-white {
-    background-color: #bfdbfe;
-    color: #1e3a8a;
-}
-
-html.theme-blue :is(input, select):focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgb(37 99 235 / 20%);
-}
-
-html.theme-blue button:focus-visible {
-    outline: 2px solid #2563eb;
-    outline-offset: 2px;
-}
