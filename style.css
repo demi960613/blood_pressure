@@ -86,9 +86,6 @@ html.theme-slate {
     --action-bg: #e2e8f0;
     --action-hover: #cbd5e1;
     --action-text: #334155;
-    --control-bg: #dbe2ea;
-    --control-hover: #c6d0dc;
-    --control-text: #334155;
 }
 
 html.theme-rose {
@@ -121,18 +118,6 @@ html.theme-dark {
     --action-text: #fff;
 }
 
-html.theme-blue {
-    --control-bg: #bfdbfe;
-    --control-hover: #93c5fd;
-    --control-text: #1e3a8a;
-}
-
-html.theme-emerald {
-    --control-bg: #e6efe8;
-    --control-hover: #d5e4d9;
-    --control-text: #355b42;
-}
-
 button.primary-action,
 button#toggleFormButton {
     background-color: var(--action-bg);
@@ -142,19 +127,6 @@ button#toggleFormButton {
 button.primary-action:hover,
 button#toggleFormButton:hover {
     background-color: var(--action-hover);
-}
-
-html.theme-slate button.bg-slate-100,
-html.theme-blue button.bg-slate-100,
-html.theme-emerald button.bg-slate-100 {
-    background-color: var(--control-bg);
-    color: var(--control-text);
-}
-
-html.theme-slate button.bg-slate-100:hover,
-html.theme-blue button.bg-slate-100:hover,
-html.theme-emerald button.bg-slate-100:hover {
-    background-color: var(--control-hover);
 }
 
 html.theme-blue #memberDropdownList button.bg-slate-100 {
