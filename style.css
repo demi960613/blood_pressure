@@ -86,48 +86,36 @@ html.theme-slate {
     --action-bg: #e2e8f0;
     --action-hover: #cbd5e1;
     --action-text: #334155;
-    --chart-sys: #475569;
-    --chart-dia: #94a3b8;
 }
 
 html.theme-rose {
     --action-bg: #ffe4e6;
     --action-hover: #fecdd3;
     --action-text: #9f1239;
-    --chart-sys: #e11d48;
-    --chart-dia: #fb7185;
 }
 
 html.theme-blue {
     --action-bg: #2563eb;
     --action-hover: #1d4ed8;
     --action-text: #ffffff;
-    --chart-sys: #2563eb;
-    --chart-dia: #60a5fa;
 }
 
 html.theme-emerald {
     --action-bg: #e1eee5;
     --action-hover: #d0e2d6;
     --action-text: #355b42;
-    --chart-sys: #047857;
-    --chart-dia: #34d399;
 }
 
 html.theme-amber {
     --action-bg: #fef3c7;
     --action-hover: #fde68a;
     --action-text: #78350f;
-    --chart-sys: #b45309;
-    --chart-dia: #f59e0b;
 }
 
 html.theme-dark {
     --action-bg: #4f46e5;
     --action-hover: #4338ca;
     --action-text: #fff;
-    --chart-sys: #818cf8;
-    --chart-dia: #c4b5fd;
 }
 
 button.primary-action,
