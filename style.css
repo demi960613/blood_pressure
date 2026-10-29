@@ -123,11 +123,54 @@ html.theme-amber {
 }
 
 html.theme-dark {
-    --action-bg: #475569;
-    --action-hover: #334155;
-    --action-text: #fff;
-    --chart-sys: #e2e8f0;
-    --chart-dia: #94a3b8;
+    --action-bg: #27272a;
+    --action-hover: #3f3f46;
+    --action-text: #fafafa;
+    --chart-sys: #f4f4f5;
+    --chart-dia: #a1a1aa;
+    color-scheme: dark;
+}
+
+html.theme-dark #appBody,
+html.theme-dark [class*="dark:bg-slate-900"] {
+    background-color: #09090b;
+}
+
+html.theme-dark [class*="dark:bg-slate-800"] {
+    background-color: #18181b;
+}
+
+html.theme-dark [class*="dark:bg-slate-700"] {
+    background-color: #27272a;
+}
+
+html.theme-dark [class*="dark:hover:bg-slate-600"]:hover,
+html.theme-dark [class*="dark:hover:bg-slate-700"]:hover {
+    background-color: #3f3f46;
+}
+
+html.theme-dark [class*="dark:border-slate-"] {
+    border-color: #3f3f46;
+}
+
+html.theme-dark [class*="dark:text-slate-100"] {
+    color: #f4f4f5;
+}
+
+html.theme-dark [class*="dark:text-slate-200"] {
+    color: #e4e4e7;
+}
+
+html.theme-dark [class*="dark:text-slate-300"] {
+    color: #d4d4d8;
+}
+
+html.theme-dark [class*="dark:text-slate-400"] {
+    color: #a1a1aa;
+}
+
+html.theme-dark [class*="dark:text-slate-500"] {
+    color: #71717a;
 }
 
 button.primary-action,

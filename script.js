@@ -241,13 +241,13 @@ function applyTheme(themeName) {
     body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-teal-50', 'bg-emerald-50', 'bg-amber-50');
     
     if (memberNameSpan) {
-        memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-teal-700', 'text-emerald-600', 'text-amber-600', 'text-indigo-400', 'text-slate-300');
+        memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-teal-700', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
     }
 
     if (activeTheme === 'dark') {
         htmlRoot.classList.add('dark');
         body.classList.add('bg-slate-900');
-        icon.className = "fa-solid fa-moon text-slate-300";
+        icon.className = "fa-solid fa-moon text-slate-400";
         if (memberNameSpan) memberNameSpan.classList.add('text-slate-300');
     } else {
         htmlRoot.classList.remove('dark');
