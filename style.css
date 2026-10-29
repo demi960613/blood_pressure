@@ -126,8 +126,8 @@ html.theme-dark {
     --action-bg: #27272a;
     --action-hover: #3f3f46;
     --action-text: #fafafa;
-    --chart-sys: #f4f4f5;
-    --chart-dia: #a1a1aa;
+    --chart-sys: #a1a1aa;
+    --chart-dia: #f4f4f5;
     color-scheme: dark;
 }
 
