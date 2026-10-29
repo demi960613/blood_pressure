@@ -36,15 +36,16 @@ body {
 
 /* 歷史紀錄清單平滑收合動畫樣式 */
 .collapsible-content {
-    max-height: 2000px;
+    max-height: 450px;
     opacity: 1;
-    overflow: hidden;
+    overflow-y: auto;
     transition: max-height 0.35s cubic-bezier(0, 1, 0, 1), opacity 0.25s ease-in-out;
 }
 
 .collapsible-content.collapsed {
     max-height: 0;
     opacity: 0;
+    overflow: hidden;
     pointer-events: none;
     margin-top: 0;
     margin-bottom: 0;
