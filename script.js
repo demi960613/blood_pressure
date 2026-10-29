@@ -114,7 +114,7 @@ function setChartRange(range) {
         const btn = document.getElementById(`btnChart${r === 'all' ? 'All' : r}`);
         if (btn) {
             if (r === range) {
-                btn.className = "theme-chart-active px-2 py-0.5 rounded-lg font-bold transition cursor-pointer shadow-xs";
+                btn.className = "px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-xs";
             } else {
                 btn.className = "px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
             }
@@ -233,12 +233,12 @@ function applyTheme(themeName) {
     const body = document.getElementById('appBody');
     const icon = document.getElementById('themeIcon');
     const memberNameSpan = document.getElementById('currentMemberName');
-    htmlRoot.dataset.theme = themeName;
 
-    body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-emerald-50', 'bg-amber-50');
+    htmlRoot.classList.toggle('theme-blue', themeName === 'blue');
+    body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-teal-50', 'bg-emerald-50', 'bg-amber-50');
     
     if (memberNameSpan) {
-        memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
+        memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-teal-700', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
     }
 
     if (themeName === 'dark') {
@@ -255,8 +255,8 @@ function applyTheme(themeName) {
                 if (memberNameSpan) memberNameSpan.classList.add('text-rose-600');
                 break;
             case 'blue': 
-                body.classList.add('bg-blue-50'); 
-                if (memberNameSpan) memberNameSpan.classList.add('text-blue-600');
+                body.classList.add('bg-teal-50');
+                if (memberNameSpan) memberNameSpan.classList.add('text-teal-700');
                 break;
             case 'emerald': 
                 body.classList.add('bg-emerald-50'); 
