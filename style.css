@@ -86,6 +86,9 @@ html.theme-slate {
     --action-bg: #e2e8f0;
     --action-hover: #cbd5e1;
     --action-text: #334155;
+    --control-bg: #dbe2ea;
+    --control-hover: #c6d0dc;
+    --control-text: #334155;
 }
 
 html.theme-rose {
@@ -101,9 +104,9 @@ html.theme-blue {
 }
 
 html.theme-emerald {
-    --action-bg: #d1fae5;
-    --action-hover: #a7f3d0;
-    --action-text: #065f46;
+    --action-bg: #e1eee5;
+    --action-hover: #d0e2d6;
+    --action-text: #355b42;
 }
 
 html.theme-amber {
@@ -118,6 +121,18 @@ html.theme-dark {
     --action-text: #fff;
 }
 
+html.theme-blue {
+    --control-bg: #ccfbf1;
+    --control-hover: #99f6e4;
+    --control-text: #115e59;
+}
+
+html.theme-emerald {
+    --control-bg: #e6efe8;
+    --control-hover: #d5e4d9;
+    --control-text: #355b42;
+}
+
 button.primary-action,
 button#toggleFormButton {
     background-color: var(--action-bg);
@@ -127,6 +142,19 @@ button#toggleFormButton {
 button.primary-action:hover,
 button#toggleFormButton:hover {
     background-color: var(--action-hover);
+}
+
+html.theme-slate button.bg-slate-100,
+html.theme-blue button.bg-slate-100,
+html.theme-emerald button.bg-slate-100 {
+    background-color: var(--control-bg);
+    color: var(--control-text);
+}
+
+html.theme-slate button.bg-slate-100:hover,
+html.theme-blue button.bg-slate-100:hover,
+html.theme-emerald button.bg-slate-100:hover {
+    background-color: var(--control-hover);
 }
 
 html.theme-blue #memberDropdownList button.bg-slate-100 {
