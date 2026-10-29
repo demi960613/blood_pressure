@@ -82,15 +82,51 @@ body {
     box-shadow: none;
 }
 
+html.theme-slate {
+    --action-bg: #e2e8f0;
+    --action-hover: #cbd5e1;
+    --action-text: #334155;
+}
+
+html.theme-rose {
+    --action-bg: #ffe4e6;
+    --action-hover: #fecdd3;
+    --action-text: #9f1239;
+}
+
+html.theme-blue {
+    --action-bg: #99f6e4;
+    --action-hover: #5eead4;
+    --action-text: #134e4a;
+}
+
+html.theme-emerald {
+    --action-bg: #d1fae5;
+    --action-hover: #a7f3d0;
+    --action-text: #065f46;
+}
+
+html.theme-amber {
+    --action-bg: #fef3c7;
+    --action-hover: #fde68a;
+    --action-text: #78350f;
+}
+
+html.theme-dark {
+    --action-bg: #4f46e5;
+    --action-hover: #4338ca;
+    --action-text: #fff;
+}
+
 button.primary-action,
 button#toggleFormButton {
-    background-color: #99f6e4;
-    color: #134e4a;
+    background-color: var(--action-bg);
+    color: var(--action-text);
 }
 
 button.primary-action:hover,
 button#toggleFormButton:hover {
-    background-color: #5eead4;
+    background-color: var(--action-hover);
 }
 
 html.theme-blue #memberDropdownList button.bg-slate-100 {

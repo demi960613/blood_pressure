@@ -233,15 +233,17 @@ function applyTheme(themeName) {
     const body = document.getElementById('appBody');
     const icon = document.getElementById('themeIcon');
     const memberNameSpan = document.getElementById('currentMemberName');
+    const themes = ['slate', 'rose', 'blue', 'emerald', 'amber', 'dark'];
+    const activeTheme = themes.includes(themeName) ? themeName : 'slate';
 
-    htmlRoot.classList.toggle('theme-blue', themeName === 'blue');
+    themes.forEach(theme => htmlRoot.classList.toggle(`theme-${theme}`, theme === activeTheme));
     body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-teal-50', 'bg-emerald-50', 'bg-amber-50');
     
     if (memberNameSpan) {
         memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-teal-700', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
     }
 
-    if (themeName === 'dark') {
+    if (activeTheme === 'dark') {
         htmlRoot.classList.add('dark');
         body.classList.add('bg-slate-900');
         icon.className = "fa-solid fa-moon text-indigo-400";
@@ -249,7 +251,7 @@ function applyTheme(themeName) {
     } else {
         htmlRoot.classList.remove('dark');
         icon.className = "fa-solid fa-palette text-slate-500";
-        switch(themeName) {
+        switch(activeTheme) {
             case 'rose': 
                 body.classList.add('bg-rose-50'); 
                 if (memberNameSpan) memberNameSpan.classList.add('text-rose-600');
