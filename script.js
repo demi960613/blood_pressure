@@ -51,10 +51,18 @@ function getLocalDateString(date = new Date()) {
     return `${year}-${month}-${day}`;
 }
 
+function parseLocalDateString(dateStr) {
+    const parts = dateStr.split(/[-/]/);
+    const year = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1;
+    const day = parseInt(parts[2], 10);
+    return new Date(year, month, day);
+}
+
 function isValidDateString(value) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
     const [year, month, day] = value.split('-').map(Number);
-    const date = new Date(year, month - 1, day);
+    const date = parseLocalDateString(value);
     return date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
 }
 
@@ -493,7 +501,7 @@ function saveRecord(e) {
                 return;
             }
             existRecord.sys = sys; existRecord.dia = dia; existRecord.pulse = pulse;
-            records.sort((a, b) => new Date(a.date) - new Date(b.date));
+            records.sort((a, b) => parseLocalDateString(a.date) - parseLocalDateString(b.date));
             saveDB(); resetForm(); initMonthFilter(records); render(); 
             
             toggleForm(false);
@@ -509,7 +517,7 @@ function saveRecord(e) {
         records.push({ id: createRecordId(), date, sys, dia, pulse });
     }
 
-    records.sort((a, b) => new Date(a.date) - new Date(b.date));
+    records.sort((a, b) => parseLocalDateString(a.date) - parseLocalDateString(b.date));
     saveDB(); resetForm(); initMonthFilter(records); render(); 
 
     if (shouldCollapseAfterSave) {
@@ -693,7 +701,7 @@ function updateChart(records) {
         const days = Number(currentChartRange);
         const cutoffDate = new Date();
         cutoffDate.setDate(cutoffDate.getDate() - days);
-        const cutoffStr = cutoffDate.toISOString().split('T')[0];
+        const cutoffStr = getLocalDateString(cutoffDate);
         
         filteredRecords = filteredRecords.filter(r => r.date >= cutoffStr);
     }
