@@ -8,6 +8,73 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+html[data-theme="slate"] {
+    --theme-primary: #475569;
+    --theme-primary-hover: #334155;
+    --theme-soft: #e2e8f0;
+    --theme-soft-text: #334155;
+    --theme-focus: #64748b;
+}
+
+html[data-theme="rose"] {
+    --theme-primary: #be123c;
+    --theme-primary-hover: #9f1239;
+    --theme-soft: #ffe4e6;
+    --theme-soft-text: #9f1239;
+    --theme-focus: #f43f5e;
+}
+
+html[data-theme="blue"] {
+    --theme-primary: #2563eb;
+    --theme-primary-hover: #1d4ed8;
+    --theme-soft: #dbeafe;
+    --theme-soft-text: #1e40af;
+    --theme-focus: #3b82f6;
+}
+
+html[data-theme="emerald"] {
+    --theme-primary: #047857;
+    --theme-primary-hover: #065f46;
+    --theme-soft: #d1fae5;
+    --theme-soft-text: #065f46;
+    --theme-focus: #10b981;
+}
+
+html[data-theme="amber"] {
+    --theme-primary: #a16207;
+    --theme-primary-hover: #854d0e;
+    --theme-soft: #fef3c7;
+    --theme-soft-text: #92400e;
+    --theme-focus: #f59e0b;
+}
+
+html[data-theme="dark"] {
+    --theme-primary: #4f46e5;
+    --theme-primary-hover: #4338ca;
+    --theme-soft: #312e81;
+    --theme-soft-text: #e0e7ff;
+    --theme-focus: #818cf8;
+}
+
+html[data-theme] .theme-primary-button {
+    background-color: var(--theme-primary);
+}
+
+html[data-theme] .theme-primary-button:hover {
+    background-color: var(--theme-primary-hover);
+}
+
+html[data-theme] .theme-focus-control:focus {
+    border-color: var(--theme-focus);
+    box-shadow: 0 0 0 2px var(--theme-focus);
+    outline: none;
+}
+
+html[data-theme] .theme-chart-active {
+    background-color: var(--theme-soft);
+    color: var(--theme-soft-text);
+}
+
 /* 自定義精細捲軸 */
 ::-webkit-scrollbar {
     width: 4px;

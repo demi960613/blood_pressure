@@ -114,7 +114,7 @@ function setChartRange(range) {
         const btn = document.getElementById(`btnChart${r === 'all' ? 'All' : r}`);
         if (btn) {
             if (r === range) {
-                btn.className = "px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-xs";
+                btn.className = "theme-chart-active px-2 py-0.5 rounded-lg font-bold transition cursor-pointer shadow-xs";
             } else {
                 btn.className = "px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
             }
@@ -233,6 +233,7 @@ function applyTheme(themeName) {
     const body = document.getElementById('appBody');
     const icon = document.getElementById('themeIcon');
     const memberNameSpan = document.getElementById('currentMemberName');
+    htmlRoot.dataset.theme = themeName;
 
     body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-emerald-50', 'bg-amber-50');
     
