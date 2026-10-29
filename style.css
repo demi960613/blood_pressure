@@ -98,9 +98,9 @@ html.theme-rose {
 }
 
 html.theme-blue {
-    --action-bg: #bfdbfe;
-    --action-hover: #93c5fd;
-    --action-text: #1e3a8a;
+    --action-bg: #2563eb;
+    --action-hover: #1d4ed8;
+    --action-text: #ffffff;
 }
 
 html.theme-emerald {
@@ -122,9 +122,9 @@ html.theme-dark {
 }
 
 html.theme-blue {
-    --control-bg: #dbeafe;
-    --control-hover: #bfdbfe;
-    --control-text: #1e40af;
+    --control-bg: #bfdbfe;
+    --control-hover: #93c5fd;
+    --control-text: #1e3a8a;
 }
 
 html.theme-emerald {
@@ -158,8 +158,8 @@ html.theme-emerald button.bg-slate-100:hover {
 }
 
 html.theme-blue #memberDropdownList button.bg-slate-100 {
-    background-color: #dbeafe;
-    color: #1e40af;
+    background-color: #bfdbfe;
+    color: #1e3a8a;
 }
 
 html.theme-blue #memberDropdownList button.bg-slate-100 i {
@@ -170,8 +170,8 @@ html.theme-blue #btnChart7.bg-white,
 html.theme-blue #btnChart30.bg-white,
 html.theme-blue #btnChart90.bg-white,
 html.theme-blue #btnChartAll.bg-white {
-    background-color: #dbeafe;
-    color: #1e40af;
+    background-color: #bfdbfe;
+    color: #1e3a8a;
 }
 
 html.theme-blue :is(input, select):focus {
