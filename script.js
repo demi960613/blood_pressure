@@ -697,15 +697,6 @@ function render() {
 
 function updateChart(records) {
     const ctx = document.getElementById('bloodPressureChart').getContext('2d');
-    const chartColors = {
-        slate: ['#475569', '#94a3b8'],
-        rose: ['#e11d48', '#fb7185'],
-        blue: ['#2563eb', '#60a5fa'],
-        emerald: ['#047857', '#34d399'],
-        amber: ['#b45309', '#f59e0b'],
-        dark: ['#818cf8', '#c4b5fd']
-    };
-    const [sysColor, diaColor] = chartColors[document.getElementById('themeSelector').value] || chartColors.slate;
     
     let filteredRecords = [...records];
     if (currentChartRange !== 'all') {
@@ -720,6 +711,9 @@ function updateChart(records) {
     const labels = filteredRecords.map(r => r.date);
     const sysData = filteredRecords.map(r => r.sys);
     const diaData = filteredRecords.map(r => r.dia);
+    const themeStyles = getComputedStyle(document.getElementById('htmlRoot'));
+    const sysColor = themeStyles.getPropertyValue('--chart-sys').trim() || '#64748b';
+    const diaColor = themeStyles.getPropertyValue('--chart-dia').trim() || '#94a3b8';
 
     if (chartInstance) chartInstance.destroy();
 
