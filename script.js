@@ -806,8 +806,19 @@ function assertCSVHeader(rows, expectedHeader) {
     }
 }
 
+function normalizeImportedDate(value) {
+    const text = value.trim();
+    const match = text.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[T ]\d{2}:\d{2}(?::\d{2}(?:\.\d+)?)?(?:Z|[+-]\d{2}:?\d{2})?)?$/i) ||
+        text.match(/^(\d{4})年(\d{1,2})月(\d{1,2})日?$/);
+    if (!match) return null;
+
+    const [, year, month, day] = match;
+    const date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    return isValidDateString(date) ? date : null;
+}
+
 function parseImportedRecord(dateValue, sysValue, diaValue, pulseValue) {
-    const date = dateValue.trim();
+    const date = normalizeImportedDate(dateValue);
     const sys = Number(sysValue);
     const dia = Number(diaValue);
     const pulse = pulseValue.trim() === '' ? 0 : Number(pulseValue);
