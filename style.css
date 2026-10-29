@@ -82,14 +82,14 @@ body {
     box-shadow: none;
 }
 
-html.theme-blue .primary-action,
-html.theme-blue #toggleFormButton {
+button.primary-action,
+button#toggleFormButton {
     background-color: #0f766e;
     color: #fff;
 }
 
-html.theme-blue .primary-action:hover,
-html.theme-blue #toggleFormButton:hover {
+button.primary-action:hover,
+button#toggleFormButton:hover {
     background-color: #115e59;
 }
 
