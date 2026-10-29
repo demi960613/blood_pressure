@@ -94,12 +94,10 @@ window.onload = function() {
 
 function setDeviceView(mode) {
     const container = document.getElementById('appViewportContainer');
-    container.classList.remove('viewport-mobile', 'viewport-tablet', 'viewport-desktop');
+    container.classList.remove('viewport-mobile', 'viewport-desktop');
 
     if (mode === 'mobile') {
         container.classList.add('viewport-mobile');
-    } else if (mode === 'tablet') {
-        container.classList.add('viewport-tablet');
     } else {
         container.classList.add('viewport-desktop');
     }
