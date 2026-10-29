@@ -98,9 +98,9 @@ html.theme-rose {
 }
 
 html.theme-blue {
-    --action-bg: #99f6e4;
-    --action-hover: #5eead4;
-    --action-text: #134e4a;
+    --action-bg: #bfdbfe;
+    --action-hover: #93c5fd;
+    --action-text: #1e3a8a;
 }
 
 html.theme-emerald {
@@ -122,9 +122,9 @@ html.theme-dark {
 }
 
 html.theme-blue {
-    --control-bg: #ccfbf1;
-    --control-hover: #99f6e4;
-    --control-text: #115e59;
+    --control-bg: #dbeafe;
+    --control-hover: #bfdbfe;
+    --control-text: #1e40af;
 }
 
 html.theme-emerald {
@@ -158,28 +158,28 @@ html.theme-emerald button.bg-slate-100:hover {
 }
 
 html.theme-blue #memberDropdownList button.bg-slate-100 {
-    background-color: #ccfbf1;
-    color: #115e59;
+    background-color: #bfdbfe;
+    color: #1e3a8a;
 }
 
 html.theme-blue #memberDropdownList button.bg-slate-100 i {
-    color: #0f766e;
+    color: #2563eb;
 }
 
 html.theme-blue #btnChart7.bg-white,
 html.theme-blue #btnChart30.bg-white,
 html.theme-blue #btnChart90.bg-white,
 html.theme-blue #btnChartAll.bg-white {
-    background-color: #ccfbf1;
-    color: #115e59;
+    background-color: #bfdbfe;
+    color: #1e3a8a;
 }
 
 html.theme-blue :is(input, select):focus {
-    border-color: #0f766e;
-    box-shadow: 0 0 0 2px rgb(15 118 110 / 20%);
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgb(37 99 235 / 20%);
 }
 
 html.theme-blue button:focus-visible {
-    outline: 2px solid #0f766e;
+    outline: 2px solid #2563eb;
     outline-offset: 2px;
 }

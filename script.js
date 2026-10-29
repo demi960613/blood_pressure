@@ -237,10 +237,10 @@ function applyTheme(themeName) {
     const activeTheme = themes.includes(themeName) ? themeName : 'slate';
 
     themes.forEach(theme => htmlRoot.classList.toggle(`theme-${theme}`, theme === activeTheme));
-    body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-teal-50', 'bg-emerald-50', 'bg-amber-50');
+    body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-emerald-50', 'bg-amber-50');
     
     if (memberNameSpan) {
-        memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-teal-700', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
+        memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-blue-700', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');
     }
 
     if (activeTheme === 'dark') {
@@ -257,8 +257,8 @@ function applyTheme(themeName) {
                 if (memberNameSpan) memberNameSpan.classList.add('text-rose-600');
                 break;
             case 'blue': 
-                body.classList.add('bg-teal-50');
-                if (memberNameSpan) memberNameSpan.classList.add('text-teal-700');
+                body.classList.add('bg-blue-50');
+                if (memberNameSpan) memberNameSpan.classList.add('text-blue-700');
                 break;
             case 'emerald': 
                 body.classList.add('bg-emerald-50'); 
