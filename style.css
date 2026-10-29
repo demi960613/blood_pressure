@@ -84,13 +84,13 @@ body {
 
 button.primary-action,
 button#toggleFormButton {
-    background-color: #0f766e;
-    color: #fff;
+    background-color: #99f6e4;
+    color: #134e4a;
 }
 
 button.primary-action:hover,
 button#toggleFormButton:hover {
-    background-color: #115e59;
+    background-color: #5eead4;
 }
 
 html.theme-blue #memberDropdownList button.bg-slate-100 {
