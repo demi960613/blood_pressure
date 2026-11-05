@@ -400,10 +400,14 @@ const GameSystem = {
         const progress = level.max === level.min
             ? 100
             : Math.min(100, Math.max(0, ((data.xp - level.min) / (level.max - level.min)) * 100));
+        const xpWithinLevel = Math.max(0, data.xp - level.min);
+        const xpForLevel = level.max - level.min;
         const fill = document.getElementById('progress-bar-fill');
         const progressBar = fill.parentElement;
         document.getElementById('current-level-text').textContent = `Lv. ${level.level} ${level.name}`;
-        document.getElementById('xp-text').textContent = `${data.xp} / ${level.max} XP`;
+        document.getElementById('xp-text').textContent = xpForLevel === 0
+            ? `已達最高等級 · ${data.xp} XP`
+            : `${xpWithinLevel} / ${xpForLevel} XP`;
         document.getElementById('progress-percent').textContent = `${Math.round(progress)}%`;
         fill.style.width = `${progress}%`;
         progressBar.setAttribute('aria-valuenow', String(Math.round(progress)));
