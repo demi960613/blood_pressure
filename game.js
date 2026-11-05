@@ -404,6 +404,7 @@ const GameSystem = {
         const progressBar = fill.parentElement;
         document.getElementById('current-level-text').textContent = `Lv. ${level.level} ${level.name}`;
         document.getElementById('xp-text').textContent = `${data.xp} / ${level.max} XP`;
+        document.getElementById('progress-percent').textContent = `${Math.round(progress)}%`;
         fill.style.width = `${progress}%`;
         progressBar.setAttribute('aria-valuenow', String(Math.round(progress)));
         document.getElementById('coin-count').textContent = String(data.coins);

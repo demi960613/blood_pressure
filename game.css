@@ -193,7 +193,15 @@ html.theme-blue #toggleFormButton:hover {
     font-weight: 600;
 }
 
+.progress-bar-row {
+    display: flex;
+    grid-column: 1 / -1;
+    align-items: center;
+    gap: 0.6rem;
+}
+
 .progress-bar-bg {
+    flex: 1;
     height: 0.7rem;
     overflow: hidden;
     border-radius: 9999px;
@@ -211,6 +219,14 @@ html.theme-blue #toggleFormButton:hover {
     color: #64748b;
     font-size: 0.7rem;
     font-weight: 500;
+    text-align: right;
+}
+
+#progress-percent {
+    min-width: 2.5rem;
+    color: var(--theme-accent-text);
+    font-size: 0.7rem;
+    font-weight: 700;
     text-align: right;
 }
 
