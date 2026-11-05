@@ -222,6 +222,20 @@ html.theme-blue #toggleFormButton:hover {
     text-align: right;
 }
 
+.xp-summary {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.25rem 0.6rem;
+    text-align: right;
+}
+
+#total-xp-text {
+    color: var(--theme-accent-text);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
 #progress-percent {
     min-width: 2.5rem;
     color: var(--theme-accent-text);

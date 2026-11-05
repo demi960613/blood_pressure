@@ -405,6 +405,7 @@ const GameSystem = {
         const fill = document.getElementById('progress-bar-fill');
         const progressBar = fill.parentElement;
         document.getElementById('current-level-text').textContent = `Lv. ${level.level} ${level.name}`;
+        document.getElementById('total-xp-text').textContent = `總 XP：${data.xp}`;
         document.getElementById('xp-text').textContent = xpForLevel === 0
             ? `已達最高等級 · ${data.xp} XP`
             : `${xpWithinLevel} / ${xpForLevel} XP`;
