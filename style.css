@@ -86,6 +86,10 @@ html.theme-slate {
     --action-bg: #e2e8f0;
     --action-hover: #cbd5e1;
     --action-text: #334155;
+    --theme-accent: #64748b;
+    --theme-accent-soft: #f1f5f9;
+    --theme-accent-border: #cbd5e1;
+    --theme-accent-text: #334155;
     --chart-sys: #475569;
     --chart-dia: #94a3b8;
 }
@@ -94,6 +98,10 @@ html.theme-rose {
     --action-bg: #ffe4e6;
     --action-hover: #fecdd3;
     --action-text: #9f1239;
+    --theme-accent: #e11d48;
+    --theme-accent-soft: #fff1f2;
+    --theme-accent-border: #fecdd3;
+    --theme-accent-text: #9f1239;
     --chart-sys: #be123c;
     --chart-dia: #fb7185;
 }
@@ -102,6 +110,10 @@ html.theme-blue {
     --action-bg: #2563eb;
     --action-hover: #60a5fa;
     --action-text: #ffffff;
+    --theme-accent: #3b82f6;
+    --theme-accent-soft: #dbeafe;
+    --theme-accent-border: #93c5fd;
+    --theme-accent-text: #1e40af;
     --chart-sys: #1d4ed8;
     --chart-dia: #60a5fa;
 }
@@ -110,6 +122,10 @@ html.theme-emerald {
     --action-bg: #e1eee5;
     --action-hover: #d0e2d6;
     --action-text: #355b42;
+    --theme-accent: #15803d;
+    --theme-accent-soft: #e1eee5;
+    --theme-accent-border: #bbd0c0;
+    --theme-accent-text: #355b42;
     --chart-sys: #047857;
     --chart-dia: #34d399;
 }
@@ -118,6 +134,10 @@ html.theme-amber {
     --action-bg: #fef3c7;
     --action-hover: #fde68a;
     --action-text: #78350f;
+    --theme-accent: #d97706;
+    --theme-accent-soft: #fffbeb;
+    --theme-accent-border: #fcd34d;
+    --theme-accent-text: #78350f;
     --chart-sys: #b45309;
     --chart-dia: #f59e0b;
 }
@@ -126,6 +146,10 @@ html.theme-dark {
     --action-bg: #27272a;
     --action-hover: #3f3f46;
     --action-text: #fafafa;
+    --theme-accent: #a1a1aa;
+    --theme-accent-soft: #27272a;
+    --theme-accent-border: #52525b;
+    --theme-accent-text: #f4f4f5;
     --chart-sys: #a1a1aa;
     --chart-dia: #f4f4f5;
     color-scheme: dark;
@@ -182,4 +206,10 @@ button#toggleFormButton {
 button.primary-action:hover,
 button#toggleFormButton:hover {
     background-color: var(--action-hover);
+}
+
+#appBody input:focus,
+#appBody select:focus {
+    border-color: var(--theme-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--theme-accent) 25%, transparent);
 }

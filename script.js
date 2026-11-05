@@ -1,7 +1,7 @@
 let storageLoadFailed = false;
 let storageWarningShown = false;
 let db = loadDatabase();
-let currentMember = db.currentMember || "平平";
+let currentMember = db.currentMember || "人員1";
 let chartInstance = null;
 let currentChartRange = '30';
 let shouldCollapseAfterSave = false;
@@ -12,7 +12,7 @@ function createRecordId() {
 }
 
 function createDefaultDatabase() {
-    return { members: Object.assign(Object.create(null), { "平平": [] }), currentMember: "平平" };
+    return { members: Object.assign(Object.create(null), { "人員1": [] }), currentMember: "人員1" };
 }
 
 function loadDatabase() {
@@ -33,9 +33,23 @@ function loadDatabase() {
                 id: typeof record.id === 'string' ? record.id : createRecordId()
             }));
         });
-        if (Object.keys(members).length === 0) members['平平'] = [];
+        if (Object.keys(members).length === 0) members['人員1'] = [];
 
-        const activeMember = Object.hasOwn(members, parsed.currentMember) ? parsed.currentMember : Object.keys(members)[0];
+        const isLegacyDefault = Object.keys(members).length === 1 && Object.hasOwn(members, '平平');
+        if (isLegacyDefault) {
+            members['人員1'] = members['平平'];
+            delete members['平平'];
+            if (window.GameSystem) {
+                try {
+                    GameSystem.renameMember('平平', '人員1');
+                } catch (error) {
+                    console.error('無法遷移預設成員的遊戲進度：', error);
+                }
+            }
+        }
+
+        const requestedMember = isLegacyDefault && parsed.currentMember === '平平' ? '人員1' : parsed.currentMember;
+        const activeMember = Object.hasOwn(members, requestedMember) ? requestedMember : Object.keys(members)[0];
         return { members, currentMember: activeMember };
     } catch (error) {
         storageLoadFailed = true;
@@ -114,7 +128,7 @@ function setChartRange(range) {
         const btn = document.getElementById(`btnChart${r === 'all' ? 'All' : r}`);
         if (btn) {
             if (r === range) {
-                btn.className = "px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-xs";
+                btn.className = "chart-range-active px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-xs";
             } else {
                 btn.className = "px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white";
             }
@@ -294,12 +308,13 @@ function initMembers() {
 
     if (!db.members[currentMember]) {
         const firstKey = Object.keys(db.members)[0];
-        currentMember = firstKey || "平平";
+        currentMember = firstKey || "人員1";
         db.currentMember = currentMember;
     }
 
     document.getElementById('selectedMemberLabel').textContent = currentMember;
     document.getElementById('currentMemberName').textContent = currentMember;
+    if (window.GameSystem) GameSystem.setMember(currentMember);
 
     for (const member of Object.keys(db.members)) {
         let isSelected = (member === currentMember);
@@ -407,7 +422,8 @@ function renameMember(oldName) {
 
     if (currentMember === oldName) currentMember = trimmedNewName;
     db.currentMember = currentMember;
-    saveDB();
+    const saved = saveDB();
+    if (saved && window.GameSystem) GameSystem.renameMember(oldName, trimmedNewName);
     initMembers();
     renderModalMemberList();
     render();
@@ -419,7 +435,8 @@ function deleteMember(member) {
         const remaining = Object.keys(db.members);
         if (currentMember === member) currentMember = remaining[0];
         db.currentMember = currentMember;
-        saveDB();
+        const saved = saveDB();
+        if (saved && window.GameSystem) GameSystem.deleteMember(member);
         resetForm();
         initMembers();
         renderModalMemberList();
@@ -504,7 +521,7 @@ function saveRecord(e) {
             }
             existRecord.sys = sys; existRecord.dia = dia; existRecord.pulse = pulse;
             records.sort((a, b) => parseLocalDateString(a.date) - parseLocalDateString(b.date));
-            saveDB(); resetForm(); initMonthFilter(records); render(); 
+            saveDB(); resetForm(); initMonthFilter(records); render();
             
             toggleForm(false);
             shouldCollapseAfterSave = false;
@@ -520,7 +537,11 @@ function saveRecord(e) {
     }
 
     records.sort((a, b) => parseLocalDateString(a.date) - parseLocalDateString(b.date));
-    saveDB(); resetForm(); initMonthFilter(records); render(); 
+    const saved = saveDB();
+    resetForm(); initMonthFilter(records); render();
+    if (saved && !editRecordId && window.GameSystem) {
+        GameSystem.onBloodPressureRecorded(getStatusCode(sys, dia), currentMember);
+    }
 
     if (shouldCollapseAfterSave) {
         toggleForm(false);

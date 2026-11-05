@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- 自定義樣式表 -->
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="game.css">
 </head>
 <body id="appBody" class="text-slate-800 dark:text-slate-100 min-h-screen p-2 sm:p-6 bg-slate-100 dark:bg-slate-900 flex flex-col items-center">
 
@@ -46,14 +47,17 @@
                         <i id="themeIcon" class="fa-solid fa-palette text-slate-500"></i>
                     </label>
                     <select id="themeSelector" aria-label="色彩主題" onchange="changeTheme(this.value)" class="w-full sm:w-auto bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer">
-                        <option value="slate">石墨灰（預設）</option>
-                        <option value="rose">柔和粉紅</option>
-                        <option value="blue">清新天藍</option>
-                        <option value="emerald">薄荷翠綠</option>
-                        <option value="amber">暖心琥珀</option>
-                        <option value="dark">🌙 深夜模式</option>
+                        <option value="slate">沉靜灰階（Lv.0）</option>
+                        <option value="dark">深夜模式（Lv.1）</option>
+                        <option value="rose">柔和粉紅（Lv.2）</option>
+                        <option value="amber">暖心琥珀（Lv.3）</option>
+                        <option value="blue">清新天藍（Lv.4）</option>
+                        <option value="emerald">薄荷翠綠（Lv.5）</option>
                     </select>
                 </div>
+                <button type="button" id="open-modal-btn" class="game-entry-btn">
+                    🏆 成就與心靈補給 <span id="nav-level-badge">Lv.0</span>
+                </button>
             </div>
         </header>
 
@@ -70,7 +74,7 @@
                         <button onclick="toggleMemberDropdown()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-800 dark:text-slate-100 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition flex items-center justify-between gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-600">
                             <span class="flex items-center gap-1.5 truncate">
                                 <i class="fa-solid fa-circle-user text-slate-500 text-xs"></i>
-                                <span id="selectedMemberLabel" class="truncate">平平</span>
+                                <span id="selectedMemberLabel" class="truncate">人員1</span>
                             </span>
                             <i class="fa-solid fa-chevron-down text-[10px] opacity-50 shrink-0"></i>
                         </button>
@@ -226,7 +230,7 @@
                 
                 <div class="inline-flex bg-slate-100 dark:bg-slate-700/60 p-0.5 rounded-xl border border-slate-200/60 dark:border-slate-600/60 text-[11px] shrink-0">
                     <button onclick="setChartRange('7')" id="btnChart7" class="px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">7天</button>
-                    <button onclick="setChartRange('30')" id="btnChart30" class="px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-xs">30天</button>
+                    <button onclick="setChartRange('30')" id="btnChart30" class="chart-range-active px-2 py-0.5 rounded-lg font-bold transition cursor-pointer bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 shadow-xs">30天</button>
                     <button onclick="setChartRange('90')" id="btnChart90" class="px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">90天</button>
                     <button onclick="setChartRange('all')" id="btnChartAll" class="px-2 py-0.5 rounded-lg font-medium transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">全部</button>
                 </div>
@@ -273,7 +277,50 @@
         </div>
     </div>
 
+    <!-- 遊戲與成就浮動彈窗 -->
+    <div id="game-modal-overlay" class="modal-overlay" style="display: none;">
+        <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="game-modal-title">
+            <button type="button" id="close-modal-btn" class="close-btn" aria-label="關閉彈窗">&times;</button>
+            <h2 id="game-modal-title">🎁 個人成就與心靈補給站</h2>
+
+            <div class="level-progress-section">
+                <span id="current-level-text">Lv. 0 沉靜灰階</span>
+                <div class="progress-bar-bg" role="progressbar" aria-label="等級經驗值進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                    <div id="progress-bar-fill" style="width: 0%;"></div>
+                </div>
+                <span id="xp-text">0 / 100 XP</span>
+            </div>
+
+            <div class="wallet-shield-section">
+                <span>💰 金幣: <span id="coin-count">0</span></span>
+                <span>🛡️ 保護盾: <span id="shield-count">0</span> 枚</span>
+                <button type="button" id="buy-shield-btn">購買保護盾 (50金幣)</button>
+            </div>
+
+            <section class="badges-section">
+                <h3>成就徽章牆</h3>
+                <div class="badge-grid">
+                    <div class="badge-item locked" id="badge-first">🌱 初次見面</div>
+                    <div class="badge-item locked" id="badge-streak">🔥 七日之星</div>
+                    <div class="badge-item locked" id="badge-rich">💰 百寶箱</div>
+                </div>
+            </section>
+
+            <section class="mindful-section">
+                <h3>心靈圖書館</h3>
+                <p id="quote-display">點擊下方按鈕抽取今日暖心小語...</p>
+                <button type="button" id="draw-quote-btn">消耗 20 金幣抽一句心靈雞湯</button>
+            </section>
+
+            <section class="theme-switcher-section">
+                <h3>介面風格解鎖</h3>
+                <div id="theme-buttons-container"></div>
+            </section>
+        </div>
+    </div>
+
     <!-- 外部 JavaScript 檔 -->
+    <script src="game.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
