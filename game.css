@@ -19,6 +19,22 @@
     background: #e2e8f0;
 }
 
+html.theme-dark .game-entry-btn {
+    border-color: #52525b;
+    background: #27272a;
+    color: #e4e4e7;
+}
+
+html.theme-dark .game-entry-btn:hover {
+    border-color: #71717a;
+    background: #3f3f46;
+}
+
+html.theme-dark #nav-level-badge {
+    background: #3f3f46;
+    color: #e4e4e7;
+}
+
 html.theme-blue #toggleFormButton {
     border-color: #93c5fd;
     background: #dbeafe;
@@ -210,16 +226,24 @@ html.theme-blue #toggleFormButton:hover {
 }
 
 html.dark .modal-content,
-html.theme-dark .modal-content {
+html.theme-dark .modal-content,
+html.dark #game-modal-overlay .modal-content,
+html.theme-dark #game-modal-overlay .modal-content {
     border-color: #3f3f46;
-    background: #18181b;
+    background-color: #18181b;
     color: #f4f4f5;
 }
 
 html.dark .wallet-shield-section,
 html.theme-dark .wallet-shield-section,
 html.dark .badge-item.locked,
-html.theme-dark .badge-item.locked {
+html.theme-dark .badge-item.locked,
+html.dark #game-modal-overlay .wallet-shield-section,
+html.theme-dark #game-modal-overlay .wallet-shield-section,
+html.dark #game-modal-overlay .badge-item.locked,
+html.theme-dark #game-modal-overlay .badge-item.locked,
+html.dark #game-modal-overlay .progress-bar-bg,
+html.theme-dark #game-modal-overlay .progress-bar-bg {
     border-color: #3f3f46;
     background: #27272a;
     color: #a1a1aa;
@@ -230,14 +254,34 @@ html.theme-dark .wallet-shield-section button,
 html.dark #draw-quote-btn,
 html.theme-dark #draw-quote-btn,
 html.dark .theme-button,
-html.theme-dark .theme-button {
+html.theme-dark .theme-button,
+html.dark #game-modal-overlay .wallet-shield-section button,
+html.theme-dark #game-modal-overlay .wallet-shield-section button,
+html.dark #game-modal-overlay #draw-quote-btn,
+html.theme-dark #game-modal-overlay #draw-quote-btn,
+html.dark #game-modal-overlay .theme-button,
+html.theme-dark #game-modal-overlay .theme-button {
     border-color: #52525b;
     background: #27272a;
     color: #e4e4e7;
 }
 
 html.dark .mindful-section p,
-html.theme-dark .mindful-section p {
+html.theme-dark .mindful-section p,
+html.dark #game-modal-overlay .mindful-section p,
+html.theme-dark #game-modal-overlay .mindful-section p {
+    background: #422006;
+    color: #fde68a;
+}
+
+html.dark #game-modal-overlay #xp-text,
+html.theme-dark #game-modal-overlay #xp-text {
+    color: #a1a1aa;
+}
+
+html.dark #game-modal-overlay .badge-item.unlocked,
+html.theme-dark #game-modal-overlay .badge-item.unlocked {
+    border-color: #854d0e;
     background: #422006;
     color: #fde68a;
 }
