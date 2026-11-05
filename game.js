@@ -242,7 +242,7 @@ const GameSystem = {
             messages.push('連續紀錄已溫柔重新計算，沒關係，今天重新開始也很棒。');
         }
         if (newlyUnlocked.includes('streak')) messages.push('解鎖徽章：七日之星！');
-        window.showAppToast(messages.join(' '), 'success', 6000);
+        window.showAppToast(messages.join(' '), shieldsUsed > 0 ? 'shield' : 'success', 6000);
     },
 
     getUnlockedBadges(member, data, records = this.getRecords(member)) {
@@ -294,13 +294,17 @@ const GameSystem = {
 
     setMember(member) {
         this.currentMember = member;
+        let shieldsUsed = 0;
+        let newlyUnlockedBadges = [];
         try {
-            this.initializeMember(member);
+            const settlement = this.initializeMember(member);
+            shieldsUsed = settlement.shieldsUsed;
+            newlyUnlockedBadges = settlement.newlyUnlocked;
         } catch (error) {
             console.error('無法結算成員的每日連續紀錄：', error);
             window.showAppToast('每日紀錄結算失敗，請確認本機資料儲存狀態。', 'error');
         }
-        this.refreshUI();
+        this.refreshUI({ shieldUsed: shieldsUsed > 0, newlyUnlockedBadges });
     },
 
     renameMember(oldName, newName) {
@@ -345,7 +349,7 @@ const GameSystem = {
             const newlyUnlockedBadges = currentBadges.filter(badge => !previousBadges.includes(badge));
             data.unlockedBadges = currentBadges;
             this.saveData(data, member);
-            this.refreshUI();
+            this.refreshUI({ shieldUsed: settlement.shieldsUsed > 0, newlyUnlockedBadges });
             const messages = [`紀錄成功！獲得 +${earnedXP} XP、${earnedCoins} 金幣`];
             if (recordDate === today) messages.push(`連續紀錄 ${data.streakDays} 天`);
             if (settlement.shieldsUsed > 0 || settlement.streakReset) {
@@ -363,14 +367,14 @@ const GameSystem = {
                 rich: '百寶箱'
             };
             newlyUnlockedBadges.forEach(badge => messages.push(`解鎖徽章：${badgeNames[badge]}`));
-            window.showAppToast(messages.join('！'), 'success', 5000);
+            window.showAppToast(messages.join('！'), settlement.shieldsUsed > 0 ? 'shield' : 'success', 5000);
         } catch (error) {
             console.error('血壓紀錄已儲存，但遊戲獎勵無法更新：', error);
             alert('血壓紀錄已儲存，但遊戲獎勵無法更新。請檢查瀏覽器儲存空間後再試。');
         }
     },
 
-    refreshUI() {
+    refreshUI({ shieldUsed = false, animateQuote = null, newlyUnlockedBadges = [] } = {}) {
         const badge = document.getElementById('nav-level-badge');
         if (!badge) return;
         try {
@@ -384,14 +388,14 @@ const GameSystem = {
                 const theme = this.themes.find(item => item.id === allowedTheme);
                 window.showAppToast(`目前成員尚未解鎖原主題，已切換為「${theme.name}」。`, 'error');
             }
-            this.renderModal(data, level);
+            this.renderModal(data, level, { shieldUsed, animateQuote, newlyUnlockedBadges });
         } catch (error) {
             console.error('無法顯示遊戲資料：', error);
             document.getElementById('quote-display').textContent = '遊戲資料目前無法讀取，請確認瀏覽器儲存設定。';
         }
     },
 
-    renderModal(data, level) {
+    renderModal(data, level, { shieldUsed = false, animateQuote = null, newlyUnlockedBadges = [] } = {}) {
         const records = this.getRecords(this.currentMember);
         const progress = level.max === level.min
             ? 100
@@ -403,18 +407,22 @@ const GameSystem = {
         fill.style.width = `${progress}%`;
         progressBar.setAttribute('aria-valuenow', String(Math.round(progress)));
         document.getElementById('coin-count').textContent = String(data.coins);
-        document.getElementById('shield-count').textContent = String(data.shields);
+        const shieldCount = document.getElementById('shield-count');
+        shieldCount.textContent = String(data.shields);
+        if (shieldUsed) this.playAnimation(shieldCount, 'shield-used-animation');
         document.getElementById('streak-count').textContent = String(data.streakDays);
 
-        this.setBadge('badge-first', records.length > 0);
-        this.setBadge('badge-streak', data.streakDays >= 7 || this.getLongestStreak(records) >= 7);
-        this.setBadge('badge-rich', data.coinsEarned >= 100);
-        document.getElementById('quote-display').textContent = data.lastQuote || '點擊下方按鈕抽取今日暖心小語...';
-        this.renderQuoteCollection(data);
+        this.setBadge('badge-first', records.length > 0, newlyUnlockedBadges.includes('first'));
+        this.setBadge('badge-streak', data.streakDays >= 7 || this.getLongestStreak(records) >= 7, newlyUnlockedBadges.includes('streak'));
+        this.setBadge('badge-rich', data.coinsEarned >= 100, newlyUnlockedBadges.includes('rich'));
+        const quoteDisplay = document.getElementById('quote-display');
+        quoteDisplay.textContent = data.lastQuote || '點擊下方按鈕抽取今日暖心小語...';
+        if (animateQuote) this.playAnimation(quoteDisplay, 'quote-reveal-animation');
+        this.renderQuoteCollection(data, animateQuote);
         this.renderThemes(data, level);
     },
 
-    renderQuoteCollection(data) {
+    renderQuoteCollection(data, animateQuote = null) {
         const collection = document.getElementById('quote-collection');
         const quotes = Array.isArray(data.unlockedQuotes) ? data.unlockedQuotes : [];
         const quoteTabs = document.getElementById('quote-category-tabs');
@@ -467,6 +475,7 @@ const GameSystem = {
             category.textContent = this.quoteCategories.find(entry => entry.id === categoryId)?.label || '已收藏';
             const content = document.createElement('div');
             content.textContent = text;
+            if (text === animateQuote) item.classList.add('quote-reveal-animation');
             item.append(category, content);
             collection.appendChild(item);
         });
@@ -491,11 +500,19 @@ const GameSystem = {
         this.renderQuoteCollection(this.getData());
     },
 
-    setBadge(id, unlocked) {
+    setBadge(id, unlocked, newlyUnlocked = false) {
         const badge = document.getElementById(id);
         badge.classList.toggle('locked', !unlocked);
         badge.classList.toggle('unlocked', unlocked);
         badge.setAttribute('aria-label', `${badge.textContent}，${unlocked ? '已解鎖' : '未解鎖'}`);
+        if (newlyUnlocked && unlocked) this.playAnimation(badge, 'badge-unlock-animation');
+    },
+
+    playAnimation(element, className) {
+        element.classList.remove(className);
+        void element.offsetWidth;
+        element.classList.add(className);
+        element.addEventListener('animationend', () => element.classList.remove(className), { once: true });
     },
 
     renderThemes(data, level) {
@@ -552,7 +569,7 @@ const GameSystem = {
         data.unlockedQuotes.push(quote.text);
         data.lastQuote = quote.text;
         this.saveData(data);
-        this.refreshUI();
+        this.refreshUI({ animateQuote: quote.text });
         window.showAppToast(`已收藏一則${quote.category}，可在心靈圖書館隨時重讀。`);
     }
 };
@@ -567,7 +584,7 @@ window.showAppToast = (message, type = 'success', duration = 3200) => {
     window.clearTimeout(appToastTimeout);
     region.replaceChildren();
     const toast = document.createElement('div');
-    toast.className = `app-toast${type === 'error' ? ' error' : ''}`;
+    toast.className = `app-toast${type === 'error' ? ' error' : type === 'shield' ? ' shield' : ''}`;
     toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
     toast.textContent = message;
     region.appendChild(toast);
@@ -582,16 +599,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('game-modal-overlay');
     const openButton = document.getElementById('open-modal-btn');
     const closeButton = document.getElementById('close-modal-btn');
+    let closeModalTimeout;
     const closeModal = () => {
-        overlay.style.display = 'none';
+        if (overlay.style.display === 'none') return;
+        overlay.classList.remove('is-open');
         document.body.style.overflow = '';
-        openButton.focus();
+        window.clearTimeout(closeModalTimeout);
+        const closeDelay = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 220;
+        closeModalTimeout = window.setTimeout(() => {
+            overlay.style.display = 'none';
+            openButton.focus();
+        }, closeDelay);
     };
 
     openButton.addEventListener('click', () => {
+        window.clearTimeout(closeModalTimeout);
         GameSystem.setMember(GameSystem.currentMember);
         overlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
+        window.requestAnimationFrame(() => overlay.classList.add('is-open'));
         closeButton.focus();
     });
     closeButton.addEventListener('click', closeModal);

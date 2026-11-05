@@ -6,6 +6,7 @@ let chartInstance = null;
 let currentChartRange = '30';
 let shouldCollapseAfterSave = false;
 let memberModalReturnFocus = null;
+let themeTransitionTimeout;
 
 function createRecordId() {
     return globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -266,9 +267,17 @@ function applyTheme(themeName) {
     const memberNameSpan = document.getElementById('currentMemberName');
     const themes = ['slate', 'rose', 'blue', 'emerald', 'amber', 'dark'];
     const activeTheme = themes.includes(themeName) ? themeName : 'slate';
+    const themeChanged = !htmlRoot.classList.contains(`theme-${activeTheme}`);
 
     themes.forEach(theme => htmlRoot.classList.toggle(`theme-${theme}`, theme === activeTheme));
-    body.classList.remove('bg-slate-100', 'bg-rose-50', 'bg-blue-50', 'bg-teal-50', 'bg-emerald-50', 'bg-amber-50');
+    if (themeChanged) {
+        window.clearTimeout(themeTransitionTimeout);
+        htmlRoot.classList.add('theme-transition');
+        themeTransitionTimeout = window.setTimeout(() => {
+            htmlRoot.classList.remove('theme-transition');
+        }, 350);
+    }
+    body.classList.remove('bg-slate-100', 'bg-slate-900', 'bg-rose-50', 'bg-blue-50', 'bg-teal-50', 'bg-emerald-50', 'bg-amber-50');
     
     if (memberNameSpan) {
         memberNameSpan.classList.remove('text-slate-600', 'dark:text-slate-300', 'text-rose-600', 'text-blue-600', 'text-teal-700', 'text-emerald-600', 'text-amber-600', 'text-indigo-400');

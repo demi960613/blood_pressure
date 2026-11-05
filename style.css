@@ -8,6 +8,40 @@ body {
     -webkit-tap-highlight-color: transparent;
 }
 
+html.theme-transition body,
+html.theme-transition #appBody button,
+html.theme-transition #appBody input,
+html.theme-transition #appBody select,
+html.theme-transition #appBody [class*="bg-"],
+html.theme-transition #appBody [class*="text-"],
+html.theme-transition #appBody [class*="border-"],
+html.theme-transition #game-modal-overlay .modal-content,
+html.theme-transition #game-modal-overlay .wallet-shield-section,
+html.theme-transition #game-modal-overlay .mindful-section p,
+html.theme-transition #game-modal-overlay .badge-item,
+html.theme-transition #game-modal-overlay .theme-button {
+    transition-property: background-color, color, border-color;
+    transition-duration: 0.45s;
+    transition-timing-function: ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    html.theme-transition body,
+    html.theme-transition #appBody button,
+    html.theme-transition #appBody input,
+    html.theme-transition #appBody select,
+    html.theme-transition #appBody [class*="bg-"],
+    html.theme-transition #appBody [class*="text-"],
+    html.theme-transition #appBody [class*="border-"],
+    html.theme-transition #game-modal-overlay .modal-content,
+    html.theme-transition #game-modal-overlay .wallet-shield-section,
+    html.theme-transition #game-modal-overlay .mindful-section p,
+    html.theme-transition #game-modal-overlay .badge-item,
+    html.theme-transition #game-modal-overlay .theme-button {
+        transition-duration: 0.01ms;
+    }
+}
+
 /* 自定義精細捲軸 */
 ::-webkit-scrollbar {
     width: 4px;
