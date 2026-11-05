@@ -234,12 +234,28 @@ function toggleForm(forceOpen = false) {
 }
 
 function changeTheme(themeName) {
-    applyTheme(themeName);
+    const activeTheme = window.GameSystem
+        ? GameSystem.getAllowedTheme(themeName)
+        : (['slate', 'rose', 'blue', 'emerald', 'amber', 'dark'].includes(themeName) ? themeName : 'slate');
+    const themeSelector = document.getElementById('themeSelector');
+    if (themeSelector) themeSelector.value = activeTheme;
+    if (window.GameSystem && activeTheme !== themeName && GameSystem.themes.some(theme => theme.id === themeName)) {
+        const theme = GameSystem.themes.find(item => item.id === activeTheme);
+        window.showAppToast(`目前等級尚未解鎖該主題，已切換為「${theme.name}」。`, 'error');
+    }
+    applyTheme(activeTheme);
     updateChart(db.members[currentMember] || []);
     try {
-        localStorage.setItem('blood_pressure_theme', themeName);
+        localStorage.setItem('blood_pressure_theme', activeTheme);
     } catch (error) {
         console.error('無法儲存主題設定：', error);
+    }
+    if (window.GameSystem) {
+        try {
+            GameSystem.saveActiveTheme(activeTheme, currentMember);
+        } catch (error) {
+            console.error('無法儲存成員主題設定：', error);
+        }
     }
 }
 
@@ -525,8 +541,17 @@ function saveRecord(e) {
             
             toggleForm(false);
             shouldCollapseAfterSave = false;
-            alert("🎉 更新成功！");
+            window.showAppToast('紀錄已更新。', 'success');
             return;
+        }
+    }
+
+    let gameSettlement = null;
+    if (!editRecordId && window.GameSystem) {
+        try {
+            gameSettlement = GameSystem.initializeMember(currentMember, { notify: false });
+        } catch (error) {
+            console.error('無法初始化成員遊戲進度，仍會繼續儲存血壓紀錄：', error);
         }
     }
 
@@ -540,7 +565,9 @@ function saveRecord(e) {
     const saved = saveDB();
     resetForm(); initMonthFilter(records); render();
     if (saved && !editRecordId && window.GameSystem) {
-        GameSystem.onBloodPressureRecorded(getStatusCode(sys, dia), currentMember);
+        GameSystem.onBloodPressureRecorded(getStatusCode(sys, dia), currentMember, date, gameSettlement);
+    } else if (saved) {
+        window.showAppToast(editRecordId ? '紀錄已更新。' : '紀錄已儲存。', 'success');
     }
 
     if (shouldCollapseAfterSave) {
@@ -750,6 +777,30 @@ function updateChart(records) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            animation: { duration: 350 },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title(items) {
+                            return items.length ? `日期：${items[0].label}` : '';
+                        },
+                        label(context) {
+                            return `${context.dataset.label}：${context.parsed.y} mmHg`;
+                        },
+                        afterBody(items) {
+                            const record = filteredRecords[items[0]?.dataIndex];
+                            return record && record.pulse ? `脈搏：${record.pulse} bpm` : [];
+                        }
+                    }
+                }
+            },
+            onClick(_event, activeElements) {
+                if (!activeElements.length) return;
+                const record = filteredRecords[activeElements[0].index];
+                const pulse = record.pulse ? `，脈搏 ${record.pulse} bpm` : '';
+                window.showAppToast(`${record.date}｜血壓 ${record.sys}/${record.dia} mmHg${pulse}`, 'info', 4500);
+            },
             scales: { y: { beginAtZero: false } }
         }
     });

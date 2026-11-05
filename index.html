@@ -293,7 +293,8 @@
 
             <div class="wallet-shield-section">
                 <span>💰 金幣: <span id="coin-count">0</span></span>
-                <span>🛡️ 保護盾: <span id="shield-count">0</span> 枚</span>
+                <span>🛡️ 剩餘保護盾: <span id="shield-count">0</span> 枚</span>
+                <span>🔥 連續紀錄: <span id="streak-count">0</span> 天</span>
                 <button type="button" id="buy-shield-btn">購買保護盾 (50金幣)</button>
             </div>
 
@@ -309,7 +310,27 @@
             <section class="mindful-section">
                 <h3>心靈圖書館</h3>
                 <p id="quote-display">點擊下方按鈕抽取今日暖心小語...</p>
-                <button type="button" id="draw-quote-btn">消耗 20 金幣抽一句心靈雞湯</button>
+                <button type="button" id="draw-quote-btn">消耗 20 金幣解鎖一張新收藏</button>
+                <div class="quote-library">
+                    <h4>我的永久收藏 <span id="quote-collection-count">0 句</span></h4>
+                    <div id="quote-category-tabs" class="quote-category-tabs" role="tablist" aria-label="心靈收藏分類">
+                        <button type="button" id="quote-tab-all" class="quote-category-tab active" role="tab" aria-selected="true" onclick="GameSystem.selectQuoteCategory('all')">
+                            全部 <span id="quote-tab-count-all">0</span>
+                        </button>
+                        <button type="button" id="quote-tab-mindful" class="quote-category-tab" role="tab" aria-selected="false" onclick="GameSystem.selectQuoteCategory('mindful')">
+                            🌟 心靈金句 <span id="quote-tab-count-mindful">0</span>
+                        </button>
+                        <button type="button" id="quote-tab-jokes" class="quote-category-tab" aria-selected="false" role="tab" onclick="GameSystem.selectQuoteCategory('jokes')">
+                            😂 療癒笑話 <span id="quote-tab-count-jokes">0</span>
+                        </button>
+                        <button type="button" id="quote-tab-daily" class="quote-category-tab" aria-selected="false" role="tab" onclick="GameSystem.selectQuoteCategory('daily')">
+                            🍃 生活微日常 <span id="quote-tab-count-daily">0</span>
+                        </button>
+                    </div>
+                    <div id="quote-collection" class="quote-collection-list" aria-live="polite">
+                        <p class="quote-library-empty">解鎖的語錄會永久收藏在這裡。</p>
+                    </div>
+                </div>
             </section>
 
             <section class="theme-switcher-section">
@@ -318,6 +339,8 @@
             </section>
         </div>
     </div>
+
+    <div id="app-toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
     <!-- 外部 JavaScript 檔 -->
     <script src="game.js"></script>
