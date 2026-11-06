@@ -48,15 +48,15 @@
                     </label>
                     <select id="themeSelector" aria-label="色彩主題" onchange="changeTheme(this.value)" class="w-full sm:w-auto bg-slate-100 dark:bg-slate-700/60 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-slate-500 cursor-pointer">
                         <option value="slate">沉靜灰階（Lv.0）</option>
-                        <option value="dark">靜謐墨黑（Lv.1）</option>
-                        <option value="rose">柔和粉紅（Lv.2）</option>
-                        <option value="amber">暖心琥珀（Lv.3）</option>
-                        <option value="blue">清新天藍（Lv.4）</option>
-                        <option value="emerald">薄荷翠綠（Lv.5）</option>
+                        <option value="dark">靜謐墨黑（Lv.1）🔒 鎖定</option>
+                        <option value="rose">柔和粉紅（Lv.2）🔒 鎖定</option>
+                        <option value="amber">暖心琥珀（Lv.3）🔒 鎖定</option>
+                        <option value="blue">清新天藍（Lv.4）🔒 鎖定</option>
+                        <option value="emerald">薄荷翠綠（Lv.5）🔒 鎖定</option>
                     </select>
                 </div>
                 <button type="button" id="open-modal-btn" class="game-entry-btn">
-                    🏆 成就與心靈補給 <span id="nav-level-badge">Lv.0</span>
+                    🏆 成就與心靈補給 <span id="nav-level-badge" class="theme-badge-accent">Lv.0</span>
                 </button>
             </div>
         </header>
@@ -283,40 +283,81 @@
             <button type="button" id="close-modal-btn" class="close-btn" aria-label="關閉彈窗">&times;</button>
             <h2 id="game-modal-title">🎁 個人成就與心靈補給站</h2>
 
+            <details class="game-demo">
+                <summary>🎮 玩法模擬：看看不同情境怎麼玩</summary>
+                <div class="game-demo-content">
+                    <p class="game-demo-note">選擇一位虛擬示範人物，再點擊操作看看結果。示範不會儲存，也不會影響目前成員資料。</p>
+                    <div class="game-demo-people" role="group" aria-label="選擇玩法示範人物">
+                        <button type="button" data-demo-person="beginner">新手小晴</button>
+                        <button type="button" data-demo-person="streak">連續打卡小安</button>
+                        <button type="button" data-demo-person="shield">保護盾小哲</button>
+                        <button type="button" data-demo-person="rebirth">轉生小林</button>
+                    </div>
+                    <div class="game-demo-preview" aria-live="polite">
+                        <strong id="game-demo-title"></strong>
+                        <span id="game-demo-level"></span>
+                        <div class="game-demo-progress" role="progressbar" aria-label="示範等級進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                            <span id="game-demo-progress-fill"></span>
+                        </div>
+                        <div class="game-demo-stats">
+                            <span>⚡ XP <b id="game-demo-xp"></b></span>
+                            <span>💰 金幣 <b id="game-demo-coins"></b></span>
+                            <span>🛡️ 保護盾 <b id="game-demo-shields"></b></span>
+                            <span>🔥 連續 <b id="game-demo-streak"></b> 天</span>
+                        </div>
+                        <p id="game-demo-description"></p>
+                        <button type="button" id="game-demo-action" class="game-demo-action"></button>
+                        <p id="game-demo-result" class="game-demo-result"></p>
+                    </div>
+                </div>
+            </details>
+
             <div class="level-progress-section">
-                <span id="current-level-text">Lv. 0 沉靜灰階</span>
-                <span class="xp-summary">
-                    <span id="total-xp-text">總 XP：0</span>
-                    <span id="xp-text">0 / 100 XP</span>
-                </span>
+                <span id="current-level-text"><i class="fa-solid fa-trophy level-crown" aria-hidden="true"></i><span id="current-level-label">Lv. 0 沉靜灰階</span></span>
                 <div class="progress-bar-row">
                     <div class="progress-bar-bg" role="progressbar" aria-label="等級經驗值進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-                        <div id="progress-bar-fill" style="width: 0%;"></div>
+                        <div id="progress-bar-fill" class="progress-bar-fill" style="width: 0%;"></div>
                     </div>
                     <span id="progress-percent">0%</span>
                 </div>
             </div>
 
             <div class="wallet-shield-section">
-                <span>💰 金幣: <span id="coin-count">0</span></span>
-                <span>🛡️ 剩餘保護盾: <span id="shield-count">0</span> 枚</span>
-                <span>🔥 連續紀錄: <span id="streak-count">0</span> 天</span>
-                <button type="button" id="buy-shield-btn">購買保護盾 (50金幣)</button>
+                <span class="wallet-xp"><i class="fa-solid fa-bolt" aria-hidden="true"></i> 總 XP：<span id="total-xp-text">0</span></span>
+                <span class="wallet-coins"><i class="fa-solid fa-coins" aria-hidden="true"></i> 金幣：<span id="coin-count">0</span></span>
+                <span class="wallet-shields"><i class="fa-solid fa-shield-halved" aria-hidden="true"></i> 保護盾：<span id="shield-count">0</span> 枚</span>
+                <span class="wallet-streak"><i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i> 連續：<span id="streak-count">0</span> 天</span>
+                <button type="button" id="buy-shield-btn" class="wallet-buy-shield">購買保護盾 (50金幣)</button>
             </div>
 
             <section class="badges-section">
-                <h3>成就徽章牆</h3>
+                <h3><i class="fa-solid fa-award" aria-hidden="true"></i> 成就徽章牆</h3>
                 <div class="badge-grid">
-                    <div class="badge-item locked" id="badge-first">🌱 初次見面</div>
-                    <div class="badge-item locked" id="badge-streak">🔥 七日之星</div>
-                    <div class="badge-item locked" id="badge-rich">💰 百寶箱</div>
+                    <div class="badge-item badge-card locked" id="badge-first">
+                        <span class="medal-circle"><span class="badge-medal">🌱</span><span class="badge-count"></span></span><span class="badge-name">初次見面</span>
+                    </div>
+                    <div class="badge-item badge-card locked" id="badge-streak">
+                        <span class="medal-circle"><span class="badge-medal">🔥</span><span class="badge-count"></span></span><span class="badge-name">七日之星</span>
+                    </div>
+                    <div class="badge-item badge-card locked" id="badge-rich">
+                        <span class="medal-circle"><span class="badge-medal">💰</span><span class="badge-count"></span></span><span class="badge-name">百寶箱</span>
+                    </div>
+                    <div class="badge-item badge-card locked" id="badge-shield">
+                        <span class="medal-circle"><span class="badge-medal">🛡️</span><span class="badge-count"></span></span><span class="badge-name">守護天使</span>
+                    </div>
+                    <div class="badge-item badge-card locked" id="badge-library">
+                        <span class="medal-circle"><span class="badge-medal">📖</span><span class="badge-count"></span></span><span class="badge-name">心靈富翁</span>
+                    </div>
+                    <div class="badge-item badge-card locked" id="badge-reincarnation">
+                        <span class="medal-circle"><span class="badge-medal">🔄</span><span class="badge-count"></span></span><span class="badge-name">轉生重置與體驗</span>
+                    </div>
                 </div>
             </section>
 
             <section class="mindful-section">
-                <h3>心靈圖書館</h3>
+                <h3><i class="fa-solid fa-book-open" aria-hidden="true"></i> 心靈圖書館</h3>
                 <p id="quote-display">點擊下方按鈕抽取今日暖心小語...</p>
-                <button type="button" id="draw-quote-btn">消耗 20 金幣解鎖一張新收藏</button>
+                <button type="button" id="draw-quote-btn">消耗 20 金幣抽取卡片（重複卡返還 10 金幣）</button>
                 <div class="quote-library">
                     <h4>我的永久收藏 <span id="quote-collection-count">0 句</span></h4>
                     <div id="quote-category-tabs" class="quote-category-tabs" role="tablist" aria-label="心靈收藏分類">
@@ -339,10 +380,6 @@
                 </div>
             </section>
 
-            <section class="theme-switcher-section">
-                <h3>介面風格解鎖</h3>
-                <div id="theme-buttons-container"></div>
-            </section>
         </div>
     </div>
 

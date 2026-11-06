@@ -2,6 +2,15 @@
    血壓紀錄追蹤系統 - 石墨灰 Theme Layout 樣式表
    ========================================== */
 
+:root {
+    --theme-progress-gradient: linear-gradient(
+        110deg,
+        var(--theme-accent) 0%,
+        color-mix(in srgb, var(--theme-accent) 55%, white) 48%,
+        var(--theme-accent) 100%
+    );
+}
+
 /* 基礎平滑過渡設定 */
 body {
     transition: background-color 0.3s ease, color 0.3s ease;

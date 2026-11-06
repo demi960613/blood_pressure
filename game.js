@@ -38,12 +38,48 @@ const GameSystem = {
     ],
     themes: [
         { id: 'slate', name: '沉靜灰階', level: 0 },
-        { id: 'dark', name: '深夜模式', level: 1 },
-        { id: 'rose', name: '柔和粉色', level: 2 },
+        { id: 'dark', name: '靜謐墨黑', level: 1 },
+        { id: 'rose', name: '柔和粉紅', level: 2 },
         { id: 'amber', name: '暖心琥珀', level: 3 },
         { id: 'blue', name: '清新天藍', level: 4 },
         { id: 'emerald', name: '薄荷翠綠', level: 5 }
     ],
+    demoScenarioId: 'beginner',
+    demoSimulated: false,
+    demoScenarios: {
+        beginner: {
+            name: '新手小晴',
+            description: '剛開始記錄。每記一次就能獲得 XP 和金幣；當天第一次記錄還能免費抽卡。',
+            action: '模擬健康正常紀錄',
+            before: { xp: 0, coins: 0, shields: 0, streak: 0 },
+            after: { xp: 20, coins: 10, shields: 0, streak: 1 },
+            result: '獲得 +20 XP、+10 金幣，連續紀錄 1 天，並解鎖「初次見面」徽章與當日免費抽卡。'
+        },
+        streak: {
+            name: '連續打卡小安',
+            description: '已累積 290 XP，今天是連續紀錄第 7 天。完成記錄後，XP 升級並領到七日獎勵。',
+            action: '模擬偏高數值紀錄',
+            before: { xp: 290, coins: 140, shields: 0, streak: 6 },
+            after: { xp: 305, coins: 248, shields: 0, streak: 7 },
+            result: '獲得 +15 XP、+8 金幣；升到 Lv.2，連續滿 7 天再獲得 +100 金幣與「七日之星」徽章。'
+        },
+        shield: {
+            name: '保護盾小哲',
+            description: '昨天忙到忘記記錄，但背包裡有 1 枚保護盾，系統會自動消耗它來延續紀錄。',
+            action: '模擬漏記一天',
+            before: { xp: 620, coins: 90, shields: 1, streak: 12 },
+            after: { xp: 620, coins: 90, shields: 0, streak: 13 },
+            result: '保護盾自動消耗 1 枚，連續紀錄延續到 13 天，並累計一次「守護天使」徽章；XP 與金幣不變。'
+        },
+        rebirth: {
+            name: '轉生小林',
+            description: '目前有 1,490 XP，再記錄一次就會跨過 1,500 XP 門檻，開啟新一輪旅程。',
+            action: '模擬健康正常紀錄',
+            before: { xp: 1490, coins: 300, shields: 0, streak: 5 },
+            after: { xp: 1510, coins: 510, shields: 0, streak: 6 },
+            result: '獲得 +20 XP、+10 金幣及轉生紅包 +200 金幣，等級回到 Lv.0 ★1，重新解鎖主題。'
+        }
+    },
 
     defaultData(xp = 0, coins = 0) {
         return {
@@ -52,9 +88,13 @@ const GameSystem = {
             coinsEarned: coins,
             shields: 0,
             streakDays: 0,
+            lastStreakBadgeDay: 0,
             unlockedBadges: [],
+            badgeCounts: { first: 0, streak: 0, rich: 0, shield: 0, library: 0, reincarnation: 0 },
             unlockedQuotes: [],
             lastQuote: '',
+            totalCardsDrawn: 0,
+            lastFreeDrawDate: '',
             lastProcessedDate: '',
             activeTheme: 'slate'
         };
@@ -109,18 +149,65 @@ const GameSystem = {
         const store = this.readStore();
         const existing = store.members[member];
         if (existing && Number.isFinite(existing.xp) && Number.isFinite(existing.coins)) {
-            existing.coinsEarned = Number.isFinite(existing.coinsEarned) ? existing.coinsEarned : existing.coins;
-            existing.shields = Number.isFinite(existing.shields) ? existing.shields : 0;
-            existing.streakDays = Number.isFinite(existing.streakDays) ? existing.streakDays : 0;
+            let changed = false;
+            const ensure = (key, value) => {
+                if (existing[key] === undefined || existing[key] === null) {
+                    existing[key] = value;
+                    changed = true;
+                }
+            };
+            if (!Number.isFinite(existing.coinsEarned)) {
+                existing.coinsEarned = existing.coins;
+                changed = true;
+            }
+            if (!Number.isFinite(existing.shields)) {
+                existing.shields = 0;
+                changed = true;
+            }
+            if (!Number.isFinite(existing.streakDays)) {
+                existing.streakDays = 0;
+                changed = true;
+            }
             existing.lastProcessedDate = typeof existing.lastProcessedDate === 'string' ? existing.lastProcessedDate : '';
+            existing.lastStreakBadgeDay = Number.isFinite(existing.lastStreakBadgeDay) ? existing.lastStreakBadgeDay : 0;
+            if (!Number.isFinite(existing.totalCardsDrawn) || existing.totalCardsDrawn < 0) {
+                existing.totalCardsDrawn = 0;
+                changed = true;
+            }
+            ensure('lastFreeDrawDate', '');
+            if (!existing.badgeCounts || typeof existing.badgeCounts !== 'object' || Array.isArray(existing.badgeCounts)) {
+                existing.badgeCounts = {
+                    first: 0,
+                    streak: 0,
+                    rich: 0,
+                    shield: 0,
+                    library: 0,
+                    reincarnation: Math.floor(existing.xp / 1500)
+                };
+                changed = true;
+            }
+            const legacyBadges = Array.isArray(existing.unlockedBadges) ? existing.unlockedBadges : [];
+            ['first', 'streak', 'rich', 'shield', 'library', 'reincarnation'].forEach(id => {
+                if (!Number.isFinite(existing.badgeCounts[id])) {
+                    existing.badgeCounts[id] = legacyBadges.includes(id)
+                        ? 1
+                        : id === 'reincarnation' ? Math.floor(existing.xp / 1500) : 0;
+                    changed = true;
+                } else if (existing.badgeCounts[id] < 0) {
+                    existing.badgeCounts[id] = 0;
+                    changed = true;
+                }
+            });
             if (!Array.isArray(existing.unlockedBadges)) {
                 existing.unlockedBadges = this.getUnlockedBadges(member, existing);
+                changed = true;
             }
             existing.unlockedQuotes = Array.isArray(existing.unlockedQuotes)
                 ? [...new Set(existing.unlockedQuotes.filter(quote => typeof quote === 'string'))]
                 : [];
             existing.lastQuote = typeof existing.lastQuote === 'string' ? existing.lastQuote : '';
             existing.activeTheme = typeof existing.activeTheme === 'string' ? existing.activeTheme : 'slate';
+            if (changed) this.saveStore(store);
             return existing;
         }
         return this.retroactiveCalculation(member, store);
@@ -136,10 +223,36 @@ const GameSystem = {
         const records = this.getRecords(member);
         const totalRecords = records.length;
         const initialData = this.defaultData(totalRecords * 10, totalRecords * 5);
+        initialData.badgeCounts.first = totalRecords > 0 ? 1 : 0;
+        initialData.badgeCounts.streak = this.countRecordedStreakBadges(records);
+        initialData.badgeCounts.rich = Math.floor(initialData.coinsEarned / 500);
         initialData.unlockedBadges = this.getUnlockedBadges(member, initialData, records);
         store.members[member] = initialData;
         this.saveStore(store);
         return initialData;
+    },
+
+    countRecordedStreakBadges(records) {
+        const dates = [...new Set(records.map(record => record.date).filter(date => this.isDate(date)))].sort();
+        let total = 0;
+        let streak = 0;
+        let previousDate = '';
+        dates.forEach(date => {
+            streak = previousDate && this.shiftDate(previousDate, 1) === date ? streak + 1 : 1;
+            if (streak % 7 === 0) total += 1;
+            previousDate = date;
+        });
+        return total;
+    },
+
+    incrementBadge(data, id) {
+        data.badgeCounts[id] = (data.badgeCounts[id] || 0) + 1;
+    },
+
+    awardStreakBadge(data) {
+        this.incrementBadge(data, 'streak');
+        data.coins += 100;
+        data.coinsEarned += 100;
     },
 
     getTodayDate() {
@@ -187,9 +300,12 @@ const GameSystem = {
         }
 
         let shieldsUsed = 0;
+        let streakBonusCoins = 0;
         const shieldDates = [];
         let protectedStreakDays = data.streakDays;
         let streakReset = false;
+        const previousBadgeCounts = { ...data.badgeCounts };
+        const previousUnlockedBadges = Array.isArray(data.unlockedBadges) ? [...data.unlockedBadges] : [];
         let date = this.shiftDate(data.lastProcessedDate, 1);
         while (date < today) {
             const recorded = records.some(record => record.date === date);
@@ -201,9 +317,16 @@ const GameSystem = {
                 shieldsUsed += 1;
                 shieldDates.push(date);
                 protectedStreakDays = data.streakDays;
+                this.incrementBadge(data, 'shield');
             } else if (data.streakDays > 0) {
                 data.streakDays = 0;
+                data.lastStreakBadgeDay = 0;
                 streakReset = true;
+            }
+            if (data.streakDays > 0 && data.streakDays % 7 === 0 && data.lastStreakBadgeDay !== data.streakDays) {
+                this.awardStreakBadge(data);
+                streakBonusCoins += 100;
+                data.lastStreakBadgeDay = data.streakDays;
             }
             data.lastProcessedDate = date;
             date = this.shiftDate(date, 1);
@@ -216,19 +339,18 @@ const GameSystem = {
             changed = true;
         }
 
-        const previousBadges = Array.isArray(data.unlockedBadges) ? data.unlockedBadges : [];
         const unlockedBadges = this.getUnlockedBadges(member, data, records);
-        const newlyUnlocked = unlockedBadges.filter(badge => !previousBadges.includes(badge));
-        if (newlyUnlocked.length || unlockedBadges.length !== previousBadges.length) changed = true;
+        const newlyUnlocked = unlockedBadges.filter(badge => (data.badgeCounts[badge] || 0) > (previousBadgeCounts[badge] || 0));
+        if (newlyUnlocked.length || unlockedBadges.length !== previousUnlockedBadges.length) changed = true;
         data.unlockedBadges = unlockedBadges;
         if (changed) this.saveData(data, member);
 
-        const settlement = { data, shieldsUsed, shieldDates, protectedStreakDays, streakReset, newlyUnlocked };
+        const settlement = { data, shieldsUsed, shieldDates, protectedStreakDays, streakReset, streakBonusCoins, newlyUnlocked };
         if (notify) this.notifyDailySettlement(settlement);
         return settlement;
     },
 
-    notifyDailySettlement({ shieldsUsed, shieldDates, protectedStreakDays, streakReset, newlyUnlocked }) {
+    notifyDailySettlement({ shieldsUsed, shieldDates, protectedStreakDays, streakReset, streakBonusCoins, newlyUnlocked }) {
         if (shieldsUsed === 0 && !streakReset && newlyUnlocked.length === 0) return;
         const messages = [];
         if (shieldsUsed > 0) {
@@ -242,24 +364,29 @@ const GameSystem = {
             messages.push('連續紀錄已溫柔重新計算，沒關係，今天重新開始也很棒。');
         }
         if (newlyUnlocked.includes('streak')) messages.push('解鎖徽章：七日之星！');
+        if (streakBonusCoins > 0) messages.push(`七日之星獎勵 +${streakBonusCoins} 金幣`);
         window.showAppToast(messages.join(' '), shieldsUsed > 0 ? 'shield' : 'success', 6000);
     },
 
     getUnlockedBadges(member, data, records = this.getRecords(member)) {
-        const unlocked = new Set((data.unlockedBadges || []).filter(badge => ['first', 'streak', 'rich'].includes(badge)));
-        if (records.length > 0) unlocked.add('first');
-        if (data.streakDays >= 7 || this.getLongestStreak(records) >= 7) unlocked.add('streak');
-        if (data.coinsEarned >= 100) unlocked.add('rich');
-        return ['first', 'streak', 'rich'].filter(badge => unlocked.has(badge));
+        if (!data.badgeCounts || typeof data.badgeCounts !== 'object') {
+            data.badgeCounts = { first: 0, streak: 0, rich: 0, shield: 0, library: 0, reincarnation: 0 };
+        }
+        if (records.length > 0) data.badgeCounts.first = Math.max(1, data.badgeCounts.first || 0);
+        data.badgeCounts.rich = Math.max(data.badgeCounts.rich || 0, Math.floor((data.coinsEarned || 0) / 500));
+        data.badgeCounts.library = Math.max(data.badgeCounts.library || 0, Math.floor((data.totalCardsDrawn || 0) / 10));
+        return ['first', 'streak', 'rich', 'shield', 'library', 'reincarnation']
+            .filter(badge => data.badgeCounts[badge] > 0);
     },
 
     getLevel(xp) {
-        if (xp >= 1500) return { level: 5, name: '薄荷翠綠', min: 1500, max: 1500 };
-        if (xp >= 1000) return { level: 4, name: '清新天藍', min: 1000, max: 1500 };
-        if (xp >= 600) return { level: 3, name: '暖心琥珀', min: 600, max: 1000 };
-        if (xp >= 300) return { level: 2, name: '柔和粉色', min: 300, max: 600 };
-        if (xp >= 100) return { level: 1, name: '深夜模式', min: 100, max: 300 };
-        return { level: 0, name: '沉靜灰階', min: 0, max: 100 };
+        const cycleXP = xp % 1500;
+        const star = Math.floor(xp / 1500);
+        if (cycleXP >= 1000) return { level: 4, star, name: '清新天藍', min: 1000, max: 1500 };
+        if (cycleXP >= 600) return { level: 3, star, name: '暖心琥珀', min: 600, max: 1000 };
+        if (cycleXP >= 300) return { level: 2, star, name: '柔和粉紅', min: 300, max: 600 };
+        if (cycleXP >= 100) return { level: 1, star, name: '靜謐墨黑', min: 100, max: 300 };
+        return { level: 0, star, name: '沉靜灰階', min: 0, max: 100 };
     },
 
     getAllowedTheme(themeId, data = this.getData()) {
@@ -330,41 +457,71 @@ const GameSystem = {
             settlement = settlement || this.initializeMember(member, { notify: false });
             const data = settlement.data;
             const today = this.getTodayDate();
+            let streakBonusCoins = 0;
             if (recordDate === today && data.lastProcessedDate < today) {
                 data.streakDays += 1;
                 data.lastProcessedDate = today;
+                if (data.streakDays > 0 && data.streakDays % 7 === 0 && data.lastStreakBadgeDay !== data.streakDays) {
+                    this.awardStreakBadge(data);
+                    streakBonusCoins = 100;
+                    data.lastStreakBadgeDay = data.streakDays;
+                }
             }
+            const previousStar = Math.floor(data.xp / 1500);
             const previousLevel = this.getLevel(data.xp).level;
-            const previousBadges = [...data.unlockedBadges];
+            const previousBadgeCounts = { ...data.badgeCounts };
             let earnedXP = 10;
             if (category === 'normal') earnedXP = 20;
             else if (category === 'normal-high') earnedXP = 15;
-            else if (category === 'stage1' || category === 'mild-high' || category === 'low') earnedXP = 12;
+            else if (category === 'low') earnedXP = 15;
+            else if (category === 'stage1' || category === 'mild-high') earnedXP = 12;
 
             const earnedCoins = Math.round(earnedXP * 0.5);
             data.xp += earnedXP;
             data.coins += earnedCoins;
             data.coinsEarned += earnedCoins;
+            const newStar = Math.floor(data.xp / 1500);
+            const reincarnations = newStar - previousStar;
+            if (reincarnations > 0) {
+                const bonusCoins = reincarnations * 200;
+                data.coins += bonusCoins;
+                data.coinsEarned += bonusCoins;
+                data.badgeCounts.reincarnation += reincarnations;
+            }
+            if (recordDate === today && data.lastFreeDrawDate !== today) {
+                data.lastFreeDrawDate = today;
+                this.awardQuote(data);
+            }
             const currentBadges = this.getUnlockedBadges(member, data);
-            const newlyUnlockedBadges = currentBadges.filter(badge => !previousBadges.includes(badge));
+            const newlyUnlockedBadges = [...new Set([
+                ...settlement.newlyUnlocked,
+                ...currentBadges.filter(badge => (data.badgeCounts[badge] || 0) > (previousBadgeCounts[badge] || 0))
+            ])];
             data.unlockedBadges = currentBadges;
             this.saveData(data, member);
             this.refreshUI({ shieldUsed: settlement.shieldsUsed > 0, newlyUnlockedBadges });
             const messages = [`紀錄成功！獲得 +${earnedXP} XP、${earnedCoins} 金幣`];
             if (recordDate === today) messages.push(`連續紀錄 ${data.streakDays} 天`);
+            if (streakBonusCoins > 0) messages.push(`七日之星獎勵 +${streakBonusCoins} 金幣`);
             if (settlement.shieldsUsed > 0 || settlement.streakReset) {
                 if (settlement.shieldsUsed > 0) {
                     messages.push(`保護盾已自動守住連續 ${settlement.protectedStreakDays} 天紀錄，消耗 ${settlement.shieldsUsed} 枚`);
                 }
                 if (settlement.streakReset) messages.push('漏記後已溫柔重新開始，今天重新出發也很棒');
             }
-            if (settlement.newlyUnlocked.includes('streak')) messages.push('解鎖徽章：七日之星');
             const newLevel = this.getLevel(data.xp);
-            if (newLevel.level > previousLevel) messages.push(`升級至 Lv.${newLevel.level} ${newLevel.name}`);
+            if (reincarnations > 0) messages.push(`轉生成功！獲得 +${reincarnations * 200} 金幣獎勵`);
+            if (newLevel.level > previousLevel || newLevel.star > previousStar) {
+                messages.push(`升級至 Lv.${newLevel.level}${newLevel.star ? ` ★${newLevel.star}` : ''} ${newLevel.name}`);
+            }
+            if (recordDate === today) messages.push(data.lastQuote ? `今日免費籤詩：${data.lastQuote}` : '已開啟今日免費心靈籤詩');
             const badgeNames = {
                 first: '初次見面',
                 streak: '七日之星',
-                rich: '百寶箱'
+                rich: '百寶箱',
+                shield: '守護天使',
+                library: '心靈富翁',
+                reincarnation: '轉生重置與體驗'
             };
             newlyUnlockedBadges.forEach(badge => messages.push(`解鎖徽章：${badgeNames[badge]}`));
             window.showAppToast(messages.join('！'), settlement.shieldsUsed > 0 ? 'shield' : 'success', 5000);
@@ -380,7 +537,7 @@ const GameSystem = {
         try {
             const data = this.getData();
             const level = this.getLevel(data.xp);
-            badge.textContent = `Lv.${level.level}`;
+            badge.textContent = `Lv.${level.level}${level.star ? ` ★${level.star}` : ''}`;
             const selectedTheme = localStorage.getItem('blood_pressure_theme') || data.activeTheme;
             const allowedTheme = this.getAllowedTheme(selectedTheme, data);
             if (selectedTheme !== allowedTheme) {
@@ -397,18 +554,14 @@ const GameSystem = {
 
     renderModal(data, level, { shieldUsed = false, animateQuote = null, newlyUnlockedBadges = [] } = {}) {
         const records = this.getRecords(this.currentMember);
+        const cycleXP = data.xp % 1500;
         const progress = level.max === level.min
             ? 100
-            : Math.min(100, Math.max(0, ((data.xp - level.min) / (level.max - level.min)) * 100));
-        const xpWithinLevel = Math.max(0, data.xp - level.min);
-        const xpForLevel = level.max - level.min;
+            : Math.min(100, Math.max(0, ((cycleXP - level.min) / (level.max - level.min)) * 100));
         const fill = document.getElementById('progress-bar-fill');
         const progressBar = fill.parentElement;
-        document.getElementById('current-level-text').textContent = `Lv. ${level.level} ${level.name}`;
-        document.getElementById('total-xp-text').textContent = `總 XP：${data.xp}`;
-        document.getElementById('xp-text').textContent = xpForLevel === 0
-            ? `已達最高等級 · ${data.xp} XP`
-            : `${xpWithinLevel} / ${xpForLevel} XP`;
+        document.getElementById('current-level-label').textContent = `Lv. ${level.level}${level.star ? ` ★${level.star}` : ''} ${level.name}`;
+        document.getElementById('total-xp-text').textContent = String(data.xp);
         document.getElementById('progress-percent').textContent = `${Math.round(progress)}%`;
         fill.style.width = `${progress}%`;
         progressBar.setAttribute('aria-valuenow', String(Math.round(progress)));
@@ -418,14 +571,56 @@ const GameSystem = {
         if (shieldUsed) this.playAnimation(shieldCount, 'shield-used-animation');
         document.getElementById('streak-count').textContent = String(data.streakDays);
 
-        this.setBadge('badge-first', records.length > 0, newlyUnlockedBadges.includes('first'));
-        this.setBadge('badge-streak', data.streakDays >= 7 || this.getLongestStreak(records) >= 7, newlyUnlockedBadges.includes('streak'));
-        this.setBadge('badge-rich', data.coinsEarned >= 100, newlyUnlockedBadges.includes('rich'));
+        this.setBadge('badge-first', data.badgeCounts.first, newlyUnlockedBadges.includes('first'));
+        this.setBadge('badge-streak', data.badgeCounts.streak, newlyUnlockedBadges.includes('streak'));
+        this.setBadge('badge-rich', data.badgeCounts.rich, newlyUnlockedBadges.includes('rich'));
+        this.setBadge('badge-shield', data.badgeCounts.shield, newlyUnlockedBadges.includes('shield'));
+        this.setBadge('badge-library', data.badgeCounts.library, newlyUnlockedBadges.includes('library'));
+        this.setBadge('badge-reincarnation', data.badgeCounts.reincarnation, newlyUnlockedBadges.includes('reincarnation'));
         const quoteDisplay = document.getElementById('quote-display');
         quoteDisplay.textContent = data.lastQuote || '點擊下方按鈕抽取今日暖心小語...';
         if (animateQuote) this.playAnimation(quoteDisplay, 'quote-reveal-animation');
         this.renderQuoteCollection(data, animateQuote);
         this.renderThemes(data, level);
+    },
+
+    selectDemoScenario(id) {
+        if (!Object.hasOwn(this.demoScenarios, id)) return;
+        this.demoScenarioId = id;
+        this.demoSimulated = false;
+        this.renderDemoScenario();
+    },
+
+    simulateDemoScenario() {
+        this.demoSimulated = true;
+        this.renderDemoScenario();
+    },
+
+    renderDemoScenario() {
+        const scenario = this.demoScenarios[this.demoScenarioId];
+        if (!scenario) return;
+        const state = this.demoSimulated ? scenario.after : scenario.before;
+        const level = this.getLevel(state.xp);
+        const cycleXP = state.xp % 1500;
+        const progress = Math.min(100, Math.max(0, ((cycleXP - level.min) / (level.max - level.min)) * 100));
+        const progressBar = document.querySelector('.game-demo-progress');
+
+        document.querySelectorAll('[data-demo-person]').forEach(button => {
+            button.setAttribute('aria-pressed', String(button.dataset.demoPerson === this.demoScenarioId));
+        });
+        document.getElementById('game-demo-title').textContent = `${scenario.name}的${this.demoSimulated ? '模擬結果' : '目前狀態'}`;
+        document.getElementById('game-demo-level').textContent =
+            `Lv.${level.level}${level.star ? ` ★${level.star}` : ''} ${level.name}・${Math.floor(cycleXP - level.min)} / ${level.max - level.min} XP`;
+        document.getElementById('game-demo-xp').textContent = String(state.xp);
+        document.getElementById('game-demo-coins').textContent = String(state.coins);
+        document.getElementById('game-demo-shields').textContent = String(state.shields);
+        document.getElementById('game-demo-streak').textContent = String(state.streak);
+        document.getElementById('game-demo-description').textContent = scenario.description;
+        document.getElementById('game-demo-action').textContent = this.demoSimulated ? '已完成示範' : scenario.action;
+        document.getElementById('game-demo-action').disabled = this.demoSimulated;
+        document.getElementById('game-demo-result').textContent = this.demoSimulated ? `示範結果：${scenario.result}` : '';
+        document.getElementById('game-demo-progress-fill').style.width = `${progress}%`;
+        progressBar.setAttribute('aria-valuenow', String(Math.round(progress)));
     },
 
     renderQuoteCollection(data, animateQuote = null) {
@@ -481,7 +676,7 @@ const GameSystem = {
             category.textContent = this.quoteCategories.find(entry => entry.id === categoryId)?.label || '已收藏';
             const content = document.createElement('div');
             content.textContent = text;
-            if (text === animateQuote) item.classList.add('quote-reveal-animation');
+            if (text === animateQuote) item.classList.add('quote-pop-in');
             item.append(category, content);
             collection.appendChild(item);
         });
@@ -506,11 +701,13 @@ const GameSystem = {
         this.renderQuoteCollection(this.getData());
     },
 
-    setBadge(id, unlocked, newlyUnlocked = false) {
+    setBadge(id, count, newlyUnlocked = false) {
         const badge = document.getElementById(id);
+        const unlocked = count > 0;
         badge.classList.toggle('locked', !unlocked);
         badge.classList.toggle('unlocked', unlocked);
-        badge.setAttribute('aria-label', `${badge.textContent}，${unlocked ? '已解鎖' : '未解鎖'}`);
+        badge.querySelector('.badge-count').textContent = unlocked ? `x${count}` : '';
+        badge.setAttribute('aria-label', `${badge.querySelector('.badge-name').textContent}，${unlocked ? `已獲得 ${count} 次` : '未解鎖'}`);
         if (newlyUnlocked && unlocked) this.playAnimation(badge, 'badge-unlock-animation');
     },
 
@@ -522,28 +719,17 @@ const GameSystem = {
     },
 
     renderThemes(data, level) {
-        const container = document.getElementById('theme-buttons-container');
         const themeSelector = document.getElementById('themeSelector');
         const activeTheme = localStorage.getItem('blood_pressure_theme') || data.activeTheme;
         [...themeSelector.options].forEach(option => {
             const theme = this.themes.find(item => item.id === option.value);
-            if (theme) option.disabled = theme.level > level.level;
+            if (theme) {
+                const locked = theme.level > level.level;
+                option.disabled = locked;
+                option.textContent = `${theme.name}（Lv.${theme.level}）${locked ? ' 🔒 鎖定' : ''}`;
+            }
         });
-        container.replaceChildren();
-        this.themes.filter(theme => theme.level <= level.level).forEach(theme => {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = `theme-button${activeTheme === theme.id ? ' active' : ''}`;
-            button.textContent = `${theme.name}（Lv.${theme.level}）`;
-            button.setAttribute('aria-pressed', String(activeTheme === theme.id));
-            button.addEventListener('click', () => {
-                changeTheme(theme.id);
-                data.activeTheme = theme.id;
-                this.saveData(data);
-                this.refreshUI();
-            });
-            container.appendChild(button);
-        });
+        themeSelector.value = this.getAllowedTheme(activeTheme, data);
     },
 
     buyShield() {
@@ -561,22 +747,42 @@ const GameSystem = {
 
     drawQuote() {
         const data = this.getData();
-        const availableQuotes = this.quotes.filter(quote => !data.unlockedQuotes.includes(quote.text));
-        if (availableQuotes.length === 0) {
-            window.showAppToast('心靈圖書館的語錄已全數收藏，隨時都能回來翻閱。');
-            return;
-        }
         if (data.coins < 20) {
             window.showAppToast('金幣不足，記錄血壓即可獲得更多金幣。', 'error');
             return;
         }
         data.coins -= 20;
-        const quote = availableQuotes[Math.floor(Math.random() * availableQuotes.length)];
-        data.unlockedQuotes.push(quote.text);
-        data.lastQuote = quote.text;
+        const previousBadgeCounts = { ...data.badgeCounts };
+        const result = this.awardQuote(data);
+        const currentBadges = this.getUnlockedBadges(this.currentMember, data);
+        const newlyUnlockedBadges = currentBadges.filter(badge => data.badgeCounts[badge] > (previousBadgeCounts[badge] || 0));
+        data.unlockedBadges = currentBadges;
         this.saveData(data);
-        this.refreshUI({ animateQuote: quote.text });
-        window.showAppToast(`已收藏一則${quote.category}，可在心靈圖書館隨時重讀。`);
+        this.refreshUI({ animateQuote: result.quote.text, newlyUnlockedBadges });
+        const categoryLabel = this.quoteCategories.find(category => category.id === result.quote.category)?.label || '心靈卡片';
+        let message = result.duplicate
+            ? `抽到重複卡片，已返還 10 金幣：${result.quote.text}`
+            : `已收藏一張${categoryLabel}卡片，可在心靈圖書館隨時重讀。`;
+        if (newlyUnlockedBadges.includes('library')) message += ' 解鎖徽章：心靈富翁！';
+        window.showAppToast(message);
+    },
+
+    awardQuote(data) {
+        const quote = this.quotes[Math.floor(Math.random() * this.quotes.length)];
+        const duplicate = data.unlockedQuotes.includes(quote.text);
+        if (duplicate) {
+            data.coins += 10;
+            data.coinsEarned += 10;
+        } else {
+            data.unlockedQuotes.push(quote.text);
+        }
+        data.totalCardsDrawn += 1;
+        data.lastQuote = quote.text;
+        data.badgeCounts.library = Math.max(data.badgeCounts.library || 0, Math.floor(data.totalCardsDrawn / 10));
+        if (data.coinsEarned >= 500) {
+            data.badgeCounts.rich = Math.max(data.badgeCounts.rich || 0, Math.floor(data.coinsEarned / 500));
+        }
+        return { quote, duplicate };
     }
 };
 
@@ -627,6 +833,11 @@ document.addEventListener('DOMContentLoaded', () => {
         closeButton.focus();
     });
     closeButton.addEventListener('click', closeModal);
+    document.querySelectorAll('[data-demo-person]').forEach(button => {
+        button.addEventListener('click', () => GameSystem.selectDemoScenario(button.dataset.demoPerson));
+    });
+    document.getElementById('game-demo-action').addEventListener('click', () => GameSystem.simulateDemoScenario());
+    GameSystem.renderDemoScenario();
     overlay.addEventListener('click', event => {
         if (event.target === overlay) closeModal();
     });
