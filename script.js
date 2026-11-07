@@ -808,7 +808,7 @@ function updateChart(records) {
                 if (!activeElements.length) return;
                 const record = filteredRecords[activeElements[0].index];
                 const pulse = record.pulse ? `，脈搏 ${record.pulse} bpm` : '';
-                window.showAppToast(`${record.date}｜血壓 ${record.sys}/${record.dia} mmHg${pulse}`, 'info', 4500);
+                window.showAppToast(`${record.date}｜血壓 ${record.sys}/${record.dia} mmHg${pulse}`, 'info', 3000);
             },
             scales: { y: { beginAtZero: false } }
         }
@@ -963,7 +963,7 @@ function settleImportedGameProgress(addedRecordsByMember, importedRecordCount) {
         window.showAppToast(
             `匯入完成：${newRecordCount} 筆新紀錄，${updatedRecordCount} 筆既有日期更新；不重複發放獎勵。`,
             'success',
-            2500
+            3000
         );
     }
 }

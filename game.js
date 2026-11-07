@@ -396,11 +396,11 @@ const GameSystem = {
     demoScenarios: {
         beginner: {
             name: '新手小晴',
-            description: '本月第一次記錄可獲得「初次見面」徽章；每筆記錄都能獲得 XP 和金幣，當天首次記錄還能免費抽卡。',
+            description: '本月首次記錄可獲得「初次見面」徽章；每筆記錄都能獲得 XP 和金幣。當日首次記錄會自動獲得免費卡；若尚未抽卡，也可在心靈圖書館手動免費抽取。',
             action: '模擬健康正常紀錄',
             before: { xp: 0, coins: 0, shields: 0, streak: 0 },
             after: { xp: 20, coins: 10, shields: 0, streak: 1 },
-            result: '獲得 +20 XP、+10 金幣，連續紀錄 1 天，並解鎖本月的「初次見面」徽章與當日免費抽卡；同月後續記錄不會再次解鎖。'
+            result: '獲得 +20 XP、+10 金幣，連續紀錄 1 天，並解鎖本月的「初次見面」徽章與當日免費卡；同月後續記錄不會再次解鎖徽章。'
         },
         streak: {
             name: '連續打卡小安',
@@ -837,7 +837,7 @@ const GameSystem = {
         if (shieldsUsed > 0) {
             window.showAppModal('🛡️ 保護盾自動救援', '已為您處理漏記，以下是本次結算：', messages);
         } else {
-            window.showAppToast(messages.join(' '), 'success', 2500);
+            window.showAppToast(messages.join(' '), 'success', 3000);
         }
     },
 
@@ -1016,7 +1016,7 @@ const GameSystem = {
                 );
             } else {
                 const dailyMessage = `記錄完成 +${earnedXP} XP、+${earnedCoins} 金幣${recordDate === today ? `，連續 ${data.streakDays} 天` : ''}${newLevel.level > previousLevel ? `，升級至 Lv.${newLevel.level}${newLevel.star ? ` ★${newLevel.star}` : ''}` : ''}${streakBonusCoins ? `，七日獎勵 +${streakBonusCoins} 金幣` : ''}${settlement.streakReset ? '，連續天數已重新計算' : ''}${newlyUnlockedBadges.length ? `，解鎖 ${newlyUnlockedBadges.map(badge => badgeNames[badge]).join('、')}` : ''}`;
-                window.showAppToast(dailyMessage, 'success', 2200);
+                window.showAppToast(dailyMessage, 'success', 3000);
             }
         } catch (error) {
             console.error('血壓紀錄已儲存，但遊戲獎勵無法更新：', error);
@@ -1093,7 +1093,7 @@ const GameSystem = {
         if (scenario?.confirmation && !window.confirm(scenario.confirmation)) return;
         this.demoSimulated = true;
         this.renderDemoScenario();
-        if (scenario?.notice) window.showAppToast(scenario.notice, 'success', 0);
+        if (scenario?.notice) window.showAppToast(scenario.notice, 'success', 3000);
     },
 
     renderDemoScenario() {
@@ -1296,7 +1296,7 @@ const GameSystem = {
 window.GameSystem = GameSystem;
 
 const appToastTimeouts = new Map();
-window.showAppToast = (message, type = 'success', duration = 3200) => {
+window.showAppToast = (message, type = 'success', duration = 3000) => {
     const region = document.getElementById('app-toast-region');
     if (!region) return;
 
@@ -1306,13 +1306,16 @@ window.showAppToast = (message, type = 'success', duration = 3200) => {
     const text = document.createElement('span');
     text.className = 'app-toast-message';
     text.textContent = message;
-    const dismissButton = document.createElement('button');
-    dismissButton.type = 'button';
-    dismissButton.className = 'app-toast-dismiss';
-    dismissButton.textContent = '了解';
-    dismissButton.setAttribute('aria-label', '關閉通知');
-    dismissButton.addEventListener('click', () => dismissToast(toast));
-    toast.append(text, dismissButton);
+    toast.append(text);
+    if (duration <= 0) {
+        const dismissButton = document.createElement('button');
+        dismissButton.type = 'button';
+        dismissButton.className = 'app-toast-dismiss';
+        dismissButton.textContent = '了解';
+        dismissButton.setAttribute('aria-label', '關閉通知');
+        dismissButton.addEventListener('click', () => dismissToast(toast));
+        toast.append(dismissButton);
+    }
     region.appendChild(toast);
     window.requestAnimationFrame(() => toast.classList.add('visible'));
     if (duration > 0) appToastTimeouts.set(toast, window.setTimeout(() => dismissToast(toast), duration));

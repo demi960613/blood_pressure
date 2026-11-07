@@ -307,10 +307,11 @@ html.theme-blue #toggleFormButton:hover {
 
 .game-guide-item {
     min-width: 0;
-    padding: 0.55rem 0.65rem;
+    padding: 0.8rem 0.9rem;
     border: 1px solid var(--theme-accent-border);
     border-radius: 0.6rem;
     background: color-mix(in srgb, var(--theme-accent-soft) 55%, white);
+    color: var(--theme-accent-text);
 }
 
 .game-guide-item h3 {
@@ -327,9 +328,17 @@ html.theme-blue #toggleFormButton:hover {
     text-align: center;
 }
 
+.game-guide-item h3 > .fa-award {
+    color: #d97706;
+}
+
+.game-guide-item h3 > .fa-book-open {
+    color: #15803d;
+}
+
 .game-guide-item ul {
     display: grid;
-    gap: 0.35rem;
+    gap: 0.45rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -337,15 +346,23 @@ html.theme-blue #toggleFormButton:hover {
 
 .game-guide-item li {
     display: grid;
-    grid-template-columns: 0.9rem minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: start;
     gap: 0.4rem;
 }
 
-.game-guide-item li > i {
-    padding-top: 0.18rem;
-    font-size: 0.68rem;
+.game-guide-item li > span > i {
+    display: inline-block;
+    width: 0.9rem;
+    margin-right: 0.35rem;
+    font-size: 0.75rem;
     text-align: center;
+}
+
+.game-guide-collection-icon {
+    margin-right: 0.4rem;
+    color: #be185d;
+    font-size: 0.75rem;
 }
 
 .guide-icon-record {
@@ -969,6 +986,11 @@ html.dark .badge-name {
     font-weight: 700;
 }
 
+.quote-library-title {
+    display: inline-flex;
+    align-items: center;
+}
+
 #quote-collection-count {
     color: #64748b;
     font-weight: 500;
@@ -1086,19 +1108,6 @@ html.dark #game-modal-overlay .mindful-section,
 html.theme-dark #game-modal-overlay .mindful-section {
     border-color: #3f3f46;
     background: #27272a;
-}
-
-html.dark .game-guide,
-html.theme-dark .game-guide,
-html.dark .game-guide-item,
-html.theme-dark .game-guide-item,
-html.dark #game-modal-overlay .game-guide,
-html.theme-dark #game-modal-overlay .game-guide,
-html.dark #game-modal-overlay .game-guide-item,
-html.theme-dark #game-modal-overlay .game-guide-item {
-    border-color: #52525b;
-    background: #27272a;
-    color: #e4e4e7;
 }
 
 html.dark .wallet-shield-section button,
