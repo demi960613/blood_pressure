@@ -237,7 +237,15 @@ html.theme-dark [class*="dark:text-slate-400"] {
 }
 
 html.theme-dark [class*="dark:text-slate-500"] {
-    color: #71717a;
+    color: #a1a1aa;
+}
+
+html.theme-dark [class*="dark:text-white"] {
+    color: #fafafa;
+}
+
+html.theme-dark [class*="dark:hover:text-white"]:hover {
+    color: #fafafa;
 }
 
 button.primary-action,
