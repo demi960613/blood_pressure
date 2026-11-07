@@ -283,6 +283,19 @@
             <button type="button" id="close-modal-btn" class="close-btn" aria-label="關閉彈窗">&times;</button>
             <h2 id="game-modal-title">🎁 個人成就與心靈補給站</h2>
 
+            <div class="game-dashboard">
+                <details class="game-guide" open>
+                    <summary>📘 遊戲說明：紀錄、升級與徽章怎麼計算？</summary>
+                    <ul>
+                        <li>每筆血壓紀錄依分類獲得 XP（一般 20、正常偏高／偏低 15、輕度偏高 12、其他 10），並取得約一半數量的金幣。</li>
+                        <li>等級依序為 Lv.0 至 Lv.5；達到 1,500 XP 是 Lv.5 滿等，滿等後再次獲得 XP 才會轉生，轉生可獲得 200 金幣。</li>
+                        <li>連續紀錄每滿 7 天可獲得七日徽章與 100 金幣；保護盾會在漏記時自動消耗以延續連續天數，消耗過保護盾可累計守護天使徽章。</li>
+                        <li>每日首次紀錄可免費抽卡；其他抽卡消耗 20 金幣（抽到重複卡返還 10），50 金幣可購買保護盾。累積抽卡 10 次可解鎖心靈富翁徽章。</li>
+                        <li>累積獲得每 500 金幣可解鎖百寶箱徽章；每次轉生也會累計轉生徽章。</li>
+                        <li>匯入新日期的歷史紀錄會補算 XP、金幣並更新可達成的徽章；同一成員、同一日期只更新內容，不重複發放。</li>
+                    </ul>
+                </details>
+
             <details class="game-demo">
                 <summary>🎮 玩法模擬：看看不同情境怎麼玩</summary>
                 <div class="game-demo-content">
@@ -292,6 +305,11 @@
                         <button type="button" data-demo-person="streak">連續打卡小安</button>
                         <button type="button" data-demo-person="shield">保護盾小哲</button>
                         <button type="button" data-demo-person="rebirth">轉生小林</button>
+                        <button type="button" data-demo-person="historicalImport">匯入紀錄小芸</button>
+                        <button type="button" data-demo-person="duplicateImport">重複匯入小傑</button>
+                        <button type="button" data-demo-person="missedWithoutShield">無盾漏記小寧</button>
+                        <button type="button" data-demo-person="restartStreak">重新打卡小禾</button>
+                        <button type="button" data-demo-person="careNotice">通知示範小暖</button>
                     </div>
                     <div class="game-demo-preview" aria-live="polite">
                         <strong id="game-demo-title"></strong>
@@ -379,6 +397,7 @@
                     </div>
                 </div>
             </section>
+            </div>
 
         </div>
     </div>

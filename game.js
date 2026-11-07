@@ -73,11 +73,52 @@ const GameSystem = {
         },
         rebirth: {
             name: '轉生小林',
-            description: '目前有 1,490 XP，再記錄一次就會跨過 1,500 XP 門檻，開啟新一輪旅程。',
-            action: '模擬健康正常紀錄',
-            before: { xp: 1490, coins: 300, shields: 0, streak: 5 },
-            after: { xp: 1510, coins: 510, shields: 0, streak: 6 },
-            result: '獲得 +20 XP、+10 金幣及轉生紅包 +200 金幣，等級回到 Lv.0 ★1，重新解鎖主題。'
+            description: '已到達 Lv.5 滿等（1,500 XP）。滿等後再獲得 XP 才會轉生。',
+            action: '模擬滿等後獲得 XP',
+            before: { xp: 1500, coins: 300, shields: 0, streak: 5 },
+            after: { xp: 1510, coins: 505, shields: 0, streak: 6 },
+            result: 'Lv.5 滿等時不會立刻轉生；再獲得 +10 XP 後轉生為 Lv.0 ★1，並獲得 +200 金幣與轉生徽章。'
+        },
+        historicalImport: {
+            name: '匯入紀錄小芸',
+            description: '匯入 7 筆新日期的連續歷史紀錄。新增日期會補發 XP、金幣，並依紀錄解鎖徽章。',
+            action: '模擬匯入 7 筆新紀錄',
+            before: { xp: 280, coins: 100, shields: 0, streak: 0 },
+            after: { xp: 350, coins: 235, shields: 0, streak: 7 },
+            result: '新增 7 筆各得 +10 XP、+5 金幣，連續 7 天再獲得 +100 金幣並解鎖「七日之星」。覆寫相同日期不會重複發獎。'
+        },
+        duplicateImport: {
+            name: '重複匯入小傑',
+            description: '匯入檔案中的日期已經存在。相同成員與日期會更新紀錄內容，不重複發放 XP 或金幣。',
+            action: '模擬覆寫同日期紀錄',
+            before: { xp: 350, coins: 185, shields: 0, streak: 7 },
+            after: { xp: 350, coins: 185, shields: 0, streak: 7 },
+            result: '血壓資料更新，但新增紀錄數為 0，因此 XP、金幣不變；既有徽章仍會重新檢查並顯示。'
+        },
+        missedWithoutShield: {
+            name: '重新出發小寧',
+            description: '累積了一段連續紀錄，但漏記時背包沒有保護盾。連續天數會歸零，其他努力都會保留。',
+            action: '模擬無盾漏記',
+            before: { xp: 840, coins: 240, shields: 0, streak: 5 },
+            after: { xp: 840, coins: 240, shields: 0, streak: 0 },
+            result: '連續天數重新計算；XP、等級、金幣、已解鎖主題與徽章都不會被扣除。今天仍可以放心重新開始。'
+        },
+        restartStreak: {
+            name: '再出發小禾',
+            description: '前一輪連續天數已歸零，但過去累積的 XP 與金幣都還在。今天再次記錄，從新一輪第 1 天開始。',
+            action: '模擬今日健康紀錄',
+            before: { xp: 840, coins: 240, shields: 0, streak: 0 },
+            after: { xp: 860, coins: 250, shields: 0, streak: 1 },
+            result: '獲得 +20 XP、+10 金幣，連續紀錄從 1 天重新累積；先前的等級與收藏不受影響。'
+        },
+        careNotice: {
+            name: '關懷通知小暖',
+            description: '每日結算遇到漏記時，關懷訊息會留在畫面上，讓您有時間閱讀，不會自動消失。',
+            action: '顯示關懷通知',
+            before: { xp: 840, coins: 240, shields: 0, streak: 5 },
+            after: { xp: 840, coins: 240, shields: 0, streak: 0 },
+            result: '通知會持續顯示，直到您按下「了解」；這只是示範，不會變更目前成員的資料。',
+            notice: '沒關係，健康管理是長久的旅程，我們今天一起重新出發！'
         }
     },
 
@@ -182,7 +223,7 @@ const GameSystem = {
                     rich: 0,
                     shield: 0,
                     library: 0,
-                    reincarnation: Math.floor(existing.xp / 1500)
+                    reincarnation: this.getReincarnationCount(existing.xp)
                 };
                 changed = true;
             }
@@ -191,7 +232,7 @@ const GameSystem = {
                 if (!Number.isFinite(existing.badgeCounts[id])) {
                     existing.badgeCounts[id] = legacyBadges.includes(id)
                         ? 1
-                        : id === 'reincarnation' ? Math.floor(existing.xp / 1500) : 0;
+                        : id === 'reincarnation' ? this.getReincarnationCount(existing.xp) : 0;
                     changed = true;
                 } else if (existing.badgeCounts[id] < 0) {
                     existing.badgeCounts[id] = 0;
@@ -223,13 +264,69 @@ const GameSystem = {
         const records = this.getRecords(member);
         const totalRecords = records.length;
         const initialData = this.defaultData(totalRecords * 10, totalRecords * 5);
+        const reincarnations = this.getReincarnationCount(initialData.xp);
         initialData.badgeCounts.first = totalRecords > 0 ? 1 : 0;
         initialData.badgeCounts.streak = this.countRecordedStreakBadges(records);
+        initialData.badgeCounts.reincarnation = reincarnations;
+        const bonusCoins = initialData.badgeCounts.streak * 100 + reincarnations * 200;
+        initialData.coins += bonusCoins;
+        initialData.coinsEarned += bonusCoins;
         initialData.badgeCounts.rich = Math.floor(initialData.coinsEarned / 500);
         initialData.unlockedBadges = this.getUnlockedBadges(member, initialData, records);
         store.members[member] = initialData;
         this.saveStore(store);
         return initialData;
+    },
+
+    onHistoricalRecordsImported(member, addedRecordCount) {
+        if (!Number.isInteger(addedRecordCount) || addedRecordCount <= 0) return;
+
+        const store = this.readStore();
+        const existing = store.members[member];
+        let data;
+        let previousBadgeCounts;
+        let newlyUnlocked = [];
+
+        if (existing && Number.isFinite(existing.xp) && Number.isFinite(existing.coins)) {
+            data = this.getData(member);
+            previousBadgeCounts = { ...data.badgeCounts };
+            const previousStar = this.getReincarnationCount(data.xp);
+            data.xp += addedRecordCount * 10;
+            data.coins += addedRecordCount * 5;
+            data.coinsEarned += addedRecordCount * 5;
+
+            const reincarnations = this.getReincarnationCount(data.xp) - previousStar;
+            if (reincarnations > 0) {
+                const bonusCoins = reincarnations * 200;
+                data.coins += bonusCoins;
+                data.coinsEarned += bonusCoins;
+                data.badgeCounts.reincarnation += reincarnations;
+            }
+            this.saveData(data, member);
+        }
+
+        const settlement = this.initializeMember(member, { notify: false });
+        data = settlement.data;
+        previousBadgeCounts = previousBadgeCounts || { ...data.badgeCounts };
+
+        const historicalStreakBadges = this.countRecordedStreakBadges(this.getRecords(member));
+        const additionalStreakBadges = Math.max(0, historicalStreakBadges - data.badgeCounts.streak);
+        if (additionalStreakBadges > 0) {
+            const bonusCoins = additionalStreakBadges * 100;
+            data.badgeCounts.streak += additionalStreakBadges;
+            data.coins += bonusCoins;
+            data.coinsEarned += bonusCoins;
+        }
+
+        const currentBadges = this.getUnlockedBadges(member, data);
+        newlyUnlocked = [...new Set([
+            ...settlement.newlyUnlocked,
+            ...currentBadges.filter(badge => (data.badgeCounts[badge] || 0) > (previousBadgeCounts[badge] || 0))
+        ])];
+        data.unlockedBadges = currentBadges;
+        this.saveData(data, member);
+
+        if (member === this.currentMember) this.refreshUI({ newlyUnlockedBadges: newlyUnlocked });
     },
 
     countRecordedStreakBadges(records) {
@@ -345,12 +442,29 @@ const GameSystem = {
         data.unlockedBadges = unlockedBadges;
         if (changed) this.saveData(data, member);
 
-        const settlement = { data, shieldsUsed, shieldDates, protectedStreakDays, streakReset, streakBonusCoins, newlyUnlocked };
+        const settlement = {
+            data,
+            shieldsUsed,
+            shieldDates,
+            protectedStreakDays,
+            streakReset,
+            streakBonusCoins,
+            shieldBadgeCount: data.badgeCounts.shield,
+            newlyUnlocked
+        };
         if (notify) this.notifyDailySettlement(settlement);
         return settlement;
     },
 
-    notifyDailySettlement({ shieldsUsed, shieldDates, protectedStreakDays, streakReset, streakBonusCoins, newlyUnlocked }) {
+    notifyDailySettlement({
+        shieldsUsed,
+        shieldDates,
+        protectedStreakDays,
+        streakReset,
+        streakBonusCoins,
+        shieldBadgeCount,
+        newlyUnlocked
+    }) {
         if (shieldsUsed === 0 && !streakReset && newlyUnlocked.length === 0) return;
         const messages = [];
         if (shieldsUsed > 0) {
@@ -358,14 +472,15 @@ const GameSystem = {
             const missedDays = shieldsUsed === 1 && shieldDates[0] === yesterday
                 ? '昨天'
                 : `日期 ${shieldDates.join('、')}`;
-            messages.push(`哎呀！${missedDays}漏了血壓紀錄，好險背包裡的 🛡️ 保護盾自動出動，幫您守住連續 ${protectedStreakDays} 天的打卡紀錄！已消耗 ${shieldsUsed} 枚。`);
+            messages.push(`${missedDays}忙碌到沒記錄嗎？守護天使已自動使用 ${shieldsUsed} 枚🛡️保護盾，幫您延續連續 ${protectedStreakDays} 天的打卡！`);
+            if (shieldBadgeCount > 0) messages.push(`守護天使徽章已累計 x${shieldBadgeCount}，感謝您持續照顧自己。`);
         }
         if (streakReset) {
-            messages.push('連續紀錄已溫柔重新計算，沒關係，今天重新開始也很棒。');
+            messages.push('有未受保護的漏記日，連續天數已歸零重新計算；不會扣除 XP、等級、金幣或主題權限。沒關係，健康管理是長久的旅程，我們今天一起重新出發！');
         }
         if (newlyUnlocked.includes('streak')) messages.push('解鎖徽章：七日之星！');
         if (streakBonusCoins > 0) messages.push(`七日之星獎勵 +${streakBonusCoins} 金幣`);
-        window.showAppToast(messages.join(' '), shieldsUsed > 0 ? 'shield' : 'success', 6000);
+        window.showAppToast(messages.join(' '), shieldsUsed > 0 ? 'shield' : 'success', 0);
     },
 
     getUnlockedBadges(member, data, records = this.getRecords(member)) {
@@ -380,13 +495,22 @@ const GameSystem = {
     },
 
     getLevel(xp) {
-        const cycleXP = xp % 1500;
-        const star = Math.floor(xp / 1500);
+        const star = this.getReincarnationCount(xp);
+        const cycleXP = xp - star * 1500;
+        if (cycleXP >= 1500) return { level: 5, star, name: '薄荷翠綠', min: 1500, max: 1500 };
         if (cycleXP >= 1000) return { level: 4, star, name: '清新天藍', min: 1000, max: 1500 };
         if (cycleXP >= 600) return { level: 3, star, name: '暖心琥珀', min: 600, max: 1000 };
         if (cycleXP >= 300) return { level: 2, star, name: '柔和粉紅', min: 300, max: 600 };
         if (cycleXP >= 100) return { level: 1, star, name: '靜謐墨黑', min: 100, max: 300 };
         return { level: 0, star, name: '沉靜灰階', min: 0, max: 100 };
+    },
+
+    getReincarnationCount(xp) {
+        return xp > 0 ? Math.floor((xp - 1) / 1500) : 0;
+    },
+
+    getCycleXP(xp, level = this.getLevel(xp)) {
+        return xp - level.star * 1500;
     },
 
     getAllowedTheme(themeId, data = this.getData()) {
@@ -467,7 +591,7 @@ const GameSystem = {
                     data.lastStreakBadgeDay = data.streakDays;
                 }
             }
-            const previousStar = Math.floor(data.xp / 1500);
+            const previousStar = this.getReincarnationCount(data.xp);
             const previousLevel = this.getLevel(data.xp).level;
             const previousBadgeCounts = { ...data.badgeCounts };
             let earnedXP = 10;
@@ -480,7 +604,7 @@ const GameSystem = {
             data.xp += earnedXP;
             data.coins += earnedCoins;
             data.coinsEarned += earnedCoins;
-            const newStar = Math.floor(data.xp / 1500);
+            const newStar = this.getReincarnationCount(data.xp);
             const reincarnations = newStar - previousStar;
             if (reincarnations > 0) {
                 const bonusCoins = reincarnations * 200;
@@ -554,7 +678,7 @@ const GameSystem = {
 
     renderModal(data, level, { shieldUsed = false, animateQuote = null, newlyUnlockedBadges = [] } = {}) {
         const records = this.getRecords(this.currentMember);
-        const cycleXP = data.xp % 1500;
+        const cycleXP = this.getCycleXP(data.xp, level);
         const progress = level.max === level.min
             ? 100
             : Math.min(100, Math.max(0, ((cycleXP - level.min) / (level.max - level.min)) * 100));
@@ -594,6 +718,8 @@ const GameSystem = {
     simulateDemoScenario() {
         this.demoSimulated = true;
         this.renderDemoScenario();
+        const scenario = this.demoScenarios[this.demoScenarioId];
+        if (scenario?.notice) window.showAppToast(scenario.notice, 'success', 0);
     },
 
     renderDemoScenario() {
@@ -601,8 +727,10 @@ const GameSystem = {
         if (!scenario) return;
         const state = this.demoSimulated ? scenario.after : scenario.before;
         const level = this.getLevel(state.xp);
-        const cycleXP = state.xp % 1500;
-        const progress = Math.min(100, Math.max(0, ((cycleXP - level.min) / (level.max - level.min)) * 100));
+        const cycleXP = this.getCycleXP(state.xp, level);
+        const progress = level.max === level.min
+            ? 100
+            : Math.min(100, Math.max(0, ((cycleXP - level.min) / (level.max - level.min)) * 100));
         const progressBar = document.querySelector('.game-demo-progress');
 
         document.querySelectorAll('[data-demo-person]').forEach(button => {
@@ -610,7 +738,9 @@ const GameSystem = {
         });
         document.getElementById('game-demo-title').textContent = `${scenario.name}的${this.demoSimulated ? '模擬結果' : '目前狀態'}`;
         document.getElementById('game-demo-level').textContent =
-            `Lv.${level.level}${level.star ? ` ★${level.star}` : ''} ${level.name}・${Math.floor(cycleXP - level.min)} / ${level.max - level.min} XP`;
+            level.level === 5
+                ? `Lv.5${level.star ? ` ★${level.star}` : ''} ${level.name}・已滿等，再獲得 XP 即轉生`
+                : `Lv.${level.level}${level.star ? ` ★${level.star}` : ''} ${level.name}・${Math.floor(cycleXP - level.min)} / ${level.max - level.min} XP`;
         document.getElementById('game-demo-xp').textContent = String(state.xp);
         document.getElementById('game-demo-coins').textContent = String(state.coins);
         document.getElementById('game-demo-shields').textContent = String(state.shields);
@@ -788,24 +918,38 @@ const GameSystem = {
 
 window.GameSystem = GameSystem;
 
-let appToastTimeout;
+const appToastTimeouts = new Map();
 window.showAppToast = (message, type = 'success', duration = 3200) => {
     const region = document.getElementById('app-toast-region');
     if (!region) return;
 
-    window.clearTimeout(appToastTimeout);
-    region.replaceChildren();
     const toast = document.createElement('div');
     toast.className = `app-toast${type === 'error' ? ' error' : type === 'shield' ? ' shield' : ''}`;
     toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
-    toast.textContent = message;
+    const text = document.createElement('span');
+    text.className = 'app-toast-message';
+    text.textContent = message;
+    const dismissButton = document.createElement('button');
+    dismissButton.type = 'button';
+    dismissButton.className = 'app-toast-dismiss';
+    dismissButton.textContent = '了解';
+    dismissButton.setAttribute('aria-label', '關閉通知');
+    dismissButton.addEventListener('click', () => dismissToast(toast));
+    toast.append(text, dismissButton);
     region.appendChild(toast);
     window.requestAnimationFrame(() => toast.classList.add('visible'));
-    appToastTimeout = window.setTimeout(() => {
-        toast.classList.remove('visible');
-        window.setTimeout(() => toast.remove(), 220);
-    }, duration);
+    if (duration > 0) appToastTimeouts.set(toast, window.setTimeout(() => dismissToast(toast), duration));
 };
+
+function dismissToast(toast) {
+    const timeout = appToastTimeouts.get(toast);
+    if (timeout !== undefined) {
+        window.clearTimeout(timeout);
+        appToastTimeouts.delete(toast);
+    }
+    toast.classList.remove('visible');
+    window.setTimeout(() => toast.remove(), 220);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('game-modal-overlay');

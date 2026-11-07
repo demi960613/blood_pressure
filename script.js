@@ -933,6 +933,18 @@ function upsertImportedRecord(records, incoming) {
     records.push({ ...incoming, id: createRecordId() });
 }
 
+function settleImportedGameProgress(addedRecordsByMember) {
+    if (!window.GameSystem) return;
+    addedRecordsByMember.forEach((count, member) => {
+        try {
+            GameSystem.onHistoricalRecordsImported(member, count);
+        } catch (error) {
+            console.error('歷史紀錄已匯入，但無法更新遊戲進度：', error);
+            window.showAppToast('歷史紀錄已匯入，但成就進度更新失敗。', 'error');
+        }
+    });
+}
+
 function importSingleMemberCSV(e) {
     const file = e.target.files[0];
     if (!file) return;
@@ -956,9 +968,14 @@ function importSingleMemberCSV(e) {
             if (!imported.length) return alert('檔案中沒有可匯入的紀錄。');
 
             const records = db.members[currentMember] || (db.members[currentMember] = []);
-            imported.forEach(record => upsertImportedRecord(records, record));
+            let addedRecordCount = 0;
+            imported.forEach(record => {
+                if (!records.some(existing => existing.date === record.date)) addedRecordCount += 1;
+                upsertImportedRecord(records, record);
+            });
             records.sort((a, b) => a.date.localeCompare(b.date));
-            saveDB(); resetForm(); initMonthFilter(records); render();
+            if (saveDB()) settleImportedGameProgress(new Map([[currentMember, addedRecordCount]]));
+            resetForm(); initMonthFilter(records); render();
             alert(`成功匯入 ${imported.length} 筆紀錄；相同日期的資料已更新。`);
         } catch (error) {
             alert(`讀取失敗：${error.message}`);
@@ -1006,12 +1023,18 @@ function importAllMembersCSV(e) {
             if (errors.length) return showImportErrors(errors);
             if (!imported.length) return alert('檔案中沒有可匯入的紀錄。');
 
+            const addedRecordsByMember = new Map();
             imported.forEach(({ name, record }) => {
                 if (!Object.hasOwn(db.members, name)) db.members[name] = [];
-                upsertImportedRecord(db.members[name], record);
+                const records = db.members[name];
+                if (!records.some(existing => existing.date === record.date)) {
+                    addedRecordsByMember.set(name, (addedRecordsByMember.get(name) || 0) + 1);
+                }
+                upsertImportedRecord(records, record);
             });
             Object.values(db.members).forEach(records => records.sort((a, b) => a.date.localeCompare(b.date)));
-            saveDB(); resetForm(); initMembers(); initMonthFilter(db.members[currentMember]); render();
+            if (saveDB()) settleImportedGameProgress(addedRecordsByMember);
+            resetForm(); initMembers(); initMonthFilter(db.members[currentMember]); render();
             alert(`成功匯入 ${imported.length} 筆紀錄；相同成員與日期的資料已更新。`);
         } catch (error) {
             alert(`總表讀取失敗：${error.message}`);
