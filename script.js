@@ -701,15 +701,15 @@ function render() {
     const statsContainer = document.getElementById('monthlyStats');
     statsContainer.innerHTML = `
         <div class="flex items-center justify-between">
-            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-calendar-days text-slate-500 mr-1"></i> 測量次數：</span>
+            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-calendar-days text-blue-600 dark:text-blue-400 mr-1"></i> 測量次數：</span>
             <span class="font-bold text-slate-700 dark:text-slate-200">${count} 次</span>
         </div>
         <div class="flex items-center justify-between">
-            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-chart-pie text-slate-500 mr-1"></i> 平均血壓：</span>
+            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-chart-pie text-teal-600 dark:text-teal-400 mr-1"></i> 平均血壓：</span>
             <span class="font-bold">${count > 0 ? `${avgSys} /${avgDia} mmHg` : '尚無資料'}</span>
         </div>
         <div class="flex items-center justify-between">
-            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-heart-pulse text-slate-500 mr-1"></i> 平均脈搏：</span>
+            <span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-heart-pulse text-rose-600 dark:text-rose-400 mr-1"></i> 平均脈搏：</span>
             <span class="font-bold">${count > 0 && avgPulse > 0 ? `${avgPulse} bpm` : '-'}</span>
         </div>
     `;
@@ -728,8 +728,8 @@ function render() {
             card.innerHTML = `
                 <div class="space-y-1 min-w-0 flex-1">
                     <div class="text-[11px] text-slate-400 dark:text-slate-500 flex items-center gap-2">
-                        <span><i class="fa-regular fa-calendar text-slate-500 mr-1"></i>${escapeHTML(r.date)}</span>
-                        ${r.pulse ? `<span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-heart-pulse text-slate-400 mr-1"></i>${escapeHTML(r.pulse)} bpm</span>` : ''}
+                        <span><i class="fa-regular fa-calendar text-blue-600 dark:text-blue-400 mr-1"></i>${escapeHTML(r.date)}</span>
+                        ${r.pulse ? `<span class="text-slate-500 dark:text-slate-400"><i class="fa-solid fa-heart-pulse text-rose-600 dark:text-rose-400 mr-1"></i>${escapeHTML(r.pulse)} bpm</span>` : ''}
                     </div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <span class="text-base font-bold text-slate-800 dark:text-slate-100">${escapeHTML(r.sys)} / ${escapeHTML(r.dia)} <span class="text-[10px] font-normal text-slate-400">mmHg</span></span>
@@ -738,10 +738,10 @@ function render() {
                 </div>
                 <div class="flex items-center gap-1 shrink-0 border-l pl-2 border-slate-200 dark:border-slate-600/60">
                     <button onclick="editRecord(${idx})" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white transition cursor-pointer text-xs" title="編輯">
-                        <i class="fa-solid fa-pen-to-square"></i>
+                        <i class="fa-solid fa-pen-to-square text-blue-600 dark:text-blue-400"></i>
                     </button>
                     <button onclick="deleteRecord(${idx})" class="p-1.5 text-slate-400 hover:text-rose-500 transition cursor-pointer text-xs" title="刪除">
-                        <i class="fa-solid fa-trash-can"></i>
+                        <i class="fa-solid fa-trash-can text-rose-600 dark:text-rose-400"></i>
                     </button>
                 </div>
             `;
@@ -933,16 +933,39 @@ function upsertImportedRecord(records, incoming) {
     records.push({ ...incoming, id: createRecordId() });
 }
 
-function settleImportedGameProgress(addedRecordsByMember) {
+function settleImportedGameProgress(addedRecordsByMember, importedRecordCount) {
     if (!window.GameSystem) return;
+    const settlements = [];
     addedRecordsByMember.forEach((count, member) => {
         try {
-            GameSystem.onHistoricalRecordsImported(member, count);
+            const settlement = GameSystem.onHistoricalRecordsImported(member, count);
+            if (settlement) settlements.push(settlement);
         } catch (error) {
             console.error('歷史紀錄已匯入，但無法更新遊戲進度：', error);
             window.showAppToast('歷史紀錄已匯入，但成就進度更新失敗。', 'error');
         }
     });
+
+    const newRecordCount = [...addedRecordsByMember.values()].reduce((total, count) => total + count, 0);
+    const updatedRecordCount = importedRecordCount - newRecordCount;
+    const firstImportSettlements = settlements.filter(settlement => settlement.firstImport);
+    if (firstImportSettlements.length) {
+        const details = [
+            `匯入 ${importedRecordCount} 筆紀錄：${newRecordCount} 筆新日期，${updatedRecordCount} 筆既有日期更新。`,
+            ...firstImportSettlements.map(settlement => settlement.isInitialCalculation
+                ? `${settlement.member}：依匯入後的歷史紀錄建立初始進度，累計 ${settlement.totalXP} XP、${settlement.totalCoins} 金幣。`
+                : `${settlement.member}：新增 ${settlement.addedRecordCount} 筆，補得 +${settlement.xpGained} XP、+${settlement.coinsGained} 金幣。`)
+        ];
+        const badges = [...new Set(firstImportSettlements.flatMap(settlement => settlement.badges))];
+        if (badges.length) details.push(`已解鎖或確認的徽章：${badges.join('、')}。`);
+        window.showAppModal('📊 首次歷史匯入完成', '遊戲進度已依匯入的歷史紀錄結算：', details);
+    } else {
+        window.showAppToast(
+            `匯入完成：${newRecordCount} 筆新紀錄，${updatedRecordCount} 筆既有日期更新；不重複發放獎勵。`,
+            'success',
+            2500
+        );
+    }
 }
 
 function importSingleMemberCSV(e) {
@@ -974,9 +997,8 @@ function importSingleMemberCSV(e) {
                 upsertImportedRecord(records, record);
             });
             records.sort((a, b) => a.date.localeCompare(b.date));
-            if (saveDB()) settleImportedGameProgress(new Map([[currentMember, addedRecordCount]]));
+            if (saveDB()) settleImportedGameProgress(new Map([[currentMember, addedRecordCount]]), imported.length);
             resetForm(); initMonthFilter(records); render();
-            alert(`成功匯入 ${imported.length} 筆紀錄；相同日期的資料已更新。`);
         } catch (error) {
             alert(`讀取失敗：${error.message}`);
         } finally {
@@ -1033,9 +1055,8 @@ function importAllMembersCSV(e) {
                 upsertImportedRecord(records, record);
             });
             Object.values(db.members).forEach(records => records.sort((a, b) => a.date.localeCompare(b.date)));
-            if (saveDB()) settleImportedGameProgress(addedRecordsByMember);
+            if (saveDB()) settleImportedGameProgress(addedRecordsByMember, imported.length);
             resetForm(); initMembers(); initMonthFilter(db.members[currentMember]); render();
-            alert(`成功匯入 ${imported.length} 筆紀錄；相同成員與日期的資料已更新。`);
         } catch (error) {
             alert(`總表讀取失敗：${error.message}`);
         } finally {

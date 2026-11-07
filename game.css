@@ -91,6 +91,88 @@
     animation: shield-toast-pulse 0.7s ease-in-out 3;
 }
 
+.app-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+}
+
+.app-modal-overlay[hidden],
+#app-modal-details[hidden] {
+    display: none !important;
+}
+
+.app-modal-content {
+    width: min(100%, 28rem);
+    max-height: 85vh;
+    overflow-y: auto;
+    padding: 1.25rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    background: #fff;
+    color: #1e293b;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25);
+}
+
+.app-modal-content h2 {
+    margin: 0 0 0.65rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.app-modal-content p {
+    margin: 0;
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.app-modal-content ul {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0.75rem 0 0;
+    padding-left: 1.25rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+#app-modal-confirm {
+    display: block;
+    min-width: 5rem;
+    margin: 1rem 0 0 auto;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--theme-accent);
+    border-radius: 0.65rem;
+    background: var(--theme-accent-soft);
+    color: var(--theme-accent-text);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+html.theme-dark #app-modal-confirm:hover,
+html.dark #app-modal-confirm:hover {
+    background: #3f3f46;
+}
+
+#app-modal-confirm:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--theme-accent) 45%, transparent);
+    outline-offset: 2px;
+}
+
+html.dark .app-modal-content,
+html.theme-dark .app-modal-content {
+    border-color: #52525b;
+    background: #18181b;
+    color: #f4f4f5;
+}
+
 @keyframes shield-toast-pulse {
     45% {
         box-shadow: 0 0 0 7px var(--theme-accent-soft), 0 10px 32px rgba(15, 23, 42, 0.24);
@@ -216,15 +298,90 @@ html.theme-blue #toggleFormButton:hover {
     cursor: pointer;
 }
 
-.game-guide ul {
+.game-guide-grid {
     display: grid;
-    gap: 0.35rem;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
     margin: 0.65rem 0 0;
-    padding-left: 1.25rem;
 }
 
-.game-guide li {
-    padding-left: 0.1rem;
+.game-guide-item {
+    min-width: 0;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid var(--theme-accent-border);
+    border-radius: 0.6rem;
+    background: color-mix(in srgb, var(--theme-accent-soft) 55%, white);
+}
+
+.game-guide-item h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.25rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+.game-guide-item h3 i {
+    width: 0.9rem;
+    text-align: center;
+}
+
+.game-guide-item ul {
+    display: grid;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.game-guide-item li {
+    display: grid;
+    grid-template-columns: 0.9rem minmax(0, 1fr);
+    align-items: start;
+    gap: 0.4rem;
+}
+
+.game-guide-item li > i {
+    padding-top: 0.18rem;
+    font-size: 0.68rem;
+    text-align: center;
+}
+
+.guide-icon-record {
+    color: #e11d48;
+}
+
+.guide-icon-rebirth {
+    color: #8b5cf6;
+}
+
+.guide-icon-monthly,
+.guide-icon-success {
+    color: #16a34a;
+}
+
+.guide-icon-streak {
+    color: #ea580c;
+}
+
+.guide-icon-shield,
+.guide-icon-import {
+    color: #3b82f6;
+}
+
+.guide-icon-draw {
+    color: #c026d3;
+}
+
+.guide-icon-coins {
+    color: #d97706;
+}
+
+@media (min-width: 480px) {
+    .game-guide-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .badges-section,
@@ -933,8 +1090,12 @@ html.theme-dark #game-modal-overlay .mindful-section {
 
 html.dark .game-guide,
 html.theme-dark .game-guide,
+html.dark .game-guide-item,
+html.theme-dark .game-guide-item,
 html.dark #game-modal-overlay .game-guide,
-html.theme-dark #game-modal-overlay .game-guide {
+html.theme-dark #game-modal-overlay .game-guide,
+html.dark #game-modal-overlay .game-guide-item,
+html.theme-dark #game-modal-overlay .game-guide-item {
     border-color: #52525b;
     background: #27272a;
     color: #e4e4e7;
@@ -978,6 +1139,13 @@ html.theme-dark .quote-library .quote-library-empty {
     color: #e4e4e7;
 }
 
+html.dark .quote-library-item,
+html.theme-dark .quote-library-item {
+    border-color: #52525b;
+    background: #27272a;
+    color: #f4f4f5;
+}
+
 html.dark .quote-library-item span,
 html.theme-dark .quote-library-item span,
 html.dark #quote-collection-count,
@@ -1015,6 +1183,10 @@ html.theme-dark .quote-category-tab span {
     .modal-content {
         max-height: 94vh;
         padding: 1.1rem;
+    }
+
+    .app-modal-content {
+        padding: 1rem;
     }
 
     .game-entry-btn {

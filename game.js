@@ -49,11 +49,11 @@ const GameSystem = {
     demoScenarios: {
         beginner: {
             name: '新手小晴',
-            description: '剛開始記錄。每記一次就能獲得 XP 和金幣；當天第一次記錄還能免費抽卡。',
+            description: '本月第一次記錄可獲得「初次見面」徽章；每筆記錄都能獲得 XP 和金幣，當天首次記錄還能免費抽卡。',
             action: '模擬健康正常紀錄',
             before: { xp: 0, coins: 0, shields: 0, streak: 0 },
             after: { xp: 20, coins: 10, shields: 0, streak: 1 },
-            result: '獲得 +20 XP、+10 金幣，連續紀錄 1 天，並解鎖「初次見面」徽章與當日免費抽卡。'
+            result: '獲得 +20 XP、+10 金幣，連續紀錄 1 天，並解鎖本月的「初次見面」徽章與當日免費抽卡；同月後續記錄不會再次解鎖。'
         },
         streak: {
             name: '連續打卡小安',
@@ -81,44 +81,13 @@ const GameSystem = {
         },
         historicalImport: {
             name: '匯入紀錄小芸',
-            description: '匯入 7 筆新日期的連續歷史紀錄。新增日期會補發 XP、金幣，並依紀錄解鎖徽章。',
+            description: '示範匯入 7 筆連續歷史紀錄，開始前會先確認。新增日期會補發 XP、金幣；相同成員與日期的紀錄會更新，但不會重複發獎。',
             action: '模擬匯入 7 筆新紀錄',
             before: { xp: 280, coins: 100, shields: 0, streak: 0 },
             after: { xp: 350, coins: 235, shields: 0, streak: 7 },
-            result: '新增 7 筆各得 +10 XP、+5 金幣，連續 7 天再獲得 +100 金幣並解鎖「七日之星」。覆寫相同日期不會重複發獎。'
-        },
-        duplicateImport: {
-            name: '重複匯入小傑',
-            description: '匯入檔案中的日期已經存在。相同成員與日期會更新紀錄內容，不重複發放 XP 或金幣。',
-            action: '模擬覆寫同日期紀錄',
-            before: { xp: 350, coins: 185, shields: 0, streak: 7 },
-            after: { xp: 350, coins: 185, shields: 0, streak: 7 },
-            result: '血壓資料更新，但新增紀錄數為 0，因此 XP、金幣不變；既有徽章仍會重新檢查並顯示。'
-        },
-        missedWithoutShield: {
-            name: '重新出發小寧',
-            description: '累積了一段連續紀錄，但漏記時背包沒有保護盾。連續天數會歸零，其他努力都會保留。',
-            action: '模擬無盾漏記',
-            before: { xp: 840, coins: 240, shields: 0, streak: 5 },
-            after: { xp: 840, coins: 240, shields: 0, streak: 0 },
-            result: '連續天數重新計算；XP、等級、金幣、已解鎖主題與徽章都不會被扣除。今天仍可以放心重新開始。'
-        },
-        restartStreak: {
-            name: '再出發小禾',
-            description: '前一輪連續天數已歸零，但過去累積的 XP 與金幣都還在。今天再次記錄，從新一輪第 1 天開始。',
-            action: '模擬今日健康紀錄',
-            before: { xp: 840, coins: 240, shields: 0, streak: 0 },
-            after: { xp: 860, coins: 250, shields: 0, streak: 1 },
-            result: '獲得 +20 XP、+10 金幣，連續紀錄從 1 天重新累積；先前的等級與收藏不受影響。'
-        },
-        careNotice: {
-            name: '關懷通知小暖',
-            description: '每日結算遇到漏記時，關懷訊息會留在畫面上，讓您有時間閱讀，不會自動消失。',
-            action: '顯示關懷通知',
-            before: { xp: 840, coins: 240, shields: 0, streak: 5 },
-            after: { xp: 840, coins: 240, shields: 0, streak: 0 },
-            result: '通知會持續顯示，直到您按下「了解」；這只是示範，不會變更目前成員的資料。',
-            notice: '沒關係，健康管理是長久的旅程，我們今天一起重新出發！'
+            result: '新增 7 筆各得 +10 XP、+5 金幣，連續 7 天再獲得 +100 金幣並解鎖「七日之星」。同日期紀錄會更新但不重複發獎；完成後會顯示可手動關閉的通知。',
+            confirmation: '這是匯入流程示範，不會讀取檔案或修改資料。要繼續查看模擬結果嗎？',
+            notice: '匯入示範完成：相同成員與日期的紀錄會更新，但不會重複發放 XP 或金幣。'
         }
     },
 
@@ -137,6 +106,7 @@ const GameSystem = {
             totalCardsDrawn: 0,
             lastFreeDrawDate: '',
             lastProcessedDate: '',
+            hasImportedHistoricalRecords: false,
             activeTheme: 'slate'
         };
     },
@@ -216,6 +186,7 @@ const GameSystem = {
                 changed = true;
             }
             ensure('lastFreeDrawDate', '');
+            ensure('hasImportedHistoricalRecords', false);
             if (!existing.badgeCounts || typeof existing.badgeCounts !== 'object' || Array.isArray(existing.badgeCounts)) {
                 existing.badgeCounts = {
                     first: 0,
@@ -265,7 +236,7 @@ const GameSystem = {
         const totalRecords = records.length;
         const initialData = this.defaultData(totalRecords * 10, totalRecords * 5);
         const reincarnations = this.getReincarnationCount(initialData.xp);
-        initialData.badgeCounts.first = totalRecords > 0 ? 1 : 0;
+        initialData.badgeCounts.first = this.countRecordedMonths(records);
         initialData.badgeCounts.streak = this.countRecordedStreakBadges(records);
         initialData.badgeCounts.reincarnation = reincarnations;
         const bonusCoins = initialData.badgeCounts.streak * 100 + reincarnations * 200;
@@ -279,16 +250,23 @@ const GameSystem = {
     },
 
     onHistoricalRecordsImported(member, addedRecordCount) {
-        if (!Number.isInteger(addedRecordCount) || addedRecordCount <= 0) return;
+        if (!Number.isInteger(addedRecordCount) || addedRecordCount <= 0) return null;
 
         const store = this.readStore();
         const existing = store.members[member];
+        const isInitialCalculation = !existing;
         let data;
         let previousBadgeCounts;
         let newlyUnlocked = [];
+        let previousXP = 0;
+        let previousCoins = 0;
+        let wasImportedBefore = false;
 
         if (existing && Number.isFinite(existing.xp) && Number.isFinite(existing.coins)) {
             data = this.getData(member);
+            previousXP = data.xp;
+            previousCoins = data.coins;
+            wasImportedBefore = data.hasImportedHistoricalRecords === true;
             previousBadgeCounts = { ...data.badgeCounts };
             const previousStar = this.getReincarnationCount(data.xp);
             data.xp += addedRecordCount * 10;
@@ -324,9 +302,31 @@ const GameSystem = {
             ...currentBadges.filter(badge => (data.badgeCounts[badge] || 0) > (previousBadgeCounts[badge] || 0))
         ])];
         data.unlockedBadges = currentBadges;
+        if (isInitialCalculation) wasImportedBefore = data.hasImportedHistoricalRecords === true;
+        data.hasImportedHistoricalRecords = true;
         this.saveData(data, member);
 
         if (member === this.currentMember) this.refreshUI({ newlyUnlockedBadges: newlyUnlocked });
+        const badgeNames = {
+            first: '初次見面',
+            streak: '七日之星',
+            rich: '百寶箱',
+            shield: '守護天使',
+            library: '心靈富翁',
+            reincarnation: '轉生重置與體驗'
+        };
+        const reportedBadges = isInitialCalculation ? currentBadges : newlyUnlocked;
+        return {
+            member,
+            addedRecordCount,
+            firstImport: !wasImportedBefore,
+            isInitialCalculation,
+            xpGained: isInitialCalculation ? data.xp : data.xp - previousXP,
+            coinsGained: isInitialCalculation ? data.coins : data.coins - previousCoins,
+            totalXP: data.xp,
+            totalCoins: data.coins,
+            badges: reportedBadges.map(badge => badgeNames[badge] || badge)
+        };
     },
 
     countRecordedStreakBadges(records) {
@@ -340,6 +340,13 @@ const GameSystem = {
             previousDate = date;
         });
         return total;
+    },
+
+    countRecordedMonths(records) {
+        return new Set(records
+            .map(record => record.date)
+            .filter(date => this.isDate(date))
+            .map(date => date.slice(0, 7))).size;
     },
 
     incrementBadge(data, id) {
@@ -472,22 +479,26 @@ const GameSystem = {
             const missedDays = shieldsUsed === 1 && shieldDates[0] === yesterday
                 ? '昨天'
                 : `日期 ${shieldDates.join('、')}`;
-            messages.push(`${missedDays}忙碌到沒記錄嗎？守護天使已自動使用 ${shieldsUsed} 枚🛡️保護盾，幫您延續連續 ${protectedStreakDays} 天的打卡！`);
-            if (shieldBadgeCount > 0) messages.push(`守護天使徽章已累計 x${shieldBadgeCount}，感謝您持續照顧自己。`);
+            messages.push(`${missedDays}未記錄，系統已自動使用 ${shieldsUsed} 枚保護盾，延續連續 ${protectedStreakDays} 天的紀錄。`);
+            if (shieldBadgeCount > 0) messages.push(`守護天使徽章累計 x${shieldBadgeCount}。`);
         }
         if (streakReset) {
             messages.push('有未受保護的漏記日，連續天數已歸零重新計算；不會扣除 XP、等級、金幣或主題權限。沒關係，健康管理是長久的旅程，我們今天一起重新出發！');
         }
         if (newlyUnlocked.includes('streak')) messages.push('解鎖徽章：七日之星！');
         if (streakBonusCoins > 0) messages.push(`七日之星獎勵 +${streakBonusCoins} 金幣`);
-        window.showAppToast(messages.join(' '), shieldsUsed > 0 ? 'shield' : 'success', 0);
+        if (shieldsUsed > 0) {
+            window.showAppModal('🛡️ 保護盾自動救援', '已為您處理漏記，以下是本次結算：', messages);
+        } else {
+            window.showAppToast(messages.join(' '), 'success', 2500);
+        }
     },
 
     getUnlockedBadges(member, data, records = this.getRecords(member)) {
         if (!data.badgeCounts || typeof data.badgeCounts !== 'object') {
             data.badgeCounts = { first: 0, streak: 0, rich: 0, shield: 0, library: 0, reincarnation: 0 };
         }
-        if (records.length > 0) data.badgeCounts.first = Math.max(1, data.badgeCounts.first || 0);
+        data.badgeCounts.first = Math.max(data.badgeCounts.first || 0, this.countRecordedMonths(records));
         data.badgeCounts.rich = Math.max(data.badgeCounts.rich || 0, Math.floor((data.coinsEarned || 0) / 500));
         data.badgeCounts.library = Math.max(data.badgeCounts.library || 0, Math.floor((data.totalCardsDrawn || 0) / 10));
         return ['first', 'streak', 'rich', 'shield', 'library', 'reincarnation']
@@ -624,21 +635,7 @@ const GameSystem = {
             data.unlockedBadges = currentBadges;
             this.saveData(data, member);
             this.refreshUI({ shieldUsed: settlement.shieldsUsed > 0, newlyUnlockedBadges });
-            const messages = [`紀錄成功！獲得 +${earnedXP} XP、${earnedCoins} 金幣`];
-            if (recordDate === today) messages.push(`連續紀錄 ${data.streakDays} 天`);
-            if (streakBonusCoins > 0) messages.push(`七日之星獎勵 +${streakBonusCoins} 金幣`);
-            if (settlement.shieldsUsed > 0 || settlement.streakReset) {
-                if (settlement.shieldsUsed > 0) {
-                    messages.push(`保護盾已自動守住連續 ${settlement.protectedStreakDays} 天紀錄，消耗 ${settlement.shieldsUsed} 枚`);
-                }
-                if (settlement.streakReset) messages.push('漏記後已溫柔重新開始，今天重新出發也很棒');
-            }
             const newLevel = this.getLevel(data.xp);
-            if (reincarnations > 0) messages.push(`轉生成功！獲得 +${reincarnations * 200} 金幣獎勵`);
-            if (newLevel.level > previousLevel || newLevel.star > previousStar) {
-                messages.push(`升級至 Lv.${newLevel.level}${newLevel.star ? ` ★${newLevel.star}` : ''} ${newLevel.name}`);
-            }
-            if (recordDate === today) messages.push(data.lastQuote ? `今日免費籤詩：${data.lastQuote}` : '已開啟今日免費心靈籤詩');
             const badgeNames = {
                 first: '初次見面',
                 streak: '七日之星',
@@ -647,8 +644,33 @@ const GameSystem = {
                 library: '心靈富翁',
                 reincarnation: '轉生重置與體驗'
             };
-            newlyUnlockedBadges.forEach(badge => messages.push(`解鎖徽章：${badgeNames[badge]}`));
-            window.showAppToast(messages.join('！'), settlement.shieldsUsed > 0 ? 'shield' : 'success', 5000);
+            const criticalDetails = [];
+            criticalDetails.push(`本次記錄獲得 +${earnedXP} XP、+${earnedCoins} 金幣。`);
+            if (recordDate === today) criticalDetails.push(`連續紀錄 ${data.streakDays} 天。`);
+            if (newLevel.level > previousLevel && reincarnations === 0) {
+                criticalDetails.push(`升級至 Lv.${newLevel.level}${newLevel.star ? ` ★${newLevel.star}` : ''} ${newLevel.name}。`);
+            }
+            if (settlement.shieldsUsed > 0) {
+                criticalDetails.push(`已自動使用 ${settlement.shieldsUsed} 枚保護盾，延續連續 ${settlement.protectedStreakDays} 天的紀錄。`);
+            }
+            if (streakBonusCoins > 0) criticalDetails.push(`七日之星獎勵 +${streakBonusCoins} 金幣。`);
+            newlyUnlockedBadges.forEach(badge => criticalDetails.push(`解鎖徽章：${badgeNames[badge]}`));
+            if (reincarnations > 0) {
+                criticalDetails.push(`已轉生至 Lv.${newLevel.level}${newLevel.star ? ` ★${newLevel.star}` : ''}。`);
+                criticalDetails.push(`獲得轉生獎勵 +${reincarnations * 200} 金幣。`);
+            }
+            if (settlement.shieldsUsed > 0 || reincarnations > 0) {
+                window.showAppModal(
+                    reincarnations > 0 ? '🎉 轉生成功！' : '🛡️ 保護盾自動救援',
+                    reincarnations > 0 && settlement.shieldsUsed > 0
+                        ? '保護盾救援與轉生結算已完成。'
+                        : reincarnations > 0 ? '恭喜達成 Lv.5 滿等轉生！' : '已為您處理漏記，連續紀錄獲得保護。',
+                    criticalDetails
+                );
+            } else {
+                const dailyMessage = `記錄完成 +${earnedXP} XP、+${earnedCoins} 金幣${recordDate === today ? `，連續 ${data.streakDays} 天` : ''}${newLevel.level > previousLevel ? `，升級至 Lv.${newLevel.level}${newLevel.star ? ` ★${newLevel.star}` : ''}` : ''}${streakBonusCoins ? `，七日獎勵 +${streakBonusCoins} 金幣` : ''}${settlement.streakReset ? '，連續天數已重新計算' : ''}${newlyUnlockedBadges.length ? `，解鎖 ${newlyUnlockedBadges.map(badge => badgeNames[badge]).join('、')}` : ''}`;
+                window.showAppToast(dailyMessage, 'success', 2200);
+            }
         } catch (error) {
             console.error('血壓紀錄已儲存，但遊戲獎勵無法更新：', error);
             alert('血壓紀錄已儲存，但遊戲獎勵無法更新。請檢查瀏覽器儲存空間後再試。');
@@ -694,6 +716,10 @@ const GameSystem = {
         shieldCount.textContent = String(data.shields);
         if (shieldUsed) this.playAnimation(shieldCount, 'shield-used-animation');
         document.getElementById('streak-count').textContent = String(data.streakDays);
+        const isFreeDrawAvailable = data.lastFreeDrawDate !== this.getTodayDate();
+        document.getElementById('draw-quote-btn').textContent = isFreeDrawAvailable
+            ? '免費抽取今日首張卡片（重複卡返還 10 金幣）'
+            : '消耗 20 金幣抽取卡片（重複卡返還 10 金幣）';
 
         this.setBadge('badge-first', data.badgeCounts.first, newlyUnlockedBadges.includes('first'));
         this.setBadge('badge-streak', data.badgeCounts.streak, newlyUnlockedBadges.includes('streak'));
@@ -716,9 +742,10 @@ const GameSystem = {
     },
 
     simulateDemoScenario() {
+        const scenario = this.demoScenarios[this.demoScenarioId];
+        if (scenario?.confirmation && !window.confirm(scenario.confirmation)) return;
         this.demoSimulated = true;
         this.renderDemoScenario();
-        const scenario = this.demoScenarios[this.demoScenarioId];
         if (scenario?.notice) window.showAppToast(scenario.notice, 'success', 0);
     },
 
@@ -877,11 +904,14 @@ const GameSystem = {
 
     drawQuote() {
         const data = this.getData();
-        if (data.coins < 20) {
+        const today = this.getTodayDate();
+        const isFreeDraw = data.lastFreeDrawDate !== today;
+        if (!isFreeDraw && data.coins < 20) {
             window.showAppToast('金幣不足，記錄血壓即可獲得更多金幣。', 'error');
             return;
         }
-        data.coins -= 20;
+        if (!isFreeDraw) data.coins -= 20;
+        else data.lastFreeDrawDate = today;
         const previousBadgeCounts = { ...data.badgeCounts };
         const result = this.awardQuote(data);
         const currentBadges = this.getUnlockedBadges(this.currentMember, data);
@@ -892,7 +922,7 @@ const GameSystem = {
         const categoryLabel = this.quoteCategories.find(category => category.id === result.quote.category)?.label || '心靈卡片';
         let message = result.duplicate
             ? `抽到重複卡片，已返還 10 金幣：${result.quote.text}`
-            : `已收藏一張${categoryLabel}卡片，可在心靈圖書館隨時重讀。`;
+            : `已${isFreeDraw ? '免費' : ''}收藏一張${categoryLabel}卡片，可在心靈圖書館隨時重讀。`;
         if (newlyUnlockedBadges.includes('library')) message += ' 解鎖徽章：心靈富翁！';
         window.showAppToast(message);
     },
@@ -941,6 +971,49 @@ window.showAppToast = (message, type = 'success', duration = 3200) => {
     if (duration > 0) appToastTimeouts.set(toast, window.setTimeout(() => dismissToast(toast), duration));
 };
 
+window.showAppModal = (title, message, details = []) => {
+    const overlay = document.getElementById('app-modal-overlay');
+    const confirmButton = document.getElementById('app-modal-confirm');
+    const detailsList = document.getElementById('app-modal-details');
+    if (!overlay || !confirmButton || !detailsList) {
+        throw new Error('確認彈窗元件不存在，無法顯示重要通知。');
+    }
+
+    document.getElementById('app-modal-title').textContent = title;
+    document.getElementById('app-modal-message').textContent = message;
+    detailsList.replaceChildren();
+    details.forEach(detail => {
+        const item = document.createElement('li');
+        item.textContent = detail;
+        detailsList.appendChild(item);
+    });
+    detailsList.hidden = details.length === 0;
+    const previousFocus = document.activeElement;
+    const previousOverflow = document.body.style.overflow;
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+
+    const handleConfirm = () => closeModal();
+    const closeModal = () => {
+        overlay.hidden = true;
+        document.body.style.overflow = previousOverflow;
+        confirmButton.removeEventListener('click', handleConfirm);
+        document.removeEventListener('keydown', handleKeydown);
+        if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
+    };
+    const handleKeydown = event => {
+        if (event.key === 'Escape') {
+            closeModal();
+        } else if (event.key === 'Tab') {
+            event.preventDefault();
+            confirmButton.focus();
+        }
+    };
+    confirmButton.addEventListener('click', handleConfirm);
+    document.addEventListener('keydown', handleKeydown);
+    confirmButton.focus();
+};
+
 function dismissToast(toast) {
     const timeout = appToastTimeouts.get(toast);
     if (timeout !== undefined) {
@@ -970,11 +1043,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     openButton.addEventListener('click', () => {
         window.clearTimeout(closeModalTimeout);
-        GameSystem.setMember(GameSystem.currentMember);
         overlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        window.requestAnimationFrame(() => overlay.classList.add('is-open'));
         closeButton.focus();
+        GameSystem.setMember(GameSystem.currentMember);
+        window.requestAnimationFrame(() => overlay.classList.add('is-open'));
     });
     closeButton.addEventListener('click', closeModal);
     document.querySelectorAll('[data-demo-person]').forEach(button => {
