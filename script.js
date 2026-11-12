@@ -496,30 +496,98 @@ function clearFormInputs() {
     document.getElementById('pulseInput').value = '';
 }
 
+function getRecordValidationErrors() {
+    const date = document.getElementById('recordDate').value;
+    const sysValue = document.getElementById('sysInput').value;
+    const diaValue = document.getElementById('diaInput').value;
+    const pulseValue = document.getElementById('pulseInput').value;
+    const errors = [];
+    const todayStr = getLocalDateString();
+
+    if (!date) {
+        errors.push('請輸入測量日期。');
+    } else if (!isValidDateString(date)) {
+        errors.push('請輸入有效的測量日期。');
+    } else if (date > todayStr) {
+        errors.push('不能選擇未來的日期。');
+    }
+
+    const validatePressure = (value, label, min, max) => {
+        if (!value) {
+            errors.push(`請輸入${label}。`);
+            return null;
+        }
+
+        const number = Number(value);
+        if (!Number.isInteger(number)) {
+            errors.push(`${label}必須是整數。`);
+            return null;
+        }
+        if (number < min || number > max) {
+            errors.push(`${label}需介於 ${min} 至 ${max} 之間。`);
+        }
+        return number;
+    };
+
+    const sys = validatePressure(sysValue, '收縮壓（SYS）', 50, 250);
+    const dia = validatePressure(diaValue, '舒張壓（DIA）', 30, 150);
+    if (sys !== null && dia !== null && sys <= dia) {
+        errors.push('收縮壓（SYS）必須大於舒張壓（DIA）。');
+    }
+
+    if (pulseValue) {
+        const pulse = Number(pulseValue);
+        if (!Number.isInteger(pulse)) {
+            errors.push('脈搏必須是整數。');
+        } else if (pulse < 30 || pulse > 200) {
+            errors.push('脈搏需介於 30 至 200 之間。');
+        }
+    }
+
+    const editRecordId = document.getElementById('editRecordId').value;
+    if (editRecordId) {
+        const records = db.members[currentMember] || [];
+        if (!records.some(record => record.id === editRecordId)) {
+            errors.push('找不到要編輯的紀錄，請重新整理後再試。');
+        } else if (isValidDateString(date) && records.some(record => record.date === date && record.id !== editRecordId)) {
+            errors.push('這個日期已經有另一筆紀錄，請先編輯或刪除原紀錄。');
+        }
+    }
+
+    return errors;
+}
+
+function showRecordValidationErrors(errors) {
+    window.showAppModal('資料尚未儲存', '請修正以下問題後再試：', errors);
+}
+
 function saveAndCollapseRecord(e) {
     const form = document.getElementById('recordForm');
     shouldCollapseAfterSave = false;
-    if (!form.reportValidity()) return;
+    const errors = getRecordValidationErrors();
+    if (errors.length) {
+        showRecordValidationErrors(errors);
+        return;
+    }
     shouldCollapseAfterSave = true;
     form.requestSubmit();
 }
 
 function saveRecord(e) {
     e.preventDefault();
+    const validationErrors = getRecordValidationErrors();
+    if (validationErrors.length) {
+        shouldCollapseAfterSave = false;
+        showRecordValidationErrors(validationErrors);
+        return;
+    }
+
     const date = document.getElementById('recordDate').value;
     const sys = Number(document.getElementById('sysInput').value);
     const dia = Number(document.getElementById('diaInput').value);
     const pulseValue = document.getElementById('pulseInput').value;
     const pulse = pulseValue === '' ? 0 : Number(pulseValue);
     const editRecordId = document.getElementById('editRecordId').value;
-
-    if (!isValidDateString(date)) return rejectRecordSave('請輸入有效的測量日期！');
-    if (!Number.isInteger(sys) || !Number.isInteger(dia)) return rejectRecordSave('血壓數值必須是整數！');
-    if (sys <= dia) return rejectRecordSave("⚠️ 收縮壓（SYS）必須大於舒張壓（DIA）！");
-    if (sys < 50 || sys > 250 || dia < 30 || dia > 150) return rejectRecordSave('血壓數值超出可輸入範圍！');
-    if (pulse !== 0 && (pulse < 30 || pulse > 200 || !Number.isInteger(pulse))) return rejectRecordSave('脈搏需介於 30 至 200 之間！');
-    const todayStr = getLocalDateString();
-    if (date > todayStr) return rejectRecordSave("⚠️ 不能選擇未來的日期！");
 
     if (pulse > 0 && (pulse < 40 || pulse > 180)) {
         if (!confirm(`⚠️ 脈搏為 ${pulse} bpm 似乎偏離常人範圍。確定儲存嗎？`)) {
@@ -531,11 +599,6 @@ function saveRecord(e) {
     if (!db.members[currentMember]) db.members[currentMember] = [];
     const records = db.members[currentMember];
     const editedIndex = editRecordId ? records.findIndex(record => record.id === editRecordId) : -1;
-
-    if (editRecordId && editedIndex === -1) return rejectRecordSave('找不到要編輯的紀錄，請重新整理後再試。');
-    if (editRecordId && records.some(record => record.date === date && record.id !== editRecordId)) {
-        return rejectRecordSave('這個日期已經有另一筆紀錄，請先編輯或刪除原紀錄。');
-    }
 
     if (!editRecordId) {
         const existRecord = records.find(r => r.date === date);
@@ -585,11 +648,6 @@ function saveRecord(e) {
     }
 }
 
-function rejectRecordSave(message) {
-    shouldCollapseAfterSave = false;
-    alert(message);
-}
-
 function editRecord(index) {
     const records = db.members[currentMember] || [];
     const selectedMonth = document.getElementById('monthFilter').value;
@@ -619,7 +677,7 @@ function resetForm() {
     document.getElementById('recordForm').reset();
     document.getElementById('editRecordId').value = "";
     document.getElementById('formTitleText').textContent = "記錄";
-    document.getElementById('submitBtn').textContent = "儲存記錄";
+    document.getElementById('submitBtn').textContent = "儲存";
     document.getElementById('cancelEditBtn').classList.add('hidden');
     document.getElementById('recordDate').valueAsDate = new Date();
     shouldCollapseAfterSave = false;
