@@ -528,12 +528,19 @@ const GameSystem = {
             }
             existing.lastProcessedDate = typeof existing.lastProcessedDate === 'string' ? existing.lastProcessedDate : '';
             existing.lastStreakBadgeDay = Number.isFinite(existing.lastStreakBadgeDay) ? existing.lastStreakBadgeDay : 0;
-            if (!Number.isFinite(existing.totalCardsDrawn) || existing.totalCardsDrawn < 0) {
-                existing.totalCardsDrawn = 0;
-                changed = true;
-            }
             ensure('lastFreeDrawDate', '');
             ensure('hasImportedHistoricalRecords', false);
+            existing.unlockedQuotes = Array.isArray(existing.unlockedQuotes)
+                ? [...new Set(existing.unlockedQuotes.filter(quote => typeof quote === 'string'))]
+                : [];
+            const recordedDraws = Number.isFinite(existing.totalCardsDrawn) && existing.totalCardsDrawn >= 0
+                ? existing.totalCardsDrawn
+                : 0;
+            const totalCardsDrawn = Math.max(recordedDraws, existing.unlockedQuotes.length);
+            if (existing.totalCardsDrawn !== totalCardsDrawn) {
+                existing.totalCardsDrawn = totalCardsDrawn;
+                changed = true;
+            }
             if (!existing.badgeCounts || typeof existing.badgeCounts !== 'object' || Array.isArray(existing.badgeCounts)) {
                 existing.badgeCounts = {
                     first: 0,
@@ -557,13 +564,18 @@ const GameSystem = {
                     changed = true;
                 }
             });
+            const libraryBadgeCount = Math.floor(existing.totalCardsDrawn / 10);
+            if (existing.badgeCounts.library < libraryBadgeCount) {
+                existing.badgeCounts.library = libraryBadgeCount;
+                changed = true;
+            }
             if (!Array.isArray(existing.unlockedBadges)) {
                 existing.unlockedBadges = this.getUnlockedBadges(member, existing);
                 changed = true;
+            } else if (libraryBadgeCount > 0 && !existing.unlockedBadges.includes('library')) {
+                existing.unlockedBadges.push('library');
+                changed = true;
             }
-            existing.unlockedQuotes = Array.isArray(existing.unlockedQuotes)
-                ? [...new Set(existing.unlockedQuotes.filter(quote => typeof quote === 'string'))]
-                : [];
             existing.lastQuote = typeof existing.lastQuote === 'string' ? existing.lastQuote : '';
             existing.activeTheme = typeof existing.activeTheme === 'string' ? existing.activeTheme : 'slate';
             if (changed) this.saveStore(store);
